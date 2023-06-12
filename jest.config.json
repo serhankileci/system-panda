@@ -1,0 +1,7 @@
+{
+	"preset": "ts-jest",
+	"testEnvironment": "node",
+	"transform": {
+		"spec/.+\\.(j|t)sx?$": "ts-jest"
+	}
+}
