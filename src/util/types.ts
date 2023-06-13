@@ -12,15 +12,16 @@ import {
 	Response as ExpressResponse,
 	Request,
 } from "express";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client/index.js";
 import { IncomingHttpHeaders } from "http";
-
-type PrismaError =
-	| Prisma.PrismaClientRustPanicError
-	| Prisma.PrismaClientInitializationError
-	| Prisma.PrismaClientKnownRequestError
-	| Prisma.PrismaClientUnknownRequestError
-	| Prisma.PrismaClientValidationError;
+import {
+	PrismaClientInitializationError,
+	PrismaClientKnownRequestError,
+	PrismaClientRustPanicError,
+	PrismaClientUnknownRequestError,
+	PrismaClientValidationError,
+	PrismaClientOptions,
+} from "@prisma/client/runtime/index.js";
 
 type RequestHeaders = {
 	[K in keyof IncomingHttpHeaders as string extends K
@@ -247,7 +248,7 @@ type DefaultMiddlewares = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 type Database = {
 	URI: string;
-} & Omit<Prisma.PrismaClientOptions, "datasources">;
+} & Omit<PrismaClientOptions, "datasources">;
 
 type Options = {
 	content: {
@@ -324,7 +325,11 @@ export {
 	Context,
 	ExistingData,
 	PluginFn,
-	PrismaError,
+	PrismaClientRustPanicError,
+	PrismaClientInitializationError,
+	PrismaClientKnownRequestError,
+	PrismaClientUnknownRequestError,
+	PrismaClientValidationError,
 
 	/* HOOKS */
 	CRUDHooks,
