@@ -1,6 +1,5 @@
 import path from "path";
 import { mkdir, writeFile } from "node:fs/promises";
-import prisma from "@prisma/client";
 import express, { json, urlencoded, static as serveStatic, ErrorRequestHandler } from "express";
 import cors from "cors";
 import compression from "compression";
@@ -26,7 +25,6 @@ import {
 	Method,
 } from "./util/index.js";
 import { prismaScript } from "./util/prismaScript.js";
-const { Prisma } = prisma;
 
 const SystemPanda: SP = async function ({ content, config }) {
 	try {
@@ -57,8 +55,8 @@ const SystemPanda: SP = async function ({ content, config }) {
 		if (!(await pathExists(pluginsDir))) await mkdir(pluginsDir);
 		if (!(await pathExists(`${projectDir}/prisma`))) await mkdir(`${projectDir}/prisma`);
 		await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaFile);
-		await prismaScript();
 
+		await prismaScript();
 		const { PrismaClient } = await import("@prisma/client");
 		const prisma = new PrismaClient({
 			errorFormat: db.errorFormat,
@@ -192,8 +190,7 @@ const SystemPanda: SP = async function ({ content, config }) {
 			});
 
 		for (const [cKey, cValue] of Object.entries(collections)) {
-			const query: any = prisma[cKey as Uncapitalize<keyof typeof Prisma.ModelName>];
-
+			const query = prisma[cKey];
 			const { fields, access, hooks, slug, webhooks } = cValue;
 			const { beforeOperation, validateInput, modifyInput, afterOperation } = hooks || {};
 
