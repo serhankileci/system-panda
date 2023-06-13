@@ -1,6 +1,6 @@
 {
 	"name": "system-panda",
-	"version": "0.3.6",
+	"version": "0.3.7",
 	"homepage": "https://github.com/serhankileci/system-panda",
 	"repository": {
 		"type": "git",
@@ -30,8 +30,7 @@
 		"lint": "eslint . --ext .ts",
 		"test": "jest",
 		"fmt-lint": "npm run format; npm run lint;",
-		"build": "tsc",
-		"prepublish": "tsc"
+		"build": "tsc"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.15.0",
