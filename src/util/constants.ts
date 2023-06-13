@@ -1,14 +1,8 @@
-import { fileURLToPath } from "node:url";
-import path from "node:path";
-
 const PLUGINS_API =
 	process.env.PLUGINS_API ||
 	"https://mmhsc5ce5v3hv4qt64p4dpodom0msylf.lambda-url.eu-central-1.on.aws/plugins";
 const projectDir = process.cwd();
 const pluginsDir = `${projectDir}/plugins`;
-
-const __filename = fileURLToPath(import.meta.url);
-
 const logfile = `${projectDir}/system-panda.log` as const;
 const crudMapping = {
 	create: "POST",
