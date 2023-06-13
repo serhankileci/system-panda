@@ -2,6 +2,14 @@
 
 Plugins are reusable snippets of code stored in your project's /plugins directory, imported and evaluated at runtime, and their default export function is executed on their specified hook for every collection route. They can be managed through the admin UI.
 
+### How to install
+1. Head over to your app's "/plugins" route to fetch a list of public plugins.
+2. Pick one by its name, for example "foobar", and from then on you can:
+	- "/plugins/foobar" to get plugin info.
+	- "/plugins/foobar/install (or uninstall)
+	- After installing, "/plugins/foobar/enable" (or disable)
+3. Restart your app.
+
 ### How to create
 1. Create a function with a **context** parameter, you may import the specific type definition from the system-panda package.
 2. Create a condition to set on which hook your plugin should be executed.
