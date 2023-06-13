@@ -8,7 +8,6 @@ const projectDir = process.cwd();
 const pluginsDir = `${projectDir}/plugins`;
 
 const __filename = fileURLToPath(import.meta.url);
-const basedir = path.resolve(path.dirname(__filename), "../..");
 
 const logfile = `${projectDir}/system-panda.log` as const;
 const crudMapping = {
@@ -20,5 +19,5 @@ const crudMapping = {
 const flip = (data: object) => Object.fromEntries(Object.entries(data).map(([k, v]) => [v, k]));
 const flippedCrudMapping = flip(crudMapping);
 
-export { PLUGINS_API, crudMapping, basedir, flippedCrudMapping, projectDir, pluginsDir, logfile };
+export { PLUGINS_API, crudMapping, flippedCrudMapping, projectDir, pluginsDir, logfile };
 export const { NODE_ENV } = process.env;

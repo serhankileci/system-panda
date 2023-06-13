@@ -1,6 +1,6 @@
 import { execa } from "execa";
 import { pathExists } from "./pathExists.js";
-import { basedir, projectDir } from "./constants.js";
+import { projectDir } from "./constants.js";
 import { SystemPandaError } from "./SystemPandaError.js";
 
 async function prismaScript() {
@@ -11,7 +11,6 @@ async function prismaScript() {
 			await execa("npx", ["prisma", "init"], {
 				stdio: "inherit",
 				reject: false,
-				cwd: basedir,
 			});
 		}
 
@@ -22,7 +21,6 @@ async function prismaScript() {
 			{
 				stdio: "inherit",
 				reject: false,
-				cwd: basedir,
 			}
 		);
 
@@ -30,7 +28,6 @@ async function prismaScript() {
 		await execa("npx", ["prisma", "generate", `--schema=${projectDir}/prisma/schema.prisma`], {
 			stdio: "inherit",
 			reject: false,
-			cwd: basedir,
 		});
 	} catch (err) {
 		throw new SystemPandaError({ level: "error", message: JSON.stringify(err) });
