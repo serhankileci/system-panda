@@ -22,6 +22,7 @@ import {
 	PrismaClientValidationError,
 	PrismaClientOptions,
 } from "@prisma/client/runtime/index.js";
+import { crudMapping } from "./index.js";
 
 type RequestHeaders = {
 	[K in keyof IncomingHttpHeaders as string extends K
@@ -59,9 +60,15 @@ type Webhook = {
 	headers?: RequestHeaders;
 };
 type WebhookPayload = Request["body"];
+type EventTriggerPayload = {
+	timestamp: string;
+	data: WebhookPayload;
+	event: keyof typeof crudMapping;
+	collection: string;
+};
 type WebhookOperations = {
 	init: () => void;
-	trigger: (data: WebhookPayload) => void;
+	trigger: (obj: EventTriggerPayload) => void;
 };
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
@@ -248,7 +255,7 @@ type DefaultMiddlewares = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 type Database = {
 	URI: string;
-} & Omit<PrismaClientOptions, "datasources">;
+} & Omit<PrismaClientOptions, "datasources" | "__internal">;
 
 type Options = {
 	content: {
@@ -294,7 +301,7 @@ type SP = (args: Options) => Promise<void>;
 /* ░░░░░░░░░░░░░░░░░░░░ MIDDLEWARES ░░░░░░░░░░░░░░░░░░░░ */
 type morganOptions = {
 	format: "combined" | "common" | "dev" | "short" | "tiny";
-	options: morgan.Options<ExpressRequest, ExpressResponse>;
+	options?: morgan.Options<ExpressRequest, ExpressResponse>;
 };
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
@@ -313,18 +320,22 @@ type Method =
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 export {
+	/* MISC */
 	SP,
 	Options,
-	MiddlewareHandler,
-	Method,
 	LogLevel,
 	Database,
-	Collection,
-	CRUD_Operation,
-	BeforeAfterMiddlewares,
 	Context,
-	ExistingData,
-	PluginFn,
+
+	/* COLLECTIONS */
+	Collection,
+
+	/* SERVER */
+	MiddlewareHandler,
+	BeforeAfterMiddlewares,
+	Method,
+
+	/* PRISMA */
 	PrismaClientRustPanicError,
 	PrismaClientInitializationError,
 	PrismaClientKnownRequestError,
@@ -333,18 +344,21 @@ export {
 
 	/* HOOKS */
 	CRUDHooks,
+	CRUD_Operation,
 	beforeOperation,
 	validateInput,
 	modifyInput,
+	ExistingData,
 	afterOperation,
 
 	/* WEBHOOKS */
 	Webhook,
 	WebhookOperations,
-	WebhookPayload,
+	EventTriggerPayload,
 
 	/* PLUGINS */
 	Plugin,
+	PluginFn,
 	PluginOperations,
 	DatabasePlugin,
 };
