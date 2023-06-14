@@ -1,4 +1,4 @@
-import { LogLevel } from "./types.js";
+import { LogLevel } from "./index.js";
 
 class SystemPandaError extends Error {
 	message: string;

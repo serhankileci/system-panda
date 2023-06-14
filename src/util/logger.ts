@@ -1,6 +1,5 @@
 import { appendFile } from "fs/promises";
-import { writeOrAppend } from "./writeOrAppend.js";
-import { SystemPandaError } from "./SystemPandaError.js";
+import { writeOrAppend, SystemPandaError } from "./index.js";
 
 async function logger(path: string, err: SystemPandaError | Error) {
 	const date = new Date(Number(Date.now())).toLocaleDateString();
