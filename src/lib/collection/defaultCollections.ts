@@ -1,8 +1,12 @@
-import { Collection } from "../../util/types";
+import { Collection } from "../../util/index.js";
 
 const defaultCollections: Record<"users" | "plugins" | "settings", Collection> = {
 	users: {
-		fields: { email: { required: true, type: "text", unique: true } },
+		fields: {
+			email: { required: true, type: "text", unique: true, index: true },
+			name: { required: true, type: "text" },
+			password: { required: true, type: "text" },
+		},
 	},
 	plugins: {
 		fields: {
