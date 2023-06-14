@@ -1,7 +1,13 @@
-# Hooks
-Hooks are functions to validate and modify input and cause side-effects throughout the lifecycle of CRUD operations.
+# **Hooks**
+Hooks are functions to cause side-effects, validate, and modify input throughout the lifecycle of CRUD operations.
 
-Before/after hooks don't need to return data, but validateInput and modifyInput must return the inputData argument after either validating or modifying it. You can throw a new Error during either modifyInput or validateInput to cancel the operation.
+Before/after hooks don't need to return data, but validateInput and modifyInput must return the inputData argument after either validating or modifying it. You can throw an error in the first 3 hooks to cancel the current operation, the afterOperation hook is executed after the operation is completed.
+
+## **Order of execution**
+1. beforeOperation
+2. modifyInput
+3. validateInput
+4. afterOperation
 
 Example:
 ```js
@@ -26,10 +32,7 @@ SystemPanda({
 				validateInput: [
 					({ context, inputData, operation, existingData}) => {
 						if (!/someRegex/.test(inputData.foobar)) {
-							throw new Error("Some error here!");
-
-							// or an object (must have a message property so that the admin UI can display the message)
-							// throw new Error({ message: "some error message!", status: 500, foo: "bar" });
+							// throw error here
 						}
 					},
 				],
