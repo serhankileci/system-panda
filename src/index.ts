@@ -23,12 +23,13 @@ import {
 	MiddlewareHandler,
 	ExistingData,
 	Method,
+	execPrismaScripts,
+	EventTriggerPayload,
 } from "./util/index.js";
-import { prismaScript } from "./util/prismaScript.js";
 
 const SystemPanda: SP = async function ({ content, config }) {
 	try {
-		const { collections, webhooks: baseWebhooks } = content || {};
+		const { collections, webhooks: globalWebhooks } = content || {};
 		const { db, session, debug, extendServer, port, defaultMiddlewares } = config || {};
 		const {
 			session: sessionOpt,
@@ -41,13 +42,17 @@ const SystemPanda: SP = async function ({ content, config }) {
 			serveStatic: serveStaticOpt,
 			urlencoded: urlencodedOpt,
 		} = defaultMiddlewares || {};
+		const usersCollection = { [session?.slug || "users"]: defaultCollections.users };
+		const internalCollections = {
+			systemPandaSettings: defaultCollections.settings,
+			systemPandaPlugins: defaultCollections.plugins,
+		};
 
 		const schemaFile = await makePrismaModel(
 			{
 				...collections,
-				systemPandaSettings: defaultCollections.settings,
-				systemPandaPlugins: defaultCollections.plugins,
-				[session?.slug || "users"]: defaultCollections.users,
+				...usersCollection,
+				...internalCollections,
 			},
 			db
 		);
@@ -56,7 +61,7 @@ const SystemPanda: SP = async function ({ content, config }) {
 		if (!(await pathExists(`${projectDir}/prisma`))) await mkdir(`${projectDir}/prisma`);
 		await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaFile);
 
-		await prismaScript();
+		await execPrismaScripts();
 		const { PrismaClient } = await import("@prisma/client");
 		const prisma = new PrismaClient({
 			errorFormat: db.errorFormat,
@@ -85,21 +90,22 @@ const SystemPanda: SP = async function ({ content, config }) {
 		}
 
 		const srvDefaultbefore: MiddlewareHandler[] = [
-			morganOpt ? morgan(morganOpt.format, morganOpt.options) : morgan("tiny"),
 			helmet(helmetOpt || {}),
 			json(jsonOpt || {}),
 			urlencoded(urlencodedOpt || { extended: false }),
 			compression(compressionOpt || {}),
 			cors(corsOpt || {}),
 		];
+		if (morganOpt) srvDefaultbefore.push(morgan(morganOpt.format, morganOpt.options));
 		if (rateLimitOpt) srvDefaultbefore.push(rateLimit(rateLimitOpt));
 
 		const srvDefaultAfterResponse: (MiddlewareHandler | ErrorRequestHandler)[] = [errHandler];
 		const app = express();
+		const defaultAndCustomCollections = { ...collections, ...usersCollection };
 
 		const ctx: Context = {
 			express: { req: app.request, res: app.response },
-			collections,
+			collections: defaultAndCustomCollections,
 			prisma,
 			sessionData: [],
 			customVars: {},
@@ -138,7 +144,7 @@ const SystemPanda: SP = async function ({ content, config }) {
 			.get("/", (req, res) => {
 				res.json({
 					plugins: { ...activePlugins, ...inactivePlugins },
-					collections: Object.keys(collections).map(x => "/" + x),
+					collections: Object.keys(defaultAndCustomCollections).map(x => "/" + x),
 				});
 			})
 			.get("/plugins/:title?", async (req, res, next) => {
@@ -189,22 +195,20 @@ const SystemPanda: SP = async function ({ content, config }) {
 				}
 			});
 
-		for (const [cKey, cValue] of Object.entries(collections)) {
+		for (const [cKey, cValue] of Object.entries(defaultAndCustomCollections)) {
 			const query = prisma[cKey];
 			const { fields, access, hooks, slug, webhooks } = cValue;
 			const { beforeOperation, validateInput, modifyInput, afterOperation } = hooks || {};
+			const mergedWebhooks = [...(globalWebhooks || []), ...(webhooks || [])];
 
-			// global webhooks for every collection
-			baseWebhooks?.forEach(obj => webhook(obj).init());
-			// webhooks for each collection
-			webhooks?.forEach(obj => webhook(obj).init());
+			mergedWebhooks?.forEach(obj => webhook(obj).init());
 
 			app.all(`/${cKey}`, async (req, res, next) => {
 				try {
 					const inputData = req.body;
 					let existingData: ExistingData;
 					const reqMethod = req.method as Method;
-					let resultData = {};
+					let resultData = [];
 
 					const operation = flippedCrudMapping[reqMethod];
 					const operationArgs = {
@@ -281,15 +285,16 @@ const SystemPanda: SP = async function ({ content, config }) {
 
 					res.json(resultData);
 
-					// trigger global and collection-specific webhooks
-					baseWebhooks?.forEach(obj => {
+					const webhookTriggerPayload: EventTriggerPayload = {
+						event: flippedCrudMapping[reqMethod],
+						collection: cKey,
+						data: resultData.length > 0 ? resultData : null,
+						timestamp: new Date().toISOString(),
+					};
+
+					mergedWebhooks?.forEach(obj => {
 						if (obj.onOperation.includes(flippedCrudMapping[reqMethod])) {
-							webhook(obj).init();
-						}
-					});
-					webhooks?.forEach(obj => {
-						if (obj.onOperation.includes(flippedCrudMapping[reqMethod])) {
-							webhook(obj).trigger(resultData);
+							webhook(obj).trigger(webhookTriggerPayload);
 						}
 					});
 				} catch (err) {
