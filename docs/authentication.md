@@ -1,2 +1,2 @@
-# Authentication
+# **Authentication**
 Placeholder.

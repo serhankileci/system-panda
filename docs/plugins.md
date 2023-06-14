@@ -1,4 +1,4 @@
-# Plugins
+# **Plugins**
 
 Plugins are reusable snippets of code stored in your project's /plugins directory, imported and evaluated at runtime, and their default export function is executed on their specified hook for every collection route. They can be managed through the admin UI.
 
