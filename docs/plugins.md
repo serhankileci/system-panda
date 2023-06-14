@@ -28,7 +28,7 @@ with the following data schema:
   title: "Example",
   author: "I'm Batman",
   description: "Demonstrates the possible functionalities of a plugin.",
-  version: "1.0.0",
+  version: "0.1.0", // must be valid SemVer format
   sourceCode: "var data = \"some data\";\nconsole.log(\"I am executed once at build-time!\");\nvar bundle_default = (context) => {\n  if (context.util.currentHook === \"afterOperation\") {\n    console.log(\"I am executed at run-time, for every afterOperation!\");\n    if (!context.customVars.testing) {\n      console.log(\"This should appear once.\");\n      context.customVars.testing = data;\n    }\n  }\n  console.log(\"This should log for every operation.\");\n};\nexport {\n  bundle_default as default\n};"
 }
 ```
