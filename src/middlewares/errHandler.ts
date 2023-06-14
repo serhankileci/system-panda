@@ -17,9 +17,17 @@ const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
 		PrismaClientRustPanicError,
 		PrismaClientUnknownRequestError,
 		PrismaClientValidationError,
-	].some(x => err instanceof x);
+	].some(x => err.constructor.name === x.name);
 
-	if (!res.headersSent) res.status(500).json(isPrismaErr ? err.message : err);
+	if (!res.headersSent) {
+		if (isPrismaErr) {
+			const error: PrismaClientValidationError = err;
+			res.status(500).json(error.message);
+		} else {
+			res.status(500).json(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+		}
+	}
+
 	await logger(logfile, err as SystemPandaError | Error);
 	console.log(err);
 };
