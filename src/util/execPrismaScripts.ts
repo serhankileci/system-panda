@@ -1,9 +1,7 @@
 import { Options as ExecaOptions, execa } from "execa";
-import { pathExists } from "./pathExists.js";
-import { projectDir } from "./constants.js";
-import { SystemPandaError } from "./SystemPandaError.js";
+import { pathExists, projectDir, SystemPandaError } from "./index.js";
 
-async function prismaScript() {
+async function execPrismaScripts() {
 	try {
 		const options = {
 			stdio: "inherit",
@@ -34,4 +32,4 @@ async function prismaScript() {
 	}
 }
 
-export { prismaScript };
+export { execPrismaScripts };
