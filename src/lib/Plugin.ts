@@ -1,16 +1,18 @@
-import { PLUGINS_API, pluginsDir } from "../util/constants.js";
-import { Plugin, PluginOperations } from "../util/index.js";
+import {
+	Plugin,
+	PluginOperations,
+	pathExists,
+	SystemPandaError,
+	PLUGINS_API,
+	pluginsDir,
+} from "../util/index.js";
 import { rm, writeFile } from "fs/promises";
-import { pathExists } from "../util/pathExists.js";
-import { SystemPandaError } from "../util/SystemPandaError.js";
 import { PrismaClient } from "@prisma/client";
 
 function plugin(prisma: PrismaClient): PluginOperations {
 	try {
 		return {
 			load: async () => {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				const dbPlugins = await prisma.systemPandaPlugins.findMany();
 				const obj: Plugin = { active: [], inactive: [] };
 
@@ -26,8 +28,6 @@ function plugin(prisma: PrismaClient): PluginOperations {
 			},
 			enable: async (title: string) => {
 				if (await pathExists(`${pluginsDir}/${title}.js`)) {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					await prisma.systemPandaPlugins.update({
 						where: { title },
 						data: { active: true },
@@ -41,8 +41,6 @@ function plugin(prisma: PrismaClient): PluginOperations {
 			},
 			disable: async (title: string) => {
 				if (await pathExists(`${pluginsDir}/${title}.js`)) {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					await prisma.systemPandaPlugins.update({
 						where: { title },
 						data: { active: false },
@@ -64,8 +62,6 @@ function plugin(prisma: PrismaClient): PluginOperations {
 
 				const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
 
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				await prisma.systemPandaPlugins.create({
 					data: { ...res, active: false },
 				});
@@ -80,10 +76,7 @@ function plugin(prisma: PrismaClient): PluginOperations {
 					});
 				}
 
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				await prisma.systemPandaPlugins.delete({ where: { title } });
-
 				await rm(`${pluginsDir}/${title}.js`);
 			},
 		};
