@@ -41,9 +41,9 @@ type DatabasePlugin = {
 	version: string;
 	fn: PluginFn;
 };
-type Plugin = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
+type Plugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
 type PluginOperations = {
-	load: () => Promise<Plugin>;
+	load: () => Promise<Plugins>;
 	enable: (title: string) => Promise<void>;
 	disable: (title: string) => Promise<void>;
 	install: (title: string) => Promise<void>;
@@ -55,7 +55,7 @@ type PluginOperations = {
 type Webhook = {
 	name: string;
 	api: string;
-	method: "GET" | "POST";
+	// method: "GET" | "POST";
 	onOperation: ("create" | "read" | "update" | "delete")[];
 	headers?: RequestHeaders;
 };
@@ -88,7 +88,7 @@ type CRUD_Operation = {
 	readonly operation: "create" | "read" | "update" | "delete";
 };
 type CU_Operation = { readonly operation: "create" | "update" };
-type ExistingData = Record<string, unknown> | undefined;
+type ExistingData = Record<string, unknown> | null | undefined;
 type InputData = Record<string, unknown>;
 
 type Context = {
@@ -257,6 +257,8 @@ type Database = {
 	URI: string;
 } & Omit<PrismaClientOptions, "datasources" | "__internal">;
 
+type ExtendServer = (app: Express, ctx: Context) => void;
+
 type Options = {
 	content: {
 		collections: Collections;
@@ -292,7 +294,7 @@ type Options = {
 		/**
 		 * extending the Express.js server
 		 */
-		extendServer?: (app: Express, ctx: Context) => void;
+		extendServer?: ExtendServer;
 	};
 };
 type SP = (args: Options) => Promise<void>;
@@ -329,11 +331,14 @@ export {
 
 	/* COLLECTIONS */
 	Collection,
+	Collections,
 
 	/* SERVER */
 	MiddlewareHandler,
 	BeforeAfterMiddlewares,
 	Method,
+	DefaultMiddlewares,
+	ExtendServer,
 
 	/* PRISMA */
 	PrismaClientRustPanicError,
@@ -357,7 +362,7 @@ export {
 	EventTriggerPayload,
 
 	/* PLUGINS */
-	Plugin,
+	Plugins,
 	PluginFn,
 	PluginOperations,
 	DatabasePlugin,
