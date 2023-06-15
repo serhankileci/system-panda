@@ -1,3 +1,8 @@
+![](https://img.shields.io/npm/v/system-panda?style=for-the-badge)
+![](https://img.shields.io/npm/dt/system-panda?style=for-the-badge)
+![](https://img.shields.io/github/last-commit/serhankileci/system-panda?style=for-the-badge)
+![](https://img.shields.io/github/license/serhankileci/system-panda?style=for-the-badge)
+
 # **SystemPanda**
 Headless CMS for Node.js, written in TypeScript.
 
@@ -31,7 +36,6 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 - i18n (1. default translations for the core application, 2. allowing custom translations for collections)
 
 ## **Example**
-
 ```ts
 import SystemPanda from "system-panda";
 
