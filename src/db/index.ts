@@ -52,11 +52,11 @@ export async function setupDatabase(db: Database, databaseColelctions: {
 	prisma: any,
 	models: any
 }> {
-	const schemastring = await generateSchema(db, databaseColelctions);
+	const schemaString = await generateSchema(db, databaseColelctions);
 	if (!(await pathExists(`${projectDir}/prisma`))) await mkdir(`${projectDir}/prisma`);
 	await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaString);
 	await execPrismaScripts();
-	const models = getModels(schemastring);
+	const models = getModels(schemaString);
 	const prisma = new PrismaClient({
 		errorFormat: db.errorFormat,
 		log: db.log,
