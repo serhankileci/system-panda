@@ -1,6 +1,6 @@
 {
 	"name": "system-panda",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"homepage": "https://github.com/serhankileci/system-panda",
 	"repository": {
 		"type": "git",
@@ -22,7 +22,7 @@
 	"license": "MIT",
 	"main": "./build/index.js",
 	"bin": {
-		"system-panda": "build/util/cli.js"
+		"system-panda": "./build/util/cli.js"
 	},
 	"types": "./build/index.d.ts",
 	"scripts": {
