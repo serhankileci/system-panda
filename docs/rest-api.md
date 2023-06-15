@@ -1,10 +1,9 @@
 # **Rest API**
 SystemPanda automatically generates a REST API for your collections for CRUD operations. Until the next version which will include an UI panel to handle your collections, plugins, etc. you can make HTTP requests with the following API interface:
 
-For GET and DELETE requests, include the data as the query string.
-For POST and PUT requests, in the request body.
+For GET include the data as the query string. For the rest, as the request body.
 
-Query keywords are Prisma query method args. The where clause must be JSON. For GET requests, Prisma's findMany method is used by default, and ...many for the rest (but you can write your queries to create or affect one datum).
+Query keywords are Prisma query method args. The where clause must be JSON. All four CRUD operations are executed with the ...many Prisma argument, but you can write your queries to affect one datum.
 
 Example GET request (indented the query string for readability):
 ```
