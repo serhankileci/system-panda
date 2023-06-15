@@ -1,5 +1,5 @@
 import { Options as ExecaOptions, execa } from "execa";
-import { pathExists, projectDir, SystemPandaError } from "./index.js";
+import { pathExists, projectDir, SystemPandaError } from "../util";
 
 async function execPrismaScripts() {
 	try {

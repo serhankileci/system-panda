@@ -23,6 +23,7 @@ import {
 	PrismaClientOptions,
 } from "@prisma/client/runtime/index.js";
 import { crudMapping } from "./index.js";
+import { Database } from "../db/types.js";
 
 type RequestHeaders = {
 	[K in keyof IncomingHttpHeaders as string extends K
@@ -110,7 +111,7 @@ type Context = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ ACCESS CONTROL ░░░░░░░░░░░░░░░░░░░░ */
-type Access = {
+export type Access = {
 	operation: OperationAccess;
 	filter: OperationAccess;
 	item: OperationAccess;
@@ -253,9 +254,7 @@ type DefaultMiddlewares = {
 	rateLimit?: RateLimitOptions | false;
 };
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
-type Database = {
-	URI: string;
-} & Omit<PrismaClientOptions, "datasources" | "__internal">;
+
 
 type Options = {
 	content: {

@@ -6,7 +6,7 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
-import { makePrismaModel, webhook, databaseSeed, plugin } from "./lib/index.js";
+import { webhook, databaseSeed, plugin } from "./lib/index.js";
 import { errHandler } from "./middlewares/index.js";
 import { defaultCollections, mapQuery } from "./lib/collection/index.js";
 import {
@@ -23,9 +23,11 @@ import {
 	MiddlewareHandler,
 	ExistingData,
 	Method,
-	execPrismaScripts,
 	EventTriggerPayload,
 } from "./util/index.js";
+import {makePrismaModel} from "./db/makePrismaModel";
+import {execPrismaScripts} from "./db/execPrismaScripts";
+import {setupDatabase} from "./db";
 
 const SystemPanda: SP = async function ({ content, config }) {
 	try {
@@ -48,46 +50,14 @@ const SystemPanda: SP = async function ({ content, config }) {
 			systemPandaPlugins: defaultCollections.plugins,
 		};
 
-		const schemaFile = await makePrismaModel(
-			{
-				...collections,
-				...usersCollection,
-				...internalCollections,
-			},
-			db
-		);
-
 		if (!(await pathExists(pluginsDir))) await mkdir(pluginsDir);
-		if (!(await pathExists(`${projectDir}/prisma`))) await mkdir(`${projectDir}/prisma`);
-		await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaFile);
 
-		await execPrismaScripts();
-		const { PrismaClient } = await import("@prisma/client");
-		const prisma = new PrismaClient({
-			errorFormat: db.errorFormat,
-			log: db.log,
-			datasources: { db: { url: db.URI } },
+		const { prisma, models } = await setupDatabase(db, {
+			collections,
+			usersCollection,
+			internalCollections
 		});
 
-		await databaseSeed(prisma);
-
-		const modelRegex = /model\s+(\w+)\s*{([\s\S]*?)}/g;
-		const models: any = {};
-		let match;
-		while ((match = modelRegex.exec(schemaFile)) !== null) {
-			const modelName = match[1];
-			const fieldsContent = match[2].trim();
-
-			const fields = fieldsContent
-				.split("\n")
-				.map(line => line.trim().split(" ")[0])
-				.filter(field => field !== "");
-
-			fields.forEach(x => {
-				if (!models[modelName]) models[modelName] = {};
-				if (models[modelName]) models[modelName][x] = null;
-			});
-		}
 
 		const srvDefaultbefore: MiddlewareHandler[] = [
 			helmet(helmetOpt || {}),
