@@ -29,8 +29,7 @@
 		"format": "prettier --check 'src/**/*.ts' || prettier --write 'src/**/*.ts'",
 		"lint": "eslint . --ext .ts",
 		"test": "jest",
-		"fmt-lint": "npm run format; npm run lint;",
-		"build": "tsc"
+		"build": "npm run format; npm run lint; tsc"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.15.0",
