@@ -22,9 +22,12 @@ const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
 	if (!res.headersSent) {
 		if (isPrismaErr) {
 			const error: PrismaClientValidationError = err;
-			res.status(500).json(error.message);
+			res.status(500).json({ success: false, message: error.message });
 		} else {
-			res.status(500).json(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+			res.status(500).json({
+				success: false,
+				message: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+			});
 		}
 	}
 
