@@ -41,7 +41,7 @@ function getModels(schemaString: string): any {
 			if (models[modelName]) models[modelName][x] = null;
 		});
 	}
-	return models
+	return models;
 }
 
 export async function setupDatabase(db: Database, databaseColelctions: {
@@ -54,7 +54,7 @@ export async function setupDatabase(db: Database, databaseColelctions: {
 }> {
 	const schemastring = await generateSchema(db, databaseColelctions);
 	if (!(await pathExists(`${projectDir}/prisma`))) await mkdir(`${projectDir}/prisma`);
-	await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaFile);
+	await writeFile(path.resolve(`${projectDir}/prisma/schema.prisma`), schemaString);
 	await execPrismaScripts();
 	const models = getModels(schemastring);
 	const prisma = new PrismaClient({
@@ -67,5 +67,5 @@ export async function setupDatabase(db: Database, databaseColelctions: {
 	return {
 		prisma,
 		models,
-	}
+	};
 }
