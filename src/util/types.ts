@@ -135,17 +135,14 @@ type ValidateModifyInputOperation = Hook<InputData | Promise<InputData>>;
 /* ░░░░░░░░░░░░░░░░░░░░ COLLECTIONS ░░░░░░░░░░░░░░░░░░░░ */
 type Collections = Record<string, Collection>;
 
-type CollectionID = {
+type Collection = {
 	id?: {
 		name: string;
 		type: "autoincrement" | "uuid";
 	};
-};
-
-type Collection = {
 	fields: {
 		[key: string]: Field;
-	} & CollectionID;
+	};
 	slug?: string;
 	access?: Access;
 	hooks?: CRUDHooks;
