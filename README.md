@@ -24,8 +24,10 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 - ### [**Server Extension**](https://github.com/serhankileci/system-panda/blob/main/docs/server-extension.md)
 	SystemPanda uses Express.js under the hood, enables commonly used middlewares by default, and lets you extend the internal server with your own routes and business logic.
 
-## **Planned Features**
+## **To-do**
 - Dashboard (UI panel to handle CRUD operations and manage plugins)
+- Extended Prisma ORM support
+	- Type-safety for CRUD hook args (existingData and inputData should reflect the relevant Prisma model)
 - Authentication
 - Access Control
 - Standard library of plugins
