@@ -9,32 +9,30 @@ const makePrismaModel = async (db: Database, collections: Collections) => {
 		dataSource +
 		Object.keys(collections)
 			.map(collection => {
-				const { fields, access, hooks, slug, webhooks } = collections[collection];
+				const { fields, id } = collections[collection];
+				const idType = !id?.type || id?.type === "autoincrement" ? "Int" : "String";
+				const idDefault = id?.type ? `${id.type}()` : "autoincrement()";
+				const idName = id?.name || "id";
 
-				const mapping = {
-					text: "String",
-					checkbox: "Boolean",
-					number: {
-						kind: ["Int", "BigInt", "Float", "Decimal"],
-					},
-					datetime: "DateTime",
-					boolean: "Boolean",
-				};
 				const lines = [
 					`model ${toPascalCase(collection)} {`,
-					`    ${fields.id?.name || "id"} Int @id @default(${
-						fields.id?.type ? fields.id.type + "()" : "autoincrement()"
-					})`,
+					`\t${idName} ${idType} @id @default(${idDefault})`,
 				];
 
 				for (const field in fields) {
-					const { defaultValue, required, type, unique, index } = fields[field];
+					const { defaultValue, required, type, unique, map } = fields[field];
 
-					const requiredTypeOrNot = required ? mapping[type] : `${mapping[type]}?`;
+					const requiredTypeOrNot = required ? type : `${type}?`;
 					const parts = ["\t" + field.replace(/\s/g, "_"), requiredTypeOrNot];
 
 					if (unique) parts.push("@unique");
-					if (defaultValue) parts.push(`@default(${JSON.stringify(defaultValue)})`);
+					if (map) parts.push(`@map("${map}")`);
+					if (defaultValue)
+						parts.push(
+							`@default(${
+								type === "DateTime" ? "now()" : JSON.stringify(defaultValue)
+							})`
+						);
 
 					lines.push(parts.join(" "));
 				}
@@ -43,10 +41,9 @@ const makePrismaModel = async (db: Database, collections: Collections) => {
 					const { index } = fields[field];
 					const parts = [];
 
-					if (index) parts.push(`@@index([${field}])`);
-
-					if (parts.length > 0) {
-						lines.push(parts.join(" "));
+					if (index) {
+						parts.push(`\t@@index([${field}])`);
+						lines.push(parts.join(""));
 					}
 				}
 
