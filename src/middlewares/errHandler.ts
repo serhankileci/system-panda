@@ -26,7 +26,8 @@ const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
 		} else {
 			res.status(500).json({
 				success: false,
-				message: JSON.stringify(err.message, Object.getOwnPropertyNames(err.message)),
+				message:
+					err instanceof Error || err instanceof SystemPandaError ? err.message : err,
 			});
 		}
 	}
