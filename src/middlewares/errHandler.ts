@@ -26,7 +26,7 @@ const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
 		} else {
 			res.status(500).json({
 				success: false,
-				message: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+				message: JSON.stringify(err.message, Object.getOwnPropertyNames(err.message)),
 			});
 		}
 	}
