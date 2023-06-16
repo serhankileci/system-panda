@@ -37,7 +37,11 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 - Task scheduling (at specified times/conditions)
 - i18n (1. default translations for the core application, 2. allowing custom translations for collections)
 
-## **Example**
+## **Installation**
+```
+npm install system-panda
+```
+## **Example App**
 ```ts
 import SystemPanda from "system-panda";
 
