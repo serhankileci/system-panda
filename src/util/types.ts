@@ -23,14 +23,7 @@ import {
 	PrismaClientOptions,
 } from "@prisma/client/runtime/index.js";
 import { crudMapping } from "./index.js";
-
-type RequestHeaders = {
-	[K in keyof IncomingHttpHeaders as string extends K
-		? never
-		: number extends K
-		? never
-		: K]: IncomingHttpHeaders[K];
-} & Record<string, string>;
+import { DeepReadonly } from "utility-types";
 
 /* ░░░░░░░░░░░░░░░░░░░░ PLUGINS ░░░░░░░░░░░░░░░░░░░░ */
 type PluginFn = (ctx: Context) => Context | Promise<Context>;
@@ -84,15 +77,8 @@ type ReadListAC = (args: unknown) => void;
 type UpdateListAC = (args: unknown) => void;
 type DeleteListAC = (args: unknown) => void;
 
-type CRUD_Operation = {
-	readonly operation: "create" | "read" | "update" | "delete";
-};
-type CU_Operation = { readonly operation: "create" | "update" };
-type ExistingData = Record<string, unknown> | null | undefined;
-type InputData = Record<string, unknown>;
-
 type Context = {
-	prisma: PrismaClient /*CollectionKeys*/;
+	prisma: PrismaClient /*CollectionKeys*/ /* try this to see if the user's generated types can be imported at runtime typeof import("@prisma/client"); */;
 	collections: Collections;
 	express: {
 		req: ExpressRequest;
@@ -118,44 +104,33 @@ type Access = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ HOOKS ░░░░░░░░░░░░░░░░░░░░ */
+type ExistingData = any;
+type InputData = any;
+
 type CRUDHooks = {
-	beforeOperation?: beforeOperation[]; // side effect, void
-	validateInput?: validateInput[];
-	modifyInput?: modifyInput[];
-	afterOperation?: afterOperation[]; // side effect, void
+	beforeOperation?: BeforeAfterOperation[];
+	validateInput?: ValidateModifyInputOperation[];
+	modifyInput?: ValidateModifyInputOperation[];
+	afterOperation?: BeforeAfterOperation[];
 };
-type BeforeAfterArgs = { ctx: Context } & {
-	existingData?: ExistingData;
+
+type ReadonlyHookOperationArgs = {
+	ctx: DeepReadonly<Omit<Context, "express" | "customVars">> & {
+		express: {
+			req: ExpressRequest;
+			res: ExpressResponse;
+		};
+		customVars: Record<string, unknown>;
+	};
+} & {
+	readonly existingData?: ExistingData;
 	inputData?: InputData;
 } & CRUD_Operation;
-type ValidateInputObj = { ctx: Context } & {
-	readonly existingData?: ExistingData;
-	readonly inputData: InputData;
-} & CU_Operation;
 
-type beforeOperation = ({ ctx, operation, existingData, inputData }: BeforeAfterArgs) => void;
-type afterOperation = ({ ctx, operation, existingData, inputData }: BeforeAfterArgs) => void;
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+type Hook<T> = ({ ctx, operation, existingData, inputData }: ReadonlyHookOperationArgs) => T;
 
-type ModifyInputObj = { ctx: Context } & {
-	existingData?: ExistingData;
-	inputData: InputData;
-} & CU_Operation;
-
-type modifyInput = ({
-	// input
-	// existingItem
-	ctx,
-	operation,
-}: ModifyInputObj) => Promise<InputData> | InputData;
-
-type validateInput = ({
-	// input,
-	// existingItem,
-	ctx,
-	operation,
-}: ValidateInputObj) => Promise<InputData> | InputData;
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+type BeforeAfterOperation = Hook<void>;
+type ValidateModifyInputOperation = Hook<InputData | Promise<InputData>>;
 
 /* ░░░░░░░░░░░░░░░░░░░░ COLLECTIONS ░░░░░░░░░░░░░░░░░░░░ */
 type Collections = Record<string, Collection>;
@@ -191,7 +166,7 @@ type CommonFieldProps = {
 	required?: boolean;
 	index?: unknown;
 
-	hooks?: CRUDHooks;
+	// hooks?: CRUDHooks;
 	defaultValue?: string;
 
 	// ui?: {
@@ -307,7 +282,18 @@ type morganOptions = {
 };
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
-/* ░░░░░░░░░░░░░░░░░░░░ FOR HELPERS ░░░░░░░░░░░░░░░░░░░░ */
+/* ░░░░░░░░░░░░░░░░░░░░ MISC. ░░░░░░░░░░░░░░░░░░░░ */
+type CRUD_Operation = {
+	readonly operation: "create" | "read" | "update" | "delete";
+};
+type RequestHeaders = {
+	[K in keyof IncomingHttpHeaders as string extends K
+		? never
+		: number extends K
+		? never
+		: K]: IncomingHttpHeaders[K];
+} & Record<string, string>;
+
 type LogLevel = "informative" | "warning" | "error";
 type Method =
 	| "GET"
@@ -322,46 +308,26 @@ type Method =
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 export {
-	/* MISC */
 	SP,
 	Options,
 	LogLevel,
 	Database,
 	Context,
-
-	/* COLLECTIONS */
 	Collection,
 	Collections,
-
-	/* SERVER */
 	MiddlewareHandler,
 	BeforeAfterMiddlewares,
 	Method,
 	DefaultMiddlewares,
 	ExtendServer,
-
-	/* PRISMA */
 	PrismaClientRustPanicError,
 	PrismaClientInitializationError,
 	PrismaClientKnownRequestError,
 	PrismaClientUnknownRequestError,
 	PrismaClientValidationError,
-
-	/* HOOKS */
-	CRUDHooks,
-	CRUD_Operation,
-	beforeOperation,
-	validateInput,
-	modifyInput,
-	ExistingData,
-	afterOperation,
-
-	/* WEBHOOKS */
 	Webhook,
 	WebhookOperations,
 	EventTriggerPayload,
-
-	/* PLUGINS */
 	Plugins,
 	PluginFn,
 	PluginOperations,
