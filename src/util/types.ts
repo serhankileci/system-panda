@@ -154,32 +154,29 @@ type Collection = {
 };
 
 // type GlobalFieldConfig = any;
-type TextFieldConfig = {
-	validation?: unknown;
-};
-type ImageFieldConfig = unknown;
-type UniqFieldProps = TextFieldConfig | ImageFieldConfig;
+// type TextFieldConfig = {
+// 	validation?: unknown;
+// };
+// type ImageFieldConfig = unknown;
+// type UniqFieldProps = TextFieldConfig | ImageFieldConfig;
 // type Text = (args: TextFieldConfig) => TextFieldConfig;
 // type Image = (args: ImageFieldConfig) => ImageFieldConfig;
 
-type CommonFieldProps = {
+type Field = {
+	type: "String" | "Int" | "BigInt" | "Float" | "Decimal" | "Json" | "DateTime" | "Boolean";
+	unique?: boolean;
 	required?: boolean;
 	index?: unknown;
+	defaultValue?: string;
+	map?: string;
+	// relation?: { ref: string; many: boolean };
 
 	// hooks?: CRUDHooks;
-	defaultValue?: string;
-
 	// ui?: {
 	// 	filterable?: unknown;
 	// 	orderable?: unknown;
 	// } & UI;
 };
-
-type Field = {
-	type: "text" | "number" | "datetime" | "boolean";
-	unique?: boolean;
-} & CommonFieldProps &
-	UniqFieldProps;
 
 // type UI = {
 // 	hidden: boolean;
