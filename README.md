@@ -42,99 +42,99 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 import SystemPanda from "system-panda";
 
 SystemPanda({
-	content: {
-		// define your data models
-		collections: {
-			albums: {
-				fields: {
-					year: {
-						type: "Int",
-						required: true,
-					},
-					title: {
-						type: "String",
-						required: true,
-						unique: true,
-						index: true,
-					},
-					dateCreated: {
-						type: "DateTime",
-					},
-					someJson: {
-						type: "Json",
-						defaultValue: JSON.stringify({ hello: "world" }),
-					},
-				},
-				webhooks: [
-					{
-						api: process.env.HOST + "/webhook",
-						name: "All Operations",
+    content: {
+        // define your data models
+        collections: {
+            albums: {
+                fields: {
+                    year: {
+                        type: "Int",
+                        required: true,
+                    },
+                    title: {
+                        type: "String",
+                        required: true,
+                        unique: true,
+                        index: true,
+                    },
+                    dateCreated: {
+                        type: "DateTime",
+                    },
+                    someJson: {
+                        type: "Json",
+                        defaultValue: JSON.stringify({ hello: "world" }),
+                    },
+                },
+                webhooks: [
+                    {
+                        api: process.env.HOST + "/webhook",
+                        name: "All Operations",
 
-						// pick which operations should trigger the webhook
-						onOperation: ["create", "read", "update", "delete"],
-					},
-				],
-				hooks: {
-					beforeOperation: [
-						async ({ ctx, operation, existingData, inputData }) => {
-							// cause side-effect
-						}
-					],
-					modifyInput: [
-						async ({ ctx, operation, existingData, inputData }) => {
-							inputData.foobar = inputData.barbaz;
+                        // pick which operations should trigger the webhook
+                        onOperation: ["create", "read", "update", "delete"],
+                    },
+                ],
+                hooks: {
+                    beforeOperation: [
+                        async ({ ctx, operation, existingData, inputData }) => {
+                            // cause side-effect
+                        }
+                    ],
+                    modifyInput: [
+                        async ({ ctx, operation, existingData, inputData }) => {
+                            inputData.foobar = inputData.barbaz;
 
-							return inputData;
-						},
-					],
-					validateInput: [
-						async ({ ctx, operation, existingData, inputData }) => {
-							if (!someRegex.test(inputData.foobar)) {
-								throw "Validation error!";
-							}
+                            return inputData;
+                        },
+                    ],
+                    validateInput: [
+                        async ({ ctx, operation, existingData, inputData }) => {
+                            if (!someRegex.test(inputData.foobar)) {
+                                throw "Validation error!";
+                            }
 
-							return inputData;
-						},
-					],
-					afterOperation: [
-						async ({ ctx, operation, existingData, inputData }) => {
-							// cause side-effect
-						}
-					],
-				},
-			},
-		},
-	},
-	config: {
-		port: 3006,
-		db: {
-			URI: process.env.DATABASE_URL!,
-		},
-		extendServer: async (app, ctx) => {
-			// add custom server logic
+                            return inputData;
+                        },
+                    ],
+                    afterOperation: [
+                        async ({ ctx, operation, existingData, inputData }) => {
+                            // cause side-effect
+                        }
+                    ],
+                },
+            },
+        },
+    },
+    config: {
+        port: 3006,
+        db: {
+            URI: process.env.DATABASE_URL!,
+        },
+        extendServer: async (app, ctx) => {
+            // add custom server logic
 
-			app.post("/webhook", (req, res, next) => {
-				console.log(req.body);
+            app.post("/webhook", (req, res, next) => {
+                console.log(req.body);
 
-				/*
-				when, for example, a POST request is made:
-				{
-					event: 'create',
-					collection: 'albums',
-					data: { beforeCreate: null, afterCreate: [ [Object] ] },
-					timestamp: '2023-06-16T20:26:31.485Z'
-				}
-				*/
+                /*
+                when, for example, a POST request is made:
+                {
+                    event: 'create',
+                    collection: 'albums',
+                    data: { beforeCreate: null, afterCreate: [ [Object] ] },
+                    timestamp: '2023-06-16T20:26:31.485Z'
+                }
+                */
 
-				res.sendStatus(200);
-			});
-		},
+                res.sendStatus(200);
+            });
+        },
 
-		// popular middlewares already enabled by default
-		// configure their options or turn them off
-		defaultMiddlewares: {
-			morgan: false,
-		},
-	},
+        // popular middlewares already enabled by default
+        // configure their options or turn them off
+        defaultMiddlewares: {
+            morgan: false,
+        },
+    },
 });
 ```
