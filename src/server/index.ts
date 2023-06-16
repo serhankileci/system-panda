@@ -16,13 +16,14 @@ import {
 	Database,
 	DefaultMiddlewares,
 	EventTriggerPayload,
-	ExistingData,
 	ExtendServer,
 	flippedCrudMapping,
 	Method,
 	MiddlewareHandler,
+	nullIfEmpty,
 	packageProjectDir,
 	PLUGINS_API,
+	SystemPandaError,
 	Webhook,
 } from "../util/index.js";
 
@@ -165,8 +166,8 @@ async function server(
 		app.all(`/${cKey}`, async (req, res, next) => {
 			try {
 				const inputData = req.body;
-				const existingData: ExistingData = null;
 				const reqMethod = req.method as Method;
+				const existingData: any = null;
 				let resultData;
 				const isArr = Array.isArray(inputData.data);
 
@@ -183,19 +184,42 @@ async function server(
 					obj.fn(ctx);
 				}
 				for (const op of beforeOperation || []) {
-					await op(operationArgs);
+					const frozenOperationArgs = {
+						...Object.freeze(Object.assign({}, operationArgs)),
+						inputData,
+						ctx: { ...ctx, customVars: ctx.customVars },
+					};
+
+					await op(frozenOperationArgs);
 				}
 
 				if (reqMethod === "GET") {
 					const mappedQuery = mapQuery(req.query);
 					resultData = await query.findMany(mappedQuery);
 				} else {
+					const data = await query.findMany({
+						where: inputData.where,
+					});
+
+					operationArgs.existingData = nullIfEmpty(data);
+
+					let mergeData = isArr
+						? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
+						: Object.assign({}, models[cKey], inputData.data);
+					mergeData = nullIfEmpty(mergeData);
+
 					ctx.util.currentHook = "validateInput";
 					for (const obj of activePlugins) {
 						obj.fn(ctx);
 					}
 					for (const op of validateInput || []) {
-						await op(operationArgs);
+						const frozenOperationArgs = {
+							...Object.freeze(Object.assign({}, operationArgs)),
+							inputData,
+							ctx: { ...ctx, customVars: ctx.customVars },
+						};
+
+						await op(frozenOperationArgs);
 					}
 
 					ctx.util.currentHook = "modifyInput";
@@ -203,12 +227,14 @@ async function server(
 						obj.fn(ctx);
 					}
 					for (const op of modifyInput || []) {
-						await op(operationArgs);
-					}
+						const frozenOperationArgs = {
+							...Object.freeze(Object.assign({}, operationArgs)),
+							inputData,
+							ctx: { ...ctx, customVars: ctx.customVars },
+						};
 
-					const mergeData = isArr
-						? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
-						: Object.assign({}, models[cKey], inputData.data);
+						await op(frozenOperationArgs);
+					}
 
 					if (reqMethod === "POST") {
 						await query.createMany({
@@ -216,35 +242,49 @@ async function server(
 							skipDuplicates: inputData.skipDuplicates,
 						});
 
+						operationArgs.existingData = mergeData;
+
 						resultData = {
 							beforeCreate: null,
 							afterCreate: mergeData,
 						};
 					} else if (reqMethod === "PUT") {
-						const beforeUpdate = await query.findMany({
-							where: inputData.where,
-						});
-						await query.updateMany({
+						const updated = await query.updateMany({
 							data: mergeData,
 							where: inputData.where,
 						});
 
+						if (updated?.count === 0) {
+							throw new SystemPandaError({
+								level: "informative",
+								status: 404,
+								message: "No data to update.",
+							});
+						}
+
 						resultData = {
-							beforeUpdate,
+							beforeUpdate: operationArgs.existingData,
 							afterUpdate: mergeData,
 						};
 					} else if (reqMethod === "DELETE") {
-						const beforeDelete = await query.findMany({
-							where: inputData.where,
-						});
-						await query.deleteMany({
+						const deleted = await query.deleteMany({
 							where: inputData.where,
 						});
 
+						if (deleted?.count === 0) {
+							throw new SystemPandaError({
+								level: "informative",
+								status: 404,
+								message: "No data to delete.",
+							});
+						}
+
 						resultData = {
-							beforeDelete,
-							afterDelete: null,
+							beforeDelete: operationArgs.existingData,
+							afterDelete: mergeData,
 						};
+
+						operationArgs.existingData = null;
 					}
 				}
 
@@ -253,7 +293,13 @@ async function server(
 					obj.fn(ctx);
 				}
 				for (const op of afterOperation || []) {
-					await op(operationArgs);
+					const frozenOperationArgs = {
+						...Object.freeze(Object.assign({}, operationArgs)),
+						inputData,
+						ctx: { ...ctx, customVars: ctx.customVars },
+					};
+
+					await op(frozenOperationArgs);
 				}
 
 				res.json({ success: true, data: resultData });
@@ -261,11 +307,7 @@ async function server(
 				const webhookTriggerPayload: EventTriggerPayload = {
 					event: flippedCrudMapping[reqMethod],
 					collection: cKey,
-					data:
-						(Array.isArray(resultData) && resultData.length > 0) ||
-						Object.keys(resultData).length > 0
-							? resultData
-							: null,
+					data: nullIfEmpty(resultData),
 					timestamp: new Date().toISOString(),
 				};
 
