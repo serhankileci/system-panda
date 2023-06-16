@@ -27,4 +27,7 @@ const selectOnQuery = (obj: object, keys: "*" | string[]) =>
 		)
 	);
 
-export { writeOrAppend, pathExists, toPascalCase, selectOnQuery };
+const nullIfEmpty = (x: unknown[] | Record<string, unknown>) =>
+	(Array.isArray(x) && x.length > 0) || Object.keys(x).length > 0 ? x : null;
+
+export { writeOrAppend, pathExists, toPascalCase, selectOnQuery, nullIfEmpty };
