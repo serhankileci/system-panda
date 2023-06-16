@@ -1,3 +1,5 @@
+import { SystemPandaError } from "../util/index.js";
+
 const mapQuery = (query: object) =>
 	Object.fromEntries(
 		Object.entries(query).map(([key, value]) => {
@@ -7,7 +9,11 @@ const mapQuery = (query: object) =>
 				try {
 					newValue = JSON.parse(newValue);
 				} catch (error) {
-					throw "Malformed JSON in the WHERE clause.";
+					throw new SystemPandaError({
+						level: "informative",
+						message: "Malformed JSON in the WHERE clause.",
+						status: 400,
+					});
 				}
 			} else if (newValue.includes(",")) {
 				if (key === "distinct") {
