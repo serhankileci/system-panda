@@ -4,7 +4,7 @@ import { SystemPandaError, logfile, logger } from "./index.js";
 
 (async () => {
 	try {
-		await execa("prisma", process.argv.slice(3), {
+		await execa("prisma", process.argv.slice(process.argv.indexOf("system-panda")), {
 			stdio: "inherit",
 			reject: false,
 		});
