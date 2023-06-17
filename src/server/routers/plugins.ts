@@ -27,7 +27,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 				await plugin(prisma).install(title);
 
 				return res.json({
-					message: `Installed plugin: ${title}. You can enable your plugin and restart your application to activate it.`,
+					message: `Installed plugin: ${title}.`,
 				});
 			} catch (err) {
 				next(err);
@@ -39,7 +39,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 				await plugin(prisma).uninstall(title);
 
 				return res.json({
-					message: `Uninstalled plugin: ${title}. Restart your application for it to take effect.`,
+					message: `Uninstalled plugin: ${title}.`,
 				});
 			} catch (err) {
 				next(err);
@@ -51,7 +51,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 				await plugin(prisma).enable(title);
 
 				return res.json({
-					message: `Enabled plugin: ${title}. Restart your application for it to take effect.`,
+					message: `Enabled plugin: ${title}.`,
 				});
 			} catch (err) {
 				next(err);
@@ -63,7 +63,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 				await plugin(prisma).disable(title);
 
 				return res.json({
-					message: `Disabled plugin: ${title}. Restart your application for it to take effect.`,
+					message: `Disabled plugin: ${title}.`,
 				});
 			} catch (err) {
 				next(err);
