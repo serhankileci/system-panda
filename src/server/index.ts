@@ -22,10 +22,10 @@ import {
 	MiddlewareHandler,
 	nullIfEmpty,
 	packageProjectDir,
-	PLUGINS_API,
 	SystemPandaError,
 	Webhook,
 } from "../util/index.js";
+import { pluginsRouter } from "./routers/index.js";
 
 async function server(
 	port: number,
@@ -50,7 +50,7 @@ async function server(
 	} = defaultMiddlewares || {};
 
 	console.log("🔃 Loading plugins...");
-	const { active: activePlugins, inactive: inactivePlugins } = await plugin(prisma).load();
+	let plugins = await plugin(prisma).load();
 
 	console.log("🔃 Setting up the server...");
 	const app = express();
@@ -88,15 +88,22 @@ async function server(
 
 	app
 		// ...
-		.use((req, res, next) => {
-			ctx.express = {
-				req,
-				res,
-			};
+		.use(async (req, res, next) => {
+			if (!ctx.express) {
+				ctx.express = {
+					req,
+					res,
+				};
+			}
+
+			if (global.shouldReloadPlugins) {
+				plugins = await plugin(prisma).load();
+
+				global.shouldReloadPlugins = false;
+			}
 
 			next();
 		})
-		.get("/favicon.ico", (req, res) => res.status(204))
 		.use(
 			serveStatic(path.join(packageProjectDir, "system-panda-static"), {
 				extensions: ["html"],
@@ -104,60 +111,15 @@ async function server(
 		);
 
 	app
-		//
+		// ...
 		.use(beforeMiddlewares)
 		.get("/", (req, res) => {
 			res.json({
-				plugins: { ...activePlugins, ...inactivePlugins },
+				plugins,
 				collections: Object.keys(collections).map(x => "/" + x),
 			});
 		})
-		.get("/plugins/:title?", async (req, res, next) => {
-			try {
-				const { title } = req.params;
-
-				if (title) {
-					return res.json(await (await fetch(`${PLUGINS_API}/${title}`)).json());
-				} else {
-					return res.json(await (await fetch(PLUGINS_API)).json());
-				}
-			} catch (err) {
-				next(err);
-			}
-		})
-		.get("/plugins/:title/:installOrUninstall", async (req, res, next) => {
-			try {
-				const { title, installOrUninstall } = req.params;
-				if (installOrUninstall !== "install" && installOrUninstall !== "uninstall")
-					return next();
-
-				await plugin(prisma)[installOrUninstall](title);
-
-				return res.json({
-					message: `${
-						installOrUninstall[0].toUpperCase() + installOrUninstall.slice(1)
-					}led plugin: ${title}. Please restart and rebuild your application.`,
-				});
-			} catch (err) {
-				next(err);
-			}
-		})
-		.get("/plugins/:title/:enableOrDisable", async (req, res, next) => {
-			try {
-				const { title, enableOrDisable } = req.params;
-				if (enableOrDisable !== "enable" && enableOrDisable !== "disable") return next();
-
-				await plugin(prisma)[enableOrDisable](title);
-
-				return res.json({
-					message: `${
-						enableOrDisable[0].toUpperCase() + enableOrDisable.slice(1)
-					}d plugin: ${title}. Please restart and rebuild your application.`,
-				});
-			} catch (err) {
-				next(err);
-			}
-		});
+		.use("/plugins", pluginsRouter(prisma));
 
 	for (const [cKey, cValue] of Object.entries(collections)) {
 		const query = prisma[cKey];
@@ -174,7 +136,6 @@ async function server(
 				const existingData: any = null;
 				let resultData;
 				const isArr = Array.isArray(inputData.data);
-
 				const operation = flippedCrudMapping[reqMethod];
 				const operationArgs = {
 					existingData,
@@ -184,7 +145,7 @@ async function server(
 				};
 
 				ctx.util.currentHook = "beforeOperation";
-				for (const obj of activePlugins) {
+				for (const obj of plugins.active) {
 					obj.fn(ctx);
 				}
 				for (const op of beforeOperation || []) {
@@ -212,11 +173,11 @@ async function server(
 						: Object.assign({}, models[cKey], inputData.data);
 					mergeData = nullIfEmpty(mergeData);
 
-					ctx.util.currentHook = "validateInput";
-					for (const obj of activePlugins) {
+					ctx.util.currentHook = "modifyInput";
+					for (const obj of plugins.active) {
 						obj.fn(ctx);
 					}
-					for (const op of validateInput || []) {
+					for (const op of modifyInput || []) {
 						const frozenOperationArgs = {
 							...Object.freeze(Object.assign({}, operationArgs)),
 							inputData,
@@ -226,11 +187,11 @@ async function server(
 						await op(frozenOperationArgs);
 					}
 
-					ctx.util.currentHook = "modifyInput";
-					for (const obj of activePlugins) {
+					ctx.util.currentHook = "validateInput";
+					for (const obj of plugins.active) {
 						obj.fn(ctx);
 					}
-					for (const op of modifyInput || []) {
+					for (const op of validateInput || []) {
 						const frozenOperationArgs = {
 							...Object.freeze(Object.assign({}, operationArgs)),
 							inputData,
@@ -293,7 +254,7 @@ async function server(
 				}
 
 				ctx.util.currentHook = "afterOperation";
-				for (const obj of activePlugins) {
+				for (const obj of plugins.active) {
 					obj.fn(ctx);
 				}
 				for (const op of afterOperation || []) {
@@ -326,16 +287,11 @@ async function server(
 		});
 	}
 
-	ctx.express = {
-		req: app.request,
-		res: app.response,
-	};
-
 	if (extendServer) extendServer(app, ctx);
 
 	app
 		// ...
-		.all("*", (req, res) => res.status(404).json({ message: "Not Found." }))
+		.all("*", (req, res) => res.status(404).json({ success: false, message: "Not Found." }))
 		.use(afterMiddlewares)
 		.listen(port, () => {
 			console.log(
