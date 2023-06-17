@@ -25,6 +25,11 @@ import {
 import { crudMapping } from "./index.js";
 import { DeepReadonly } from "utility-types";
 
+declare global {
+	// eslint-disable-next-line no-var
+	var shouldReloadPlugins: boolean;
+}
+
 /* ░░░░░░░░░░░░░░░░░░░░ PLUGINS ░░░░░░░░░░░░░░░░░░░░ */
 type PluginFn = (ctx: Context) => Context | Promise<Context>;
 type DatabasePlugin = {
