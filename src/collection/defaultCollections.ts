@@ -11,6 +11,7 @@ const defaultCollections: Record<"users" | "plugins" | "settings", Collection> =
 	plugins: {
 		fields: {
 			title: { required: true, type: "String", unique: true },
+			description: { required: true, type: "String" },
 			author: { required: true, type: "String" },
 			version: { required: true, type: "String" },
 			sourceCode: { required: true, type: "String" },
