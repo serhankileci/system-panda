@@ -111,7 +111,7 @@ SystemPanda({
         },
     },
     config: {
-        port: 3006,
+        port: Number(process.env.PORT),
         db: {
             URI: process.env.DATABASE_URL!,
         },
