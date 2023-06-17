@@ -8,20 +8,20 @@ async function execPrismaScripts() {
 			reject: false,
 		};
 
-		console.log("Checking for Prisma files...");
+		console.log("📄 Checking for Prisma files...");
 		if (!pathExists("prisma") && !pathExists("prisma/schema.prisma")) {
 			console.log("Executing: 'prisma init'...");
 			await execa("npx", ["prisma", "init"], options as ExecaOptions);
 		}
 
-		console.log("Executing: 'prisma migrate dev'...");
+		console.log("📄 Executing: 'prisma migrate dev'...");
 		await execa(
 			"npx",
 			["prisma", "migrate", "dev", `--schema=${userProjectDir}/prisma/schema.prisma`],
 			options as ExecaOptions
 		);
 
-		console.log("Executing: 'prisma generate'...");
+		console.log("📄 Executing: 'prisma generate'...");
 		await execa(
 			"npx",
 			["prisma", "generate", `--schema=${userProjectDir}/prisma/schema.prisma`],

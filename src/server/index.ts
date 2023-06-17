@@ -48,7 +48,11 @@ async function server(
 		serveStatic: serveStaticOpt,
 		urlencoded: urlencodedOpt,
 	} = defaultMiddlewares || {};
+
+	console.log("🔃 Loading plugins...");
 	const { active: activePlugins, inactive: inactivePlugins } = await plugin(prisma).load();
+
+	console.log("🔃 Setting up the server...");
 	const app = express();
 
 	const beforeMiddlewares: MiddlewareHandler[] = [
@@ -335,7 +339,7 @@ async function server(
 		.use(afterMiddlewares)
 		.listen(port, () => {
 			console.log(
-				`\n✨ Connected to ${db.URI} via Prisma ORM.\n✨ SystemPanda live on http://localhost:${port}.`
+				`✨ Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
 			);
 		});
 

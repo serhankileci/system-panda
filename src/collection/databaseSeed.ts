@@ -8,6 +8,7 @@ async function databaseSeed(prisma: PrismaClient) {
 	// await prisma.systemPandaPlugins.createMany();
 
 	if ((await prisma.users.count()) === 0) {
+		console.log("😊 Creating initial user...");
 		const pw = randomUUID();
 		const hash = await bcrypt.hash(pw, await bcrypt.genSalt(10));
 		const userData = {
@@ -28,7 +29,7 @@ async function databaseSeed(prisma: PrismaClient) {
 			})
 		);
 		console.log(
-			`Your initial auto-generated password is: ${hash}, you should change it. It was also written to "system-panda.log".`
+			`✅ Your initial auto-generated password is: ${hash}, you should change it. It was also written to "system-panda.log".`
 		);
 	}
 }
