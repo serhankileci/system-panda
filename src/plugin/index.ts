@@ -5,6 +5,7 @@ import {
 	SystemPandaError,
 	PLUGINS_API,
 	pluginsDir,
+	DatabasePlugin,
 } from "../util/index.js";
 import { mkdir, rm, writeFile } from "fs/promises";
 import { PrismaClient } from "@prisma/client";
@@ -17,7 +18,7 @@ function plugin(prisma: PrismaClient): PluginOperations {
 
 		return {
 			load: async () => {
-				const dbPlugins = await prisma.systemPandaPlugins.findMany();
+				const dbPlugins: DatabasePlugin[] = await prisma.systemPandaPlugins.findMany();
 				const obj: Plugins = { active: [], inactive: [] };
 
 				for (const plugin of dbPlugins) {
@@ -31,57 +32,34 @@ function plugin(prisma: PrismaClient): PluginOperations {
 				return obj;
 			},
 			enable: async (title: string) => {
-				if (await pathExists(`${pluginsDir}/${title}.js`)) {
-					await prisma.systemPandaPlugins.update({
-						where: { title },
-						data: { active: true },
-					});
-				} else {
-					throw new SystemPandaError({
-						level: "warning",
-						message: `Plugin "${title}" is not installed.`,
-					});
-				}
+				await prisma.systemPandaPlugins.update({
+					where: { title },
+					data: { active: true },
+				});
+
+				global.shouldReloadPlugins = true;
 			},
 			disable: async (title: string) => {
-				if (await pathExists(`${pluginsDir}/${title}.js`)) {
-					await prisma.systemPandaPlugins.update({
-						where: { title },
-						data: { active: false },
-					});
-				} else {
-					throw new SystemPandaError({
-						level: "warning",
-						message: `Plugin "${title}" is not installed.`,
-					});
-				}
+				await prisma.systemPandaPlugins.update({
+					where: { title },
+					data: { active: false },
+				});
+
+				global.shouldReloadPlugins = true;
 			},
 			install: async (title: string) => {
-				if (await pathExists(`${pluginsDir}/${title}.js`)) {
-					throw new SystemPandaError({
-						level: "warning",
-						message: `Plugin "${title}" is already installed.`,
-					});
-				}
-
 				const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
 
 				await prisma.systemPandaPlugins.create({
 					data: { ...res, active: false },
 				});
-
 				await writeFile(`${pluginsDir}/${title}.js`, res.sourceCode);
 			},
 			uninstall: async (title: string) => {
-				if (!(await pathExists(`${pluginsDir}/${title}.js`))) {
-					throw new SystemPandaError({
-						level: "warning",
-						message: `Plugin "${title}" is already not installed.`,
-					});
-				}
-
 				await prisma.systemPandaPlugins.delete({ where: { title } });
 				await rm(`${pluginsDir}/${title}.js`);
+
+				global.shouldReloadPlugins = true;
 			},
 		};
 	} catch (err: unknown) {
