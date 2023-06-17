@@ -3,7 +3,7 @@
 ![](https://img.shields.io/github/last-commit/serhankileci/system-panda?style=for-the-badge)
 ![](https://img.shields.io/github/license/serhankileci/system-panda?style=for-the-badge)
 
-# **SystemPanda**
+# **SystemPanda** 🐼
 Headless CMS for Node.js, written in TypeScript.
 
 A hobby project that could turn into a production-grade Headless CMS, and will likely go through major changes until it's the way I originally planned it, which is a highly opinionated, architecturally rigid, yet deeply customizable system that aims to solve the limitations of Headless CMS' that hold developers back.
@@ -41,6 +41,7 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 ```
 npm install system-panda
 ```
+You can also [download plugins](https://github.com/serhankileci/system-panda/blob/main/docs/plugins.md#how-to-install) for your app and SystemPanda will handle the installations. No configuration or import required.
 ## **Example App**
 ```ts
 import SystemPanda from "system-panda";
