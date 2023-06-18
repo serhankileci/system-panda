@@ -8,9 +8,9 @@ const SystemPanda: SP = async function ({ content, config }) {
 		console.log("🔨 Building SystemPanda...");
 
 		const { collections, webhooks: globalWebhooks } = content || {};
-		const { db, session, debug, extendServer, port, defaultMiddlewares } = config || {};
+		const { db, extendServer, port, defaultMiddlewares } = config || {};
 
-		const usersCollection = { [session?.slug || "users"]: defaultCollections.users };
+		const usersCollection = { [/*session?.slug ||*/ "users"]: defaultCollections.users };
 		const internalCollections = {
 			systemPandaSettings: defaultCollections.settings,
 			systemPandaPlugins: defaultCollections.plugins,
