@@ -43,7 +43,7 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 npm install system-panda
 ```
 You can also [download plugins](https://github.com/serhankileci/system-panda/blob/main/docs/plugins.md#how-to-install) for your app and SystemPanda will handle the installations. No configuration or import required.
-## **Example App**
+## **Example**
 ```ts
 import SystemPanda from "system-panda";
 
