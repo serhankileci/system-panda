@@ -19,20 +19,30 @@ const makePrismaModel = async (db: Database, collections: Collections) => {
 					`\t${idName} ${idType} @id @default(${idDefault})`,
 				];
 
-				for (const field in fields) {
-					const { defaultValue, required, type, unique, map } = fields[field];
+				for (const key in fields) {
+					const field = fields[key];
+					const { defaultValue, required, type, unique, map } = field;
+					let decidedType;
 
-					const requiredTypeOrNot = required ? type : `${type}?`;
-					const parts = ["\t" + field.replace(/\s/g, "_"), requiredTypeOrNot];
+					if (type === "number") decidedType = field.kind;
+					else decidedType = type;
+
+					const requiredTypeOrNot = required ? decidedType : `${decidedType}?`;
+					const parts = ["\t" + key.replace(/\s/g, "_"), requiredTypeOrNot];
 
 					if (unique) parts.push("@unique");
 					if (map) parts.push(`@map("${map}")`);
-					if (defaultValue)
-						parts.push(
-							`@default(${
-								type === "DateTime" ? "now()" : JSON.stringify(defaultValue)
-							})`
-						);
+					if (defaultValue) {
+						let value;
+
+						if (type === "DateTime" && typeof field.defaultValue === "object") {
+							value = field.defaultValue.kind + "()";
+						} else {
+							value = JSON.stringify(defaultValue);
+						}
+
+						parts.push(`@default(${value})`);
+					}
 
 					lines.push(parts.join(" "));
 				}
