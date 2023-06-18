@@ -236,10 +236,7 @@ type MiddlewareHandler = (
 type DefaultMiddlewares = {
 	// session?: Express.SessionStore;
 	serveStatic?: { root: string; options: ServeStaticOptions } | false;
-	morgan?: {
-		format: "combined" | "common" | "dev" | "short" | "tiny";
-		options?: morgan.Options<ExpressRequest, ExpressResponse>;
-	} | false;
+	morgan?: morganOptions | false;
 	cors?: CorsOptions | false;
 	json?: bodyParser.OptionsJson | false;
 	compression?: CompressionOptions | false;
@@ -248,6 +245,10 @@ type DefaultMiddlewares = {
 	rateLimit?: RateLimitOptions | false;
 };
 
+type morganOptions = {
+	format: "combined" | "common" | "dev" | "short" | "tiny";
+	options?: morgan.Options<ExpressRequest, ExpressResponse>;
+};
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 type Database = {
 	URI: string;
