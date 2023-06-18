@@ -114,8 +114,8 @@ type InputData = any;
 
 type CRUDHooks = {
 	beforeOperation?: BeforeAfterOperation[];
-	validateInput?: ValidateModifyInputOperation[];
-	modifyInput?: ValidateModifyInputOperation[];
+	validateInput?: ModifyValidateInputOperation[];
+	modifyInput?: ModifyValidateInputOperation[];
 	afterOperation?: BeforeAfterOperation[];
 };
 
@@ -135,7 +135,7 @@ type ReadonlyHookOperationArgs = {
 type Hook<T> = ({ ctx, operation, existingData, inputData }: ReadonlyHookOperationArgs) => T;
 
 type BeforeAfterOperation = Hook<void>;
-type ValidateModifyInputOperation = Hook<InputData | Promise<InputData>>;
+type ModifyValidateInputOperation = Hook<InputData | Promise<InputData>>;
 
 /* ░░░░░░░░░░░░░░░░░░░░ COLLECTIONS ░░░░░░░░░░░░░░░░░░░░ */
 type Collections = Record<string, Collection>;
@@ -331,4 +331,7 @@ export {
 	PluginFn,
 	PluginOperations,
 	DatabasePlugin,
+	CRUDHooks,
+	BeforeAfterOperation,
+	ModifyValidateInputOperation,
 };
