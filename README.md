@@ -53,21 +53,21 @@ SystemPanda({
         collections: {
             albums: {
                 fields: {
-					title: {
-						type: "String",
-						required: true,
-						unique: true,
-						index: true,
-					},
+                    title: {
+                        type: "String",
+                        required: true,
+                        unique: true,
+                        index: true,
+                    },
                     year: {
                         type: "Int",
                         required: true,
                     },
                     dateCreated: {
                         type: "DateTime",
-						defaultValue: {
-							kind: "now"
-						}
+                        defaultValue: {
+                            kind: "now"
+                        }
                     },
                     someJson: {
                         type: "Json",
