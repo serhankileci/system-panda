@@ -38,7 +38,6 @@ async function server(
 	globalWebhooks?: Webhook[]
 ) {
 	const {
-		session: sessionOpt,
 		compression: compressionOpt,
 		cors: corsOpt,
 		helmet: helmetOpt,
@@ -123,7 +122,7 @@ async function server(
 
 	for (const [cKey, cValue] of Object.entries(collections)) {
 		const query = prisma[cKey];
-		const { fields, access, hooks, slug, webhooks } = cValue;
+		const { fields, hooks, slug, webhooks } = cValue;
 		const { beforeOperation, validateInput, modifyInput, afterOperation } = hooks || {};
 		const mergedWebhooks = [...(globalWebhooks || []), ...(webhooks || [])];
 
@@ -144,19 +143,24 @@ async function server(
 					ctx,
 				};
 
-				ctx.util.currentHook = "beforeOperation";
-				for (const obj of plugins.active) {
-					obj.fn(ctx);
-				}
-				for (const op of beforeOperation || []) {
-					const frozenOperationArgs = {
-						...Object.freeze(Object.assign({}, operationArgs)),
-						inputData,
-						ctx: { ...ctx, customVars: ctx.customVars },
-					};
+				const handleHookAndPlugin = async () => {
+					for (const obj of plugins.active) {
+						obj.fn(ctx);
+					}
 
-					await op(frozenOperationArgs);
-				}
+					for (const op of hooks![ctx.util.currentHook] || []) {
+						const frozenOperationArgs = {
+							...Object.freeze(Object.assign({}, operationArgs)),
+							inputData: inputData.data,
+							ctx: { ...ctx, customVars: ctx.customVars },
+						};
+
+						await op(frozenOperationArgs);
+					}
+				};
+
+				ctx.util.currentHook = "beforeOperation";
+				await handleHookAndPlugin();
 
 				if (reqMethod === "GET") {
 					const mappedQuery = mapQuery(req.query);
@@ -168,38 +172,16 @@ async function server(
 
 					operationArgs.existingData = nullIfEmpty(data);
 
+					ctx.util.currentHook = "modifyInput";
+					await handleHookAndPlugin();
+
+					ctx.util.currentHook = "validateInput";
+					await handleHookAndPlugin();
+
 					let mergeData = isArr
 						? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
 						: Object.assign({}, models[cKey], inputData.data);
 					mergeData = nullIfEmpty(mergeData);
-
-					ctx.util.currentHook = "modifyInput";
-					for (const obj of plugins.active) {
-						obj.fn(ctx);
-					}
-					for (const op of modifyInput || []) {
-						const frozenOperationArgs = {
-							...Object.freeze(Object.assign({}, operationArgs)),
-							inputData,
-							ctx: { ...ctx, customVars: ctx.customVars },
-						};
-
-						await op(frozenOperationArgs);
-					}
-
-					ctx.util.currentHook = "validateInput";
-					for (const obj of plugins.active) {
-						obj.fn(ctx);
-					}
-					for (const op of validateInput || []) {
-						const frozenOperationArgs = {
-							...Object.freeze(Object.assign({}, operationArgs)),
-							inputData,
-							ctx: { ...ctx, customVars: ctx.customVars },
-						};
-
-						await op(frozenOperationArgs);
-					}
 
 					if (reqMethod === "POST") {
 						await query.createMany({
@@ -254,18 +236,7 @@ async function server(
 				}
 
 				ctx.util.currentHook = "afterOperation";
-				for (const obj of plugins.active) {
-					obj.fn(ctx);
-				}
-				for (const op of afterOperation || []) {
-					const frozenOperationArgs = {
-						...Object.freeze(Object.assign({}, operationArgs)),
-						inputData,
-						ctx: { ...ctx, customVars: ctx.customVars },
-					};
-
-					await op(frozenOperationArgs);
-				}
+				await handleHookAndPlugin();
 
 				res.json({ success: true, data: resultData });
 
