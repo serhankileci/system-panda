@@ -71,19 +71,9 @@ type WebhookOperations = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ FOR PROPS TYPES ░░░░░░░░░░░░░░░░░░░░ */
-type OperationAccess = {
-	create: CreateListAC;
-	read: ReadListAC;
-	update: UpdateListAC;
-	delete: DeleteListAC;
-};
-type CreateListAC = (args: unknown) => void;
-type ReadListAC = (args: unknown) => void;
-type UpdateListAC = (args: unknown) => void;
-type DeleteListAC = (args: unknown) => void;
 
 type Context = {
-	prisma: PrismaClient /*CollectionKeys*/ /* try this to see if the user's generated types can be imported at runtime typeof import("@prisma/client"); */;
+	prisma: PrismaClient;
 	collections: Collections;
 	express: {
 		req: ExpressRequest;
@@ -101,11 +91,21 @@ type Context = {
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ ACCESS CONTROL ░░░░░░░░░░░░░░░░░░░░ */
-type Access = {
-	operation: OperationAccess;
-	filter: OperationAccess;
-	item: OperationAccess;
-};
+// type Access = {
+// 	operation: OperationAccess;
+// 	filter: OperationAccess;
+// 	item: OperationAccess;
+// };
+// type OperationAccess = {
+// 	create: CreateListAC;
+// 	read: ReadListAC;
+// 	update: UpdateListAC;
+// 	delete: DeleteListAC;
+// };
+// type CreateListAC = (args: unknown) => void;
+// type ReadListAC = (args: unknown) => void;
+// type UpdateListAC = (args: unknown) => void;
+// type DeleteListAC = (args: unknown) => void;
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ HOOKS ░░░░░░░░░░░░░░░░░░░░ */
@@ -149,7 +149,7 @@ type Collection = {
 		[key: string]: Field;
 	};
 	slug?: string;
-	access?: Access;
+	// access?: Access;
 	hooks?: CRUDHooks;
 	webhooks?: Webhook[];
 	// ui?: UI;
@@ -165,19 +165,37 @@ type Collection = {
 // type Image = (args: ImageFieldConfig) => ImageFieldConfig;
 
 type Field = {
-	type: "String" | "Int" | "BigInt" | "Float" | "Decimal" | "Json" | "DateTime" | "Boolean";
 	unique?: boolean;
 	required?: boolean;
-	index?: unknown;
-	defaultValue?: string;
+	index?: boolean;
 	map?: string;
 	// relation?: { ref: string; many: boolean };
-
 	// hooks?: CRUDHooks;
 	// ui?: {
 	// 	filterable?: unknown;
 	// 	orderable?: unknown;
 	// } & UI;
+} & (StringFields | IntField | BoolField | DateTimeField);
+
+type StringFields = {
+	type: "String" | "Json";
+	defaultValue?: string;
+};
+
+type IntField = {
+	type: "number";
+	defaultValue?: number;
+	kind: "Int" | "BigInt" | "Float" | "Decimal";
+};
+
+type BoolField = {
+	type: "Boolean";
+	defaultValue?: boolean;
+};
+
+type DateTimeField = {
+	defaultValue?: { kind: "now" } | string;
+	type: "DateTime";
 };
 
 // type UI = {
@@ -216,9 +234,12 @@ type MiddlewareHandler = (
 ) => void | Promise<void>;
 
 type DefaultMiddlewares = {
-	session?: Express.SessionStore;
+	// session?: Express.SessionStore;
 	serveStatic?: { root: string; options: ServeStaticOptions } | false;
-	morgan?: morganOptions | false;
+	morgan?: {
+		format: "combined" | "common" | "dev" | "short" | "tiny";
+		options?: morgan.Options<ExpressRequest, ExpressResponse>;
+	} | false;
 	cors?: CorsOptions | false;
 	json?: bodyParser.OptionsJson | false;
 	compression?: CompressionOptions | false;
@@ -226,6 +247,7 @@ type DefaultMiddlewares = {
 	urlencoded?: bodyParser.OptionsUrlencoded | false;
 	rateLimit?: RateLimitOptions | false;
 };
+
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 type Database = {
 	URI: string;
@@ -248,22 +270,22 @@ type Options = {
 
 	config: {
 		// env?: "development" | "testing" | "staging" | "production";
-		debug?: {
-			verboseConsole?: boolean;
-			logfiles?: boolean;
-		};
+		// debug?: {
+		// 	verboseConsole?: boolean;
+		// 	logfiles?: boolean;
+		// };
 		db: Database;
 		// rootDir?: string;
 
 		port: number;
-		session?: {
-			include: string[];
-			/**
-			 * default: SessionCookie, random secret, "users"
-			 */
-			secret: string;
-			slug?: string;
-		};
+		// session?: {
+		// 	include: string[];
+		// 	/**
+		// 	 * default: SessionCookie, random secret, "users"
+		// 	 */
+		// 	secret: string;
+		// 	slug?: string;
+		// };
 		defaultMiddlewares?: DefaultMiddlewares;
 		/**
 		 * extending the Express.js server
@@ -272,13 +294,6 @@ type Options = {
 	};
 };
 type SP = (args: Options) => Promise<void>;
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
-
-/* ░░░░░░░░░░░░░░░░░░░░ MIDDLEWARES ░░░░░░░░░░░░░░░░░░░░ */
-type morganOptions = {
-	format: "combined" | "common" | "dev" | "short" | "tiny";
-	options?: morgan.Options<ExpressRequest, ExpressResponse>;
-};
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ MISC. ░░░░░░░░░░░░░░░░░░░░ */
@@ -334,4 +349,7 @@ export {
 	CRUDHooks,
 	BeforeAfterOperation,
 	ModifyValidateInputOperation,
+	Field,
+	IntField,
+	DateTimeField,
 };
