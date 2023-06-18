@@ -26,6 +26,7 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 
 ## **To-do**
 - Dashboard (UI panel to handle CRUD operations and manage plugins)
+- File storage support
 - Extended Prisma ORM support
 	- Type-safety for CRUD hook args (existingData and inputData should reflect the relevant Prisma model)
 - Authentication
