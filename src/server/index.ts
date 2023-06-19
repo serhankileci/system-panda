@@ -20,6 +20,7 @@ import {
 	flippedCrudMapping,
 	Method,
 	MiddlewareHandler,
+	MutableProps,
 	nullIfEmpty,
 	packageProjectDir,
 	SystemPandaError,
@@ -48,10 +49,7 @@ async function server(
 		urlencoded: urlencodedOpt,
 	} = defaultMiddlewares || {};
 
-	console.log("🔃 Loading plugins...");
-	let plugins = await plugin(prisma).load();
-
-	console.log("🔃 Setting up the server...");
+	console.log("🐼 Setting up the server...");
 	const app = express();
 
 	const beforeMiddlewares: MiddlewareHandler[] = [
@@ -68,12 +66,18 @@ async function server(
 
 	const afterMiddlewares: (MiddlewareHandler | ErrorRequestHandler)[] = [errHandler];
 
+	console.log("🐼 Loading plugins...");
+	const initialPlugins = await plugin(prisma).load();
+	const mutableProps: MutableProps = {
+		plugins: initialPlugins,
+	};
+
 	const ctx: Context = {
 		express: {
 			req: app.request,
 			res: app.response,
 		},
-		collections: collections,
+		collections,
 		prisma,
 		sessionData: [],
 		customVars: {},
@@ -85,50 +89,35 @@ async function server(
 		},
 	};
 
-	app
-		// ...
-		.use(async (req, res, next) => {
-			if (!ctx.express) {
-				ctx.express = {
-					req,
-					res,
-				};
-			}
-
-			if (global.shouldReloadPlugins) {
-				plugins = await plugin(prisma).load();
-
-				global.shouldReloadPlugins = false;
-			}
-
+	app.use(
+		(req, res, next) => {
+			if (!ctx.express) ctx.express = { req, res };
 			next();
+		},
+		serveStatic(path.join(packageProjectDir, "system-panda-static"), {
+			extensions: ["html"],
 		})
-		.use(
-			serveStatic(path.join(packageProjectDir, "system-panda-static"), {
-				extensions: ["html"],
-			})
-		);
+	);
 
 	app
-		// ...
 		.use(beforeMiddlewares)
 		.get("/", (req, res) => {
 			res.json({
-				plugins,
-				collections: Object.keys(collections).map(x => "/" + x),
+				plugins: mutableProps.plugins,
+				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
 			});
 		})
-		.use("/plugins", pluginsRouter(prisma));
+		.use("/plugins", pluginsRouter(mutableProps, prisma));
 
 	for (const [cKey, cValue] of Object.entries(collections)) {
+		const { hooks, slug, webhooks } = cValue;
+		const slugOrKey = slug || cKey;
 		const query = prisma[cKey];
-		const { fields, hooks, slug, webhooks } = cValue;
-		const { beforeOperation, validateInput, modifyInput, afterOperation } = hooks || {};
 		const mergedWebhooks = [...(globalWebhooks || []), ...(webhooks || [])];
 
 		mergedWebhooks?.forEach(obj => webhook(obj).init());
 
-		app.all(`/${cKey}`, async (req, res, next) => {
+		app.all(`/${slugOrKey}`, async (req, res, next) => {
 			try {
 				const inputData = req.body;
 				const reqMethod = req.method as Method;
@@ -144,11 +133,11 @@ async function server(
 				};
 
 				const handleHookAndPlugin = async () => {
-					for (const obj of plugins.active) {
+					for (const obj of mutableProps.plugins.active) {
 						obj.fn(ctx);
 					}
 
-					for (const op of hooks![ctx.util.currentHook] || []) {
+					for (const op of (hooks || {})[ctx.util.currentHook] || []) {
 						const frozenOperationArgs = {
 							...Object.freeze(Object.assign({}, operationArgs)),
 							inputData: inputData.data,
@@ -181,6 +170,7 @@ async function server(
 					let mergeData = isArr
 						? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
 						: Object.assign({}, models[cKey], inputData.data);
+
 					mergeData = nullIfEmpty(mergeData);
 
 					if (reqMethod === "POST") {
@@ -242,7 +232,10 @@ async function server(
 
 				const webhookTriggerPayload: EventTriggerPayload = {
 					event: flippedCrudMapping[reqMethod],
-					collection: cKey,
+					collection: {
+						name: cKey,
+						slug: slugOrKey,
+					},
 					data: nullIfEmpty(resultData),
 					timestamp: new Date().toISOString(),
 				};
@@ -266,7 +259,7 @@ async function server(
 		.use(afterMiddlewares)
 		.listen(port, () => {
 			console.log(
-				`✨ Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
+				`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
 			);
 		});
 
