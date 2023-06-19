@@ -1,10 +1,10 @@
 import express from "express";
-import { PLUGINS_API } from "../../util/index.js";
+import { MutableProps, PLUGINS_API } from "../../util/index.js";
 import { plugin } from "../../plugin/index.js";
 import { PrismaClient } from "@prisma/client";
 const router = express.Router();
 
-const pluginsRouter = (prisma: PrismaClient) => {
+const pluginsRouter = (mutableProps: MutableProps, prisma: PrismaClient) => {
 	return router
 		.get("/", async (req, res, next) => {
 			try {
@@ -25,6 +25,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 			try {
 				const { title } = req.params;
 				await plugin(prisma).install(title);
+				mutableProps.plugins = await plugin(prisma).load();
 
 				return res.json({
 					message: `Installed plugin: ${title}.`,
@@ -37,6 +38,7 @@ const pluginsRouter = (prisma: PrismaClient) => {
 			try {
 				const { title } = req.params;
 				await plugin(prisma).uninstall(title);
+				mutableProps.plugins = await plugin(prisma).load();
 
 				return res.json({
 					message: `Uninstalled plugin: ${title}.`,
@@ -49,9 +51,10 @@ const pluginsRouter = (prisma: PrismaClient) => {
 			try {
 				const { title } = req.params;
 				await plugin(prisma).enable(title);
+				mutableProps.plugins = await plugin(prisma).load();
 
 				return res.json({
-					message: `Enabled plugin: ${title}.`,
+					message: `Enabled plugin: ${title} and reloaded the plugins.`,
 				});
 			} catch (err) {
 				next(err);
@@ -61,9 +64,10 @@ const pluginsRouter = (prisma: PrismaClient) => {
 			try {
 				const { title } = req.params;
 				await plugin(prisma).disable(title);
+				mutableProps.plugins = await plugin(prisma).load();
 
 				return res.json({
-					message: `Disabled plugin: ${title}.`,
+					message: `Disabled plugin: ${title} and reloaded the plugins.`,
 				});
 			} catch (err) {
 				next(err);
