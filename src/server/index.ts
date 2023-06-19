@@ -7,7 +7,7 @@ import cors from "cors";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 import { plugin } from "../plugin/index.js";
-import { errHandler } from "../middlewares/errHandler.js";
+import { errHandler } from "./middlewares/index.js";
 import { webhook } from "../webhook/index.js";
 import { mapQuery } from "../collection/mapQuery.js";
 import {

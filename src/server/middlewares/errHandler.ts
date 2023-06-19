@@ -7,7 +7,7 @@ import {
 	PrismaClientRustPanicError,
 	PrismaClientUnknownRequestError,
 	PrismaClientValidationError,
-} from "../util/index.js";
+} from "../../util/index.js";
 import { ErrorRequestHandler } from "express";
 
 const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
