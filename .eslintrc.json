@@ -14,7 +14,8 @@
 	"rules": {
 		"indent": ["warn", "tab"],
 		"quotes": ["error", "double"],
-		"semi": ["error", "always"]
+		"semi": ["error", "always"],
+		"no-mixed-spaces-and-tabs": "warn"
 	},
 	"ignorePatterns": ["**/build/*", "**/node_modules/*"]
 }
