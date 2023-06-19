@@ -15,7 +15,7 @@ async function database(db: Database, collections: Collections) {
 
 	const models = getModels(generatedSchemaString);
 
-	console.log("⚗️ Connecting to database...");
+	console.log("🐼 Connecting to database...");
 	const { PrismaClient } = await import("@prisma/client");
 	const prisma = new PrismaClient({
 		errorFormat: db.errorFormat,
