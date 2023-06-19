@@ -10,7 +10,7 @@ import {
 } from "../../util/index.js";
 import { ErrorRequestHandler } from "express";
 
-const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
+const errHandler: ErrorRequestHandler = async (err, req, res) => {
 	const isPrismaErr = [
 		PrismaClientInitializationError,
 		PrismaClientKnownRequestError,
