@@ -36,16 +36,12 @@ function plugin(prisma: PrismaClient): PluginOperations {
 					where: { title },
 					data: { active: true },
 				});
-
-				global.shouldReloadPlugins = true;
 			},
 			disable: async (title: string) => {
 				await prisma.systemPandaPlugins.update({
 					where: { title },
 					data: { active: false },
 				});
-
-				global.shouldReloadPlugins = true;
 			},
 			install: async (title: string) => {
 				const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
@@ -58,8 +54,6 @@ function plugin(prisma: PrismaClient): PluginOperations {
 			uninstall: async (title: string) => {
 				await prisma.systemPandaPlugins.delete({ where: { title } });
 				await rm(`${pluginsDir}/${title}.js`);
-
-				global.shouldReloadPlugins = true;
 			},
 		};
 	} catch (err: unknown) {
