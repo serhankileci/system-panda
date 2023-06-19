@@ -25,10 +25,9 @@ import {
 import { crudMapping } from "./index.js";
 import { DeepReadonly } from "utility-types";
 
-declare global {
-	// eslint-disable-next-line no-var
-	var shouldReloadPlugins: boolean;
-}
+// declare global {
+// eslint-disable-next-line no-var
+// }
 
 /* ░░░░░░░░░░░░░░░░░░░░ PLUGINS ░░░░░░░░░░░░░░░░░░░░ */
 type PluginFn = (ctx: Context) => Context | Promise<Context>;
@@ -62,7 +61,10 @@ type EventTriggerPayload = {
 	timestamp: string;
 	data: WebhookPayload;
 	event: keyof typeof crudMapping;
-	collection: string;
+	collection: {
+		name: string;
+		slug: string;
+	};
 };
 type WebhookOperations = {
 	init: () => void;
@@ -298,6 +300,9 @@ type SP = (args: Options) => Promise<void>;
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 
 /* ░░░░░░░░░░░░░░░░░░░░ MISC. ░░░░░░░░░░░░░░░░░░░░ */
+type MutableProps = {
+	plugins: Plugins;
+};
 type CRUD_Operation = {
 	readonly operation: "create" | "read" | "update" | "delete";
 };
@@ -350,4 +355,5 @@ export {
 	CRUDHooks,
 	BeforeAfterOperation,
 	ModifyValidateInputOperation,
+	MutableProps,
 };
