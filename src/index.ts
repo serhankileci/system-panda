@@ -5,7 +5,7 @@ import { server } from "./server/index.js";
 
 const SystemPanda: SP = async function ({ content, config }) {
 	try {
-		console.log("🔨 Building SystemPanda...");
+		console.log("🐼 Building SystemPanda...");
 
 		const { collections, webhooks: globalWebhooks } = content || {};
 		const { db, extendServer, port, defaultMiddlewares } = config || {};
