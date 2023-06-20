@@ -274,8 +274,8 @@ type Options = {
 	config: {
 		// env?: "development" | "testing" | "staging" | "production";
 		// debug?: {
-		// 	verboseConsole?: boolean;
-		// 	logfiles?: boolean;
+		// 	stdout?: boolean;
+		// 	logfile?: { path: string; } | false;
 		// };
 		db: Database;
 		// rootDir?: string;
