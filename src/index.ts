@@ -32,7 +32,6 @@ const SystemPanda: SP = async function ({ content, config }) {
 			globalWebhooks
 		);
 	} catch (err: unknown) {
-		console.log(err);
 		await logger(logfile, err as SystemPandaError | Error);
 	}
 };
