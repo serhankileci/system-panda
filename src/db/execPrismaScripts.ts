@@ -1,34 +1,40 @@
 import { Options as ExecaOptions, execa } from "execa";
-import { pathExists, userProjectDir, SystemPandaError } from "../util/index.js";
+import { SystemPandaError, pathExists, userProjectDir } from "../util/index.js";
 
 async function execPrismaScripts() {
-	try {
-		const options = {
-			stdio: "inherit",
-			reject: false,
-		};
+	const options: ExecaOptions = {
+		reject: false,
+		stdio: ["inherit", "inherit", "pipe"],
+	};
 
-		console.log("🐼 Checking for Prisma files...");
-		if (!pathExists("prisma") && !pathExists("prisma/schema.prisma")) {
-			console.log("🐼 Executing: 'prisma init'...");
-			await execa("npx", ["prisma", "init"], options as ExecaOptions);
+	console.log("🐼 Checking for Prisma files...");
+	if (!pathExists("prisma") && !pathExists("prisma/schema.prisma")) {
+		console.log("🐼 Executing: 'prisma init'...");
+		const initCmd = await execa("npx", ["prisma", "init"], options);
+
+		if (initCmd.failed) {
+			throw new SystemPandaError({ level: "error", message: initCmd.stderr?.toString() });
 		}
+	}
 
-		console.log("🐼 Executing: 'prisma migrate dev'...");
-		await execa(
-			"npx",
-			["prisma", "migrate", "dev", `--schema=${userProjectDir}/prisma/schema.prisma`],
-			options as ExecaOptions
-		);
+	console.log("🐼 Executing: 'prisma migrate dev'...");
+	const migrateCmd = await execa(
+		"npx",
+		["prisma", "migrate", "dev", `--schema=${userProjectDir}/prisma/schema.prisma`],
+		options
+	);
+	if (migrateCmd.failed) {
+		throw new SystemPandaError({ level: "error", message: migrateCmd.stderr?.toString() });
+	}
 
-		console.log("🐼 Executing: 'prisma generate'...");
-		await execa(
-			"npx",
-			["prisma", "generate", `--schema=${userProjectDir}/prisma/schema.prisma`],
-			options as ExecaOptions
-		);
-	} catch (err) {
-		throw new SystemPandaError({ level: "error", message: JSON.stringify(err) });
+	console.log("🐼 Executing: 'prisma generate'...");
+	const generateCmd = await execa(
+		"npx",
+		["prisma", "generate", `--schema=${userProjectDir}/prisma/schema.prisma`],
+		options
+	);
+	if (generateCmd.failed) {
+		throw new SystemPandaError({ level: "error", message: generateCmd.stderr?.toString() });
 	}
 }
 
