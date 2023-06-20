@@ -272,15 +272,21 @@ type Options = {
 	};
 
 	config: {
-		// env?: "development" | "testing" | "staging" | "production";
-		// debug?: {
-		// 	verboseConsole?: boolean;
-		// 	logfiles?: boolean;
-		// };
-		db: Database;
-		// rootDir?: string;
-
 		port: number;
+		db: Database;
+		debug?: {
+			/**
+			 * default: true
+			 */
+			stdout?: boolean;
+			/**
+			 * default: true
+			 */
+			logfile?: boolean;
+		};
+		// rootDir?: string;
+		// env?: "development" | "testing" | "staging" | "production";
+
 		// session?: {
 		// 	include: string[];
 		// 	/**
@@ -291,7 +297,7 @@ type Options = {
 		// };
 		defaultMiddlewares?: DefaultMiddlewares;
 		/**
-		 * extending the Express.js server
+		 * extend the underlying Express.js server
 		 */
 		extendServer?: ExtendServer;
 	};
