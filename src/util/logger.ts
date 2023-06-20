@@ -1,7 +1,9 @@
 import { appendFile } from "fs/promises";
 import { writeOrAppend, SystemPandaError } from "./index.js";
 
-async function logger(path: string, err: SystemPandaError | Error) {
+async function logger(path: string, err: SystemPandaError | Error, stdout = true) {
+	if (stdout) console.error(err);
+
 	const date = new Date(Number(Date.now())).toLocaleDateString();
 	const hour = new Date(date).toLocaleString("default", {
 		hour: "2-digit",
