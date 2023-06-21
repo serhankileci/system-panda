@@ -10,15 +10,15 @@ A hobby project that could turn into a production-grade Headless CMS, and will l
 
 ## **Features**
 - ### [**Hooks**](https://github.com/serhankileci/system-panda/blob/main/docs/hooks.md)
-	Lifecycle hooks can be used for CRUD operations, including causing side-effects, input validation and modification, etc.
+	Lifecycle hooks for CRUD operations, such as causing side-effects, and validating and modifying input.
 - ### [**Plugins**](https://github.com/serhankileci/system-panda/blob/main/docs/plugins.md)
 	Reusable snippets of bundled code that can be installed directly to your app.
 - ### [**Webhooks**](https://github.com/serhankileci/system-panda/blob/main/docs/webhooks.md)
-	Trigger API requests with data on specific hooks.
+	Trigger API requests with relevant data and metadata on specific hooks.
 - ### [**Prisma ORM**](https://github.com/serhankileci/system-panda/blob/main/docs/prisma-orm.md)
 	Database layer with full access to Prisma throughout the lifecycle of your app.
-- ### [**Collections**](https://github.com/serhankileci/system-panda/blob/main/docs/collections.md)
-	Define your collections as objects with an API similar to a Prisma model, and they will be mapped into Prisma data models.
+- ### [**Data Collections**](https://github.com/serhankileci/system-panda/blob/main/docs/collections.md)
+	Define objects that represent your data that is then mapped to Prisma models.
 - ### [**REST API**](https://github.com/serhankileci/system-panda/blob/main/docs/rest-api.md)
 	Generated routes for your collections that serve data.
 - ### [**Server Extension**](https://github.com/serhankileci/system-panda/blob/main/docs/server-extension.md)
