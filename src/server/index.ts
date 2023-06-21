@@ -1,13 +1,7 @@
-import express, { json, urlencoded, ErrorRequestHandler, static as serveStatic } from "express";
-import morgan from "morgan";
-import { rateLimit } from "express-rate-limit";
-import helmet from "helmet";
-import compression from "compression";
-import cors from "cors";
-import path from "path";
+import express, { ErrorRequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
 import { plugin } from "../plugin/index.js";
-import { errHandler } from "./middlewares/index.js";
+import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
 import { webhook } from "../webhook/index.js";
 import { mapQuery } from "../collection/mapQuery.js";
 import {
@@ -22,7 +16,6 @@ import {
 	MiddlewareHandler,
 	MutableProps,
 	nullIfEmpty,
-	packageProjectDir,
 	SystemPandaError,
 	Webhook,
 } from "../util/index.js";
@@ -38,32 +31,10 @@ async function server(
 	extendServer?: ExtendServer,
 	globalWebhooks?: Webhook[]
 ) {
-	const {
-		compression: compressionOpt,
-		cors: corsOpt,
-		helmet: helmetOpt,
-		json: jsonOpt,
-		morgan: morganOpt,
-		rateLimit: rateLimitOpt,
-		serveStatic: serveStaticOpt,
-		urlencoded: urlencodedOpt,
-	} = defaultMiddlewares || {};
-
 	console.log("🐼 Setting up the server...");
 	const app = express();
 
-	const beforeMiddlewares: MiddlewareHandler[] = [
-		helmet(helmetOpt || {}),
-		json(jsonOpt || {}),
-		urlencoded(urlencodedOpt || { extended: false }),
-		compression(compressionOpt || {}),
-		cors(corsOpt || {}),
-	];
-	if (morganOpt) beforeMiddlewares.push(morgan(morganOpt.format, morganOpt.options));
-	if (rateLimitOpt) beforeMiddlewares.push(rateLimit(rateLimitOpt));
-	if (serveStaticOpt)
-		beforeMiddlewares.push(serveStatic(serveStaticOpt.root, serveStaticOpt.options));
-
+	const beforeMiddlewares = beforeMiddlewaresHandler(defaultMiddlewares || {});
 	const afterMiddlewares: (MiddlewareHandler | ErrorRequestHandler)[] = [errHandler];
 
 	console.log("🐼 Loading plugins...");
@@ -89,17 +60,9 @@ async function server(
 		},
 	};
 
-	app.use(
-		(req, res, next) => {
-			if (!ctx.express) ctx.express = { req, res };
-			next();
-		},
-		serveStatic(path.join(packageProjectDir, "system-panda-static"), {
-			extensions: ["html"],
-		})
-	);
-
 	app
+		// ...
+		.use(internalMiddlewares(ctx))
 		.use(beforeMiddlewares)
 		.get("/", (req, res) => {
 			res.json({
