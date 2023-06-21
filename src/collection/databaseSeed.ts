@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
-import { SystemPandaError, logfile, logger, selectOnQuery } from "../util/index.js";
+import { selectOnQuery } from "../util/index.js";
 
 async function databaseSeed(prisma: PrismaClient) {
 	// await prisma.systemPandaSettings.createMany();
@@ -21,16 +21,7 @@ async function databaseSeed(prisma: PrismaClient) {
 			select: selectOnQuery(userData, "*"),
 		});
 
-		await logger(
-			logfile,
-			new SystemPandaError({
-				level: "informative",
-				message: `Initial user created. Email: admin@systempanda.com, password: ${hash}.`,
-			})
-		);
-		console.log(
-			`🐼 Your initial auto-generated password is: ${hash}, you should change it. It was also written to "system-panda.log".`
-		);
+		console.log(`🐼 Initial user created. Email: admin@systempanda.com, password: ${hash}.`);
 	}
 }
 
