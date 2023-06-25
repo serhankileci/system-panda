@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { plugin } from "../plugin/index.js";
 import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
 import { webhook } from "../webhook/index.js";
-import { mapQuery } from "../collection/mapQuery.js";
+import { mapQuery } from "../collection/index.js";
 import {
 	Collections,
 	Context,
