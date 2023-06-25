@@ -166,18 +166,25 @@ type Collection = {
 // type Text = (args: TextFieldConfig) => TextFieldConfig;
 // type Image = (args: ImageFieldConfig) => ImageFieldConfig;
 
-type Field = {
-	unique?: boolean;
-	required?: boolean;
-	index?: boolean;
-	map?: string;
-	// relation?: { ref: string; many: boolean };
-	// hooks?: CRUDHooks;
-	// ui?: {
-	// 	filterable?: unknown;
-	// 	orderable?: unknown;
-	// } & UI;
-} & (StringFields | IntField | BoolField | DateTimeField);
+type Field =
+	| RelationField
+	| ({
+			unique?: boolean;
+			required?: boolean;
+			index?: boolean;
+			map?: string;
+			// hooks?: CRUDHooks;
+			// ui?: {
+			// 	filterable?: unknown;
+			// 	orderable?: unknown;
+			// } & UI;
+	  } & (StringFields | IntField | BoolField | DateTimeField));
+
+type RelationField = {
+	type: "relation";
+	ref: string;
+	many: boolean;
+};
 
 type StringFields = {
 	type: "String" | "Json";
@@ -356,4 +363,5 @@ export {
 	BeforeAfterOperation,
 	ModifyValidateInputOperation,
 	MutableProps,
+	Field,
 };
