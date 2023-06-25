@@ -29,19 +29,19 @@ function plugin(prisma: PrismaClient): PluginOperations {
 
 			return obj;
 		},
-		enable: async (title: string) => {
+		enable: async title => {
 			await prisma.systemPandaPlugins.update({
 				where: { title },
 				data: { active: true },
 			});
 		},
-		disable: async (title: string) => {
+		disable: async title => {
 			await prisma.systemPandaPlugins.update({
 				where: { title },
 				data: { active: false },
 			});
 		},
-		install: async (title: string) => {
+		install: async title => {
 			const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
 
 			await prisma.systemPandaPlugins.create({
@@ -49,7 +49,7 @@ function plugin(prisma: PrismaClient): PluginOperations {
 			});
 			await writeFile(`${pluginsDir}/${title}.js`, res.sourceCode);
 		},
-		uninstall: async (title: string) => {
+		uninstall: async title => {
 			await prisma.systemPandaPlugins.delete({ where: { title } });
 			await rm(`${pluginsDir}/${title}.js`);
 		},
