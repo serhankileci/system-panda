@@ -29,7 +29,7 @@ const makePrismaModel = async (db: Database, collections: Collections) => {
 					const parts = ["\t" + formattedField];
 					let fieldType;
 
-					if (type === "number") fieldType = key.kind;
+					if (type === "number") fieldType = key.subtype;
 					else fieldType = type;
 
 					if (type === "relation") {
