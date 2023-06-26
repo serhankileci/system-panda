@@ -145,8 +145,8 @@ async function server(
 						operationArgs.existingData = mergeData;
 
 						resultData = {
-							beforeCreate: null,
-							afterCreate: mergeData,
+							before: null,
+							after: mergeData,
 						};
 					} else if (reqMethod === "PUT") {
 						const updated = await query.updateMany({
@@ -163,8 +163,8 @@ async function server(
 						}
 
 						resultData = {
-							beforeUpdate: operationArgs.existingData,
-							afterUpdate: mergeData,
+							before: operationArgs.existingData,
+							after: mergeData,
 						};
 					} else if (reqMethod === "DELETE") {
 						const deleted = await query.deleteMany({
@@ -180,8 +180,8 @@ async function server(
 						}
 
 						resultData = {
-							beforeDelete: operationArgs.existingData,
-							afterDelete: mergeData,
+							before: operationArgs.existingData,
+							after: mergeData,
 						};
 
 						operationArgs.existingData = null;
