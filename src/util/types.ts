@@ -25,11 +25,13 @@ import {
 import { crudMapping } from "./index.js";
 import { DeepReadonly } from "utility-types";
 
-// declare global {
-// eslint-disable-next-line no-var
-// }
+declare global {
+	/* eslint-disable no-var */
+	// node globals have to be declared with var
+	/* eslint-enable no-var */
+}
 
-/* ░░░░░░░░░░░░░░░░░░░░ PLUGINS ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** PLUGINS ********** */
 type PluginFn = (ctx: Context) => Context | Promise<Context>;
 type DatabasePlugin = {
 	active: boolean;
@@ -46,13 +48,12 @@ type PluginOperations = {
 	install: (title: string) => Promise<void>;
 	uninstall: (title: string) => Promise<void>;
 };
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
-/* ░░░░░░░░░░░░░░░░░░░░ WEBHOOKS ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** WEBHOOKS ********** */
 type Webhook = {
 	name: string;
 	api: string;
-	// method: "GET" | "POST";
 	onOperation: ("create" | "read" | "update" | "delete")[];
 	headers?: RequestHeaders;
 };
@@ -70,10 +71,9 @@ type WebhookOperations = {
 	init: () => void;
 	trigger: (obj: EventTriggerPayload) => void;
 };
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
-/* ░░░░░░░░░░░░░░░░░░░░ FOR PROPS TYPES ░░░░░░░░░░░░░░░░░░░░ */
-
+/* ********** CONTEXT ********** */
 type Context = {
 	prisma: PrismaClient;
 	collections: Collections;
@@ -90,27 +90,9 @@ type Context = {
 	};
 	customVars: Record<string, unknown>;
 };
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
-/* ░░░░░░░░░░░░░░░░░░░░ ACCESS CONTROL ░░░░░░░░░░░░░░░░░░░░ */
-// type Access = {
-// 	operation: OperationAccess;
-// 	filter: OperationAccess;
-// 	item: OperationAccess;
-// };
-// type OperationAccess = {
-// 	create: CreateListAC;
-// 	read: ReadListAC;
-// 	update: UpdateListAC;
-// 	delete: DeleteListAC;
-// };
-// type CreateListAC = (args: unknown) => void;
-// type ReadListAC = (args: unknown) => void;
-// type UpdateListAC = (args: unknown) => void;
-// type DeleteListAC = (args: unknown) => void;
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
-
-/* ░░░░░░░░░░░░░░░░░░░░ HOOKS ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** HOOKS ********** */
 type ExistingData = any;
 type InputData = any;
 
@@ -139,7 +121,7 @@ type Hook<T> = ({ ctx, operation, existingData, inputData }: ReadonlyHookOperati
 type BeforeAfterOperation = Hook<void>;
 type ModifyValidateInputOperation = Hook<InputData | Promise<InputData>>;
 
-/* ░░░░░░░░░░░░░░░░░░░░ COLLECTIONS ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** COLLECTIONS ********** */
 type Collections = Record<string, Collection>;
 
 type Collection = {
@@ -151,84 +133,44 @@ type Collection = {
 		[key: string]: Field;
 	};
 	slug?: string;
-	// access?: Access;
 	hooks?: CRUDHooks;
 	webhooks?: Webhook[];
-	// ui?: UI;
 };
 
-// type GlobalFieldConfig = any;
-// type TextFieldConfig = {
-// 	validation?: unknown;
-// };
-// type ImageFieldConfig = unknown;
-// type UniqFieldProps = TextFieldConfig | ImageFieldConfig;
-// type Text = (args: TextFieldConfig) => TextFieldConfig;
-// type Image = (args: ImageFieldConfig) => ImageFieldConfig;
-
-type Field =
-	| RelationField
-	| ({
-			unique?: boolean;
-			required?: boolean;
-			index?: boolean;
-			map?: string;
-			// hooks?: CRUDHooks;
-			// ui?: {
-			// 	filterable?: unknown;
-			// 	orderable?: unknown;
-			// } & UI;
-	  } & (StringFields | IntField | BoolField | DateTimeField));
-
+type CommonFieldProps = {
+	unique?: boolean;
+	required?: boolean;
+	index?: boolean;
+	map?: string;
+};
+type Field = RelationField | (OtherFields & CommonFieldProps);
+type OtherFields = StringFields | NumField | BoolField | DateTimeField;
 type RelationField = {
 	type: "relation";
 	ref: string;
 	many: boolean;
 };
-
 type StringFields = {
 	type: "String" | "Json";
 	defaultValue?: string;
 };
-
-type IntField = {
+type NumField = {
 	type: "number";
 	defaultValue?: number;
-	kind: "Int" | "BigInt" | "Float" | "Decimal";
+	subtype: "Int" | "BigInt" | "Float" | "Decimal";
 };
-
 type BoolField = {
 	type: "Boolean";
 	defaultValue?: boolean;
 };
-
 type DateTimeField = {
-	defaultValue?: { kind: "now" } | string;
 	type: "DateTime";
+	defaultValue?: { kind: "now" } | string;
 };
 
-// type UI = {
-// 	hidden: boolean;
-// 	override: {
-// 		components: Record<
-// 			string,
-// 			Record<
-// 				string,
-// 				{
-// 					css: {
-// 						[key: string]: (existingCSS: string) => Record<string, string>;
-// 					};
-// 					js: {
-// 						[key: string]: (existingCSS: string) => Record<string, string>;
-// 					};
-// 				}
-// 			>
-// 		>;
-// 	};
-// };
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
-/* ░░░░░░░░░░░░░░░░░░░░ MIDDLEWARES ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** MIDDLEWARES ********** */
 type BeforeAfterMiddlewares = {
 	middlewares?: {
 		before: MiddlewareHandler[];
@@ -243,7 +185,6 @@ type MiddlewareHandler = (
 ) => void | Promise<void>;
 
 type DefaultMiddlewares = {
-	// session?: Express.SessionStore;
 	serveStatic?: { root: string; options: ServeStaticOptions } | false;
 	morgan?: morganOptions | false;
 	cors?: CorsOptions | false;
@@ -258,7 +199,7 @@ type morganOptions = {
 	format: "combined" | "common" | "dev" | "short" | "tiny";
 	options?: morgan.Options<ExpressRequest, ExpressResponse>;
 };
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 type Database = {
 	URI: string;
 } & Omit<PrismaClientOptions, "datasources" | "__internal">;
@@ -269,44 +210,18 @@ type Options = {
 	content: {
 		collections: Collections;
 		webhooks?: Webhook[];
-		// storage?: {
-		// 	kind: "local" | "remote";
-		// 	type: "file" | "image";
-		// 	pathPrefix: string;
-		// 	generateURL: (path: string) => string;
-		// };
-		// ui?: UI;
 	};
-
 	config: {
-		// env?: "development" | "testing" | "staging" | "production";
-		// debug?: {
-		// 	stdout?: boolean;
-		// 	logfile?: { path: string; } | false;
-		// };
 		db: Database;
-		// rootDir?: string;
-
 		port: number;
-		// session?: {
-		// 	include: string[];
-		// 	/**
-		// 	 * default: SessionCookie, random secret, "users"
-		// 	 */
-		// 	secret: string;
-		// 	slug?: string;
-		// };
 		defaultMiddlewares?: DefaultMiddlewares;
-		/**
-		 * extending the Express.js server
-		 */
 		extendServer?: ExtendServer;
 	};
 };
 type SP = (args: Options) => Promise<void>;
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
-/* ░░░░░░░░░░░░░░░░░░░░ MISC. ░░░░░░░░░░░░░░░░░░░░ */
+/* ********** MISC. ********** */
 type MutableProps = {
 	plugins: Plugins;
 };
@@ -332,7 +247,7 @@ type Method =
 	| "OPTIONS"
 	| "TRACE"
 	| "CONNECT";
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+/* ******************** */
 
 export {
 	SP,
