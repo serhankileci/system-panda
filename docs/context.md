@@ -4,12 +4,12 @@ The context object is the heart of your SystemPanda app, here you have access to
 ## **Interface**
 ```ts
 {
-	prisma,
-	collections,
-	express,
-	sessionData,
-	bools,
-	util,
-	customVars
+    prisma,
+    collections,
+    express,
+    sessionData,
+    bools,
+    util,
+    customVars
 }
 ```

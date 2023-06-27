@@ -14,33 +14,33 @@ Hooks are arrays of functions to cause side-effects, validate, and modify input 
 ## **Example**
 ```ts
 {
-	hooks: {
-		beforeOperation: [
-			({ context, operation, existingData, inputData }) => {
-				// cause side-effect
-			},
-		],
-		modifyInput: [
-			({context, inputData, operation, existingData}) => {
-				inputData.foo = "bar";
+    hooks: {
+        beforeOperation: [
+            ({ context, operation, existingData, inputData }) => {
+                // cause side-effect
+            },
+        ],
+        modifyInput: [
+            ({context, inputData, operation, existingData}) => {
+                inputData.foo = "bar";
 
-				return inputData;
-			}
-		],
-		validateInput: [
-			({ context, inputData, operation, existingData}) => {
-				if (!someRegex.test(inputData.baz)) {
-					throw new Error("Validation error!");
-				}
+                return inputData;
+            }
+        ],
+        validateInput: [
+            ({ context, inputData, operation, existingData}) => {
+                if (!someRegex.test(inputData.baz)) {
+                    throw new Error("Validation error!");
+                }
 
-				return inputData;
-			},
-		],
-		afterOperation: [
-			({ context, operation, existingData, inputData }) => {
-				// cause side-effect
-			},
-		],
-	}
+                return inputData;
+            },
+        ],
+        afterOperation: [
+            ({ context, operation, existingData, inputData }) => {
+                // cause side-effect
+            },
+        ],
+    }
 }
 ```

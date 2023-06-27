@@ -4,19 +4,19 @@ Extend the internal Express.js server to add new routes, middlewares, and busine
 ## **Example**
 ```js
 {
-	config: {
-		port: Number(process.env.PORT),
-		extendServer: async (app, ctx) => {
-			app.get("/foo", (req, res) => res.send("bar"));
-		},
-		defaultMiddlewares: {
-			// configure the "cors" middleware
-			cors: {
-				origin: "*"
-			},
-			// turn off the "morgan" middleware
-			morgan: false
-		}
-	}
+    config: {
+        port: Number(process.env.PORT),
+        extendServer: async (app, ctx) => {
+            app.get("/foo", (req, res) => res.send("bar"));
+        },
+        defaultMiddlewares: {
+            // configure the "cors" middleware
+            cors: {
+                origin: "*"
+            },
+            // turn off the "morgan" middleware
+            morgan: false
+        }
+    }
 }
 ```

@@ -1,11 +1,13 @@
 # **Rest API**
-SystemPanda automatically generates a REST API for your collections for CRUD operations. Until the next version which will include an UI panel to handle your collections, plugins, etc. you can make HTTP requests with the following API interface:
+A REST API for your collections are automatically generated for CRUD operations.
 
-For GET include the data as the query string. For the rest, as the request body.
+Until the next version which will include an UI panel to handle your collections, plugins, etc. you can make HTTP requests with the following API interface.
+
+For GET, include the data as the query string. For the rest, as the request body.
 
 Query keywords are Prisma query method args. The where clause must be JSON. All four CRUD operations are executed with the ...many Prisma argument, but you can write your queries to affect one datum.
 
-Example GET request (indented the query string for readability):
+Example GET request (newlined the query string for readability):
 ```
 ?
 take=10
@@ -18,7 +20,7 @@ distinct=foo,bar
 &
 cursor=email-foo,id-3
 &
-select=email-true,id-false
+select=email-true,id-true
 &
 where={"field1":"value1","field2":{"subfield1":"subvalue1","subfield2":"subvalue2"},"field3":["value3","value4"]}
 ```

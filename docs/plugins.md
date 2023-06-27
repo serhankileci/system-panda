@@ -27,13 +27,13 @@ https://mmhsc5ce5v3hv4qt64p4dpodom0msylf.lambda-url.eu-central-1.on.aws/plugins
 with the following JSON schema:
 ```js
 {
-  title: "My Plugin",
-  author: "John Doe",
-  description: "Demonstrates the possible functionalities of a plugin.",
-  // valid SemVer format
-  version: "0.1.0",
-  // bundle string
-  sourceCode: "var data = \"some data\";\nconsole.log(\"I am executed once at build-time!\");\nvar bundle_default = (context) => {\n  if (context.util.currentHook === \"afterOperation\") {\n    console.log(\"I am executed at run-time, for every afterOperation!\");\n    if (!context.customVars.testing) {\n      console.log(\"This should appear once.\");\n      context.customVars.testing = data;\n    }\n  }\n  console.log(\"This should log for every operation.\");\n};\nexport {\n  bundle_default as default\n};"
+    title: "My Plugin",
+    author: "John Doe",
+    description: "Demonstrates the possible functionalities of a plugin.",
+    // valid SemVer format
+    version: "0.1.0",
+    // bundle string
+    sourceCode: "var data = \"some data\";\nconsole.log(\"I am executed once at build-time!\");\nvar bundle_default = (context) => {\n  if (context.util.currentHook === \"afterOperation\") {\n    console.log(\"I am executed at run-time, for every afterOperation!\");\n    if (!context.customVars.testing) {\n      console.log(\"This should appear once.\");\n      context.customVars.testing = data;\n    }\n  }\n  console.log(\"This should log for every operation.\");\n};\nexport {\n  bundle_default as default\n};"
 }
 ```
 
@@ -47,33 +47,33 @@ import anotherFile from "./anotherFile.js";
 import somePackage from "some-package";
 
 const foobar = somePackage()
-			  .configure()
-			  .connect()
-			  .getData();
+              .configure()
+              .connect()
+              .getData();
 
 console.log("I am executed once at build-time!");
 
 export default context => {
-	// conditioning the plugin to only run during the afterOperation hook
-	if (context.util.currentHook === "afterOperation") {
-		console.log("I am executed at run-time, on every afterOperation hook!");
+    // conditioning the plugin to only run during the afterOperation hook
+    if (context.util.currentHook === "afterOperation") {
+        console.log("I am executed at run-time, on every afterOperation hook!");
 
-		// a way to limit this code-block to run only once
-		if (!context.customVars.foobar) {
-			console.log("This should appear once.");
+        // a way to limit this code-block to run only once
+        if (!context.customVars.foobar) {
+            console.log("This should appear once.");
 
-			// loading the customVars object with important values!
-			context.customVars.foobar = foobar;
-		}
+            // loading the customVars object with important values!
+            context.customVars.foobar = foobar;
+        }
 
-		// by not conditioning this part, someFile will be called on all afterOperation hooks
-		someFile();
-	}
+        // by not conditioning this part, someFile will be called on all afterOperation hooks
+        someFile();
+    }
 
-	console.log("This should log for every operation.");
+    console.log("This should log for every operation.");
 
-	// by not limiting this logic, anotherFile will be called for EVERY hook
-	anotherFile();
+    // by not limiting this logic, anotherFile will be called for EVERY hook
+    anotherFile();
 };
 ```
 
@@ -81,17 +81,17 @@ export default context => {
 
 ```ts
 {
-	hooks: {
-		beforeOperation: [
-			({ ctx, operation, existingData, inputData }) => {
-				console.log(ctx.customVars.foobar); // undefined
-			},
-		],
-		afterOperation: [
-			({ ctx, operation, existingData, inputData }) => {
-				console.log(ctx.customVars.foobar); // some data
-			},
-		],
-	}
+    hooks: {
+        beforeOperation: [
+            ({ ctx, operation, existingData, inputData }) => {
+                console.log(ctx.customVars.foobar); // undefined
+            },
+        ],
+        afterOperation: [
+            ({ ctx, operation, existingData, inputData }) => {
+                console.log(ctx.customVars.foobar); // some data
+            },
+        ],
+    }
 }
 ```
