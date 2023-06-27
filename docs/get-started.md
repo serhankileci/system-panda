@@ -5,39 +5,39 @@ Here is a basic, example application that uses most of what SystemPanda has to o
 
 ```ts
 import SystemPanda from "system-panda";
-
+    
 SystemPanda({
     content: {
         // define your data models
-		// 2 example collections with one-to-many relation
+        // 2 example collections with one-to-many relation
         collections: {
-			song: {
-				fields: {
-					title: {
-						type: "String",
-						required: true,
-					},
-					relation_album: {
-						type: "relation",
-						ref: "album.id",
-						many: false,
-					},
-				},
-			},
+            song: {
+                fields: {
+                    title: {
+                        type: "String",
+                        required: true,
+                    },
+                    relation_album: {
+                        type: "relation",
+                        ref: "album.id",
+                        many: false,
+                    },
+                },
+            },
             album: {
-				id: {
-					name: "id",
-					type: "uuid",
-				},
+                id: {
+                    name: "id",
+                    type: "uuid",
+                },
 
-				// map custom name for collection
+                // map custom name for collection
                 slug: "records",
-				fields: {
-					relation_song: {
-						type: "relation",
-						ref: "song",
-						many: true,
-					},
+                fields: {
+                    relation_song: {
+                        type: "relation",
+                        ref: "song",
+                        many: true,
+                    },
                     name: {
                         type: "String",
                         required: true,
