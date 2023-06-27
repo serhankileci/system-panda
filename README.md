@@ -21,7 +21,7 @@ Check out the [**example app**](https://github.com/serhankileci/system-panda/blo
 - ### [**Plugins**](https://github.com/serhankileci/system-panda/blob/main/docs/plugins.md)
 	Reusable snippets of code that can be installed directly to your app.
 - ### [**Webhooks**](https://github.com/serhankileci/system-panda/blob/main/docs/webhooks.md)
-	Trigger API requests with data/metadata on specific hooks and operations.
+	Trigger API requests with data on specific hooks/operations.
 - ### [**Collections**](https://github.com/serhankileci/system-panda/blob/main/docs/collections.md)
 	With Prisma ORM as the database layer, define your data as objects that are mapped to Prisma schema models.
 - ### [**REST API**](https://github.com/serhankileci/system-panda/blob/main/docs/rest-api.md)
