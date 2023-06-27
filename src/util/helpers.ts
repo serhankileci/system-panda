@@ -14,12 +14,6 @@ const pathExists = (path: string) =>
 		.then(() => true)
 		.catch(() => false);
 
-const toPascalCase = (str: string) =>
-	str
-		.split(/[^a-zA-Z0-9]/g)
-		.map(group => group[0].toUpperCase() + group.slice(1))
-		.join("");
-
 const selectOnQuery = (obj: object, keys: "*" | string[]) =>
 	Object.fromEntries(
 		Object.keys(obj).map(key =>
@@ -30,4 +24,4 @@ const selectOnQuery = (obj: object, keys: "*" | string[]) =>
 const nullIfEmpty = (x: unknown[] | Record<string, unknown>) =>
 	(Array.isArray(x) && x.length > 0) || Object.keys(x).length > 0 ? x : null;
 
-export { writeOrAppend, pathExists, toPascalCase, selectOnQuery, nullIfEmpty };
+export { writeOrAppend, pathExists, selectOnQuery, nullIfEmpty };
