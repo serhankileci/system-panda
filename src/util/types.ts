@@ -206,17 +206,25 @@ type Database = {
 
 type ExtendServer = (app: Express, ctx: Context) => void;
 
+type Config = {
+	db: Database;
+	port: number;
+	defaultMiddlewares?: DefaultMiddlewares;
+	extendServer?: ExtendServer;
+	healthCheck?:
+		| {
+				path?: string;
+				data?: Record<string, any> | (() => Record<string, any>);
+		  }
+		| false;
+};
+
 type Options = {
 	content: {
 		collections: Collections;
 		webhooks?: Webhook[];
 	};
-	config: {
-		db: Database;
-		port: number;
-		defaultMiddlewares?: DefaultMiddlewares;
-		extendServer?: ExtendServer;
-	};
+	config: Config;
 };
 type SP = (args: Options) => Promise<void>;
 /* ******************** */
@@ -279,4 +287,5 @@ export {
 	ModifyValidateInputOperation,
 	MutableProps,
 	Field,
+	Config,
 };

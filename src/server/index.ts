@@ -4,13 +4,12 @@ import { plugin } from "../plugin/index.js";
 import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
 import { webhook } from "../webhook/index.js";
 import { mapQuery } from "../collection/index.js";
+import { pluginsRouter } from "./routers/index.js";
 import {
 	Collections,
+	Config,
 	Context,
-	Database,
-	DefaultMiddlewares,
 	EventTriggerPayload,
-	ExtendServer,
 	flippedCrudMapping,
 	Method,
 	MiddlewareHandler,
@@ -19,19 +18,16 @@ import {
 	SystemPandaError,
 	Webhook,
 } from "../util/index.js";
-import { pluginsRouter } from "./routers/index.js";
 
 async function server(
-	port: number,
-	db: Database,
+	config: Config,
 	prisma: PrismaClient,
 	collections: Collections,
 	models: any,
-	defaultMiddlewares?: DefaultMiddlewares,
-	extendServer?: ExtendServer,
 	globalWebhooks?: Webhook[]
 ) {
 	console.log("🐼 Setting up the server...");
+	const { db, port, defaultMiddlewares, extendServer, healthCheck } = config;
 	const app = express();
 
 	const beforeMiddlewares = beforeMiddlewaresHandler(defaultMiddlewares || {});
@@ -71,6 +67,17 @@ async function server(
 			});
 		})
 		.use("/plugins", pluginsRouter(mutableProps, prisma));
+
+	if (healthCheck !== false)
+		app.get(healthCheck?.path || "/health-check", (req, res) => {
+			res.json(
+				healthCheck?.data || {
+					status: "healthy",
+					timestamp: new Date().toISOString(),
+					uptime: process.uptime(),
+				}
+			);
+		});
 
 	for (const [cKey, cValue] of Object.entries(collections)) {
 		const { hooks, slug, webhooks } = cValue;
