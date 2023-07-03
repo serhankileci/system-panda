@@ -1,15 +1,14 @@
 import {
-	Plugins,
-	PluginOperations,
+	PluginFn,
 	pathExists,
 	PLUGINS_API,
 	pluginsDir,
 	DatabasePlugin,
+	Plugins,
 } from "../util/index.js";
 import { mkdir, rm, writeFile } from "fs/promises";
-import { PrismaClient } from "@prisma/client";
 
-function plugin(prisma: PrismaClient): PluginOperations {
+const plugin: PluginFn = prisma => {
 	(async () => {
 		if (!(await pathExists(pluginsDir))) await mkdir(pluginsDir);
 	})();
@@ -54,6 +53,6 @@ function plugin(prisma: PrismaClient): PluginOperations {
 			await rm(`${pluginsDir}/${title}.js`);
 		},
 	};
-}
+};
 
 export { plugin };
