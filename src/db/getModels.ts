@@ -14,7 +14,7 @@ function getModels(schemaString: string) {
 
 		fields.forEach(x => {
 			if (!models[modelName]) models[modelName] = {};
-			if (models[modelName]) models[modelName][x] = null;
+			if (models[modelName]) models[modelName][x] = undefined;
 		});
 	}
 
