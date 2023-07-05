@@ -218,7 +218,7 @@ type AuthSession = {
 	initFirstAuth: { [key: string]: any };
 	/**
 	 * add collection fields to include in the session
-	 * default: "*"
+	 * default: undefined
 	 */
 	sessionData?: "*" | string[];
 	options: {
