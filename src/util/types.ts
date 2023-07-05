@@ -24,21 +24,18 @@ import {
 } from "@prisma/client/runtime/index.js";
 import { crudMapping } from "./index.js";
 import { DeepReadonly } from "utility-types";
-
-declare global {
-	/* eslint-disable no-var */
-	// node globals have to be declared with var
-	/* eslint-enable no-var */
-}
+import { SessionData } from "express-session";
 
 /* ********** PLUGINS ********** */
-type PluginFn = (ctx: Context) => Context | Promise<Context>;
+type PluginExportFn = (ctx: Context) => Context | Promise<Context>;
+type PluginFn = (prisma: PrismaClient) => PluginOperations;
+
 type DatabasePlugin = {
 	active: boolean;
 	title: string;
 	author: string;
 	version: string;
-	fn: PluginFn;
+	fn: PluginExportFn;
 };
 type Plugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
 type PluginOperations = {
@@ -67,7 +64,7 @@ type EventTriggerPayload = {
 		slug: string;
 	};
 };
-type WebhookOperations = {
+type WebhookFn = (webhook: Webhook) => {
 	init: () => void;
 	trigger: (obj: EventTriggerPayload) => void;
 };
@@ -81,10 +78,8 @@ type Context = {
 		req: ExpressRequest;
 		res: ExpressResponse;
 	};
-	sessionData: string[];
-	bools: {
-		isLocalhost: boolean;
-	};
+	sessionData: Record<string, unknown> | undefined;
+	bools: Record<string, boolean>;
 	util: {
 		currentHook: keyof CRUDHooks;
 	};
@@ -126,8 +121,8 @@ type Collections = Record<string, Collection>;
 
 type Collection = {
 	id?: {
-		name: string;
-		type: "autoincrement" | "uuid";
+		name?: string;
+		type: "autoincrement" | "uuid" | "cuid";
 	};
 	fields: {
 		[key: string]: Field;
@@ -165,7 +160,7 @@ type BoolField = {
 };
 type DateTimeField = {
 	type: "DateTime";
-	defaultValue?: { kind: "now" } | string;
+	defaultValue?: { kind: "now" | "updatedAt" } | string;
 };
 
 /* ******************** */
@@ -206,8 +201,44 @@ type Database = {
 
 type ExtendServer = (app: Express, ctx: Context) => void;
 
+type AuthSession = {
+	/**
+	 * default: "user"
+	 */
+	collectionKey?: string;
+	/**
+	 * unique identifier field example: "email"
+	 */
+	uniqueIdentifierField?: string;
+	/**
+	 * default: "password"
+	 * rename password field
+	 */
+	secretField?: string;
+	initFirstAuth: { [key: string]: any };
+	/**
+	 * add collection fields to include in the session
+	 * default: "*"
+	 */
+	sessionData?: "*" | string[];
+	options: {
+		/**
+		 * default: 24 * 60 * 60 * 1000 (30 days)
+		 */
+		maxAge?: number;
+		secret: string;
+	};
+};
+
+type NormalizedAuthFields = {
+	collectionKey: string;
+	secretField: string;
+	uniqueIdentifierField: string;
+};
+
 type Config = {
 	db: Database;
+	authSession: AuthSession;
 	port: number;
 	defaultMiddlewares?: DefaultMiddlewares;
 	extendServer?: ExtendServer;
@@ -255,6 +286,29 @@ type Method =
 	| "OPTIONS"
 	| "TRACE"
 	| "CONNECT";
+
+declare global {
+	/* eslint-disable no-var */
+	// node globals have to be declared with var
+	/* eslint-enable no-var */
+}
+
+declare module "express-session" {
+	interface SessionData {
+		userID?: string;
+	}
+}
+
+interface CustomSessionData extends SessionData {
+	userID?: string;
+}
+
+type AllPrismaErrors =
+	| PrismaClientInitializationError
+	| PrismaClientKnownRequestError
+	| PrismaClientRustPanicError
+	| PrismaClientUnknownRequestError
+	| PrismaClientValidationError;
 /* ******************** */
 
 export {
@@ -270,17 +324,19 @@ export {
 	Method,
 	DefaultMiddlewares,
 	ExtendServer,
+	AllPrismaErrors,
 	PrismaClientRustPanicError,
 	PrismaClientInitializationError,
 	PrismaClientKnownRequestError,
 	PrismaClientUnknownRequestError,
 	PrismaClientValidationError,
 	Webhook,
-	WebhookOperations,
+	WebhookFn,
 	EventTriggerPayload,
 	Plugins,
-	PluginFn,
+	PluginExportFn,
 	PluginOperations,
+	PluginFn,
 	DatabasePlugin,
 	CRUDHooks,
 	BeforeAfterOperation,
@@ -288,4 +344,8 @@ export {
 	MutableProps,
 	Field,
 	Config,
+	AuthSession,
+	NormalizedAuthFields,
+	RelationField,
+	CustomSessionData,
 };
