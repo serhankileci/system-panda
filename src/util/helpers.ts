@@ -1,5 +1,12 @@
 import { access, constants, stat } from "fs/promises";
 import { Stats } from "fs";
+import {
+	PrismaClientInitializationError,
+	PrismaClientKnownRequestError,
+	PrismaClientRustPanicError,
+	PrismaClientUnknownRequestError,
+	PrismaClientValidationError,
+} from "./types.js";
 
 const writeOrAppend = async (file: string, mb = 1) => {
 	const data = await stat(file).catch(() => "w");
@@ -24,4 +31,20 @@ const selectOnQuery = (obj: object, keys: "*" | string[]) =>
 const nullIfEmpty = (x: unknown[] | Record<string, unknown>) =>
 	(Array.isArray(x) && x.length > 0) || Object.keys(x).length > 0 ? x : null;
 
-export { writeOrAppend, pathExists, selectOnQuery, nullIfEmpty };
+const isPrismaErr = (err: unknown) =>
+	[
+		PrismaClientInitializationError,
+		PrismaClientKnownRequestError,
+		PrismaClientRustPanicError,
+		PrismaClientUnknownRequestError,
+		PrismaClientValidationError,
+	].some(x => err?.constructor.name === x.name);
+
+function filterObjByKeys(obj: Record<string, unknown>, keys: string[]) {
+	return Object.keys(obj).reduce((prev: typeof obj, cur: keyof typeof obj) => {
+		if (keys.includes(cur)) prev[cur] = obj[cur];
+		return prev;
+	}, {});
+}
+
+export { writeOrAppend, pathExists, selectOnQuery, nullIfEmpty, isPrismaErr, filterObjByKeys };
