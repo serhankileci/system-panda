@@ -28,11 +28,12 @@ Check out the [**example app**](https://github.com/serhankileci/system-panda/blo
 	Generated REST API for your collections that serve data.
 - ### [**Server Extension**](https://github.com/serhankileci/system-panda/blob/main/docs/server-extension.md)
 	Extend the internal Express.js server with custom routes, middlewares, and business logic.
+- ### [**User Management**](https://github.com/serhankileci/system-panda/blob/main/docs/user-management.md)
+	Authentication and Access Control.
 
 ## **Planned Features**
-- Dashboard (to manage CRUD operations, users, plugins)
-- Authentication
 - Access Control
+- Dashboard (to manage CRUD operations, users, plugins)
 - Content media support
 - Standard library of plugins
 - Plugin system revisited
@@ -40,4 +41,3 @@ Check out the [**example app**](https://github.com/serhankileci/system-panda/blo
 - Version Control (for rollbacks, etc.)
 - Task scheduling (at specified times/conditions)
 - i18n (default translations for the core app and allowing custom translations for collections)
-- Next.js frontend (?)
