@@ -1,14 +1,35 @@
 import { Collection } from "../util/index.js";
 
-const defaultCollections: Record<"users" | "plugins" | "settings", Collection> = {
-	users: {
+const defaultCollections: Record<
+	"systemPandaUsers" | "systemPandaSession" | "systemPandaPlugins" | "systemPandaSettings",
+	Collection
+> = {
+	systemPandaUsers: {
+		fields: {},
+	},
+	systemPandaSession: {
+		id: {
+			type: "cuid",
+		},
 		fields: {
-			email: { required: true, type: "String", unique: true, index: true },
-			name: { required: true, type: "String" },
-			password: { required: true, type: "String" },
+			data: {
+				type: "Json",
+			},
+			createdAt: {
+				type: "DateTime",
+				defaultValue: {
+					kind: "now",
+				},
+			},
+			updatedAt: {
+				type: "DateTime",
+				defaultValue: {
+					kind: "updatedAt",
+				},
+			},
 		},
 	},
-	plugins: {
+	systemPandaPlugins: {
 		fields: {
 			title: { required: true, type: "String", unique: true },
 			description: { required: true, type: "String" },
@@ -18,7 +39,7 @@ const defaultCollections: Record<"users" | "plugins" | "settings", Collection> =
 			active: { required: true, type: "Boolean" },
 		},
 	},
-	settings: {
+	systemPandaSettings: {
 		fields: {
 			name: {
 				type: "String",
