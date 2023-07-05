@@ -1,10 +1,17 @@
-import express, { ErrorRequestHandler } from "express";
+import express from "express";
+import * as url from "node:url";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { plugin } from "../plugin/index.js";
-import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
+import {
+	beforeMiddlewaresHandler,
+	ifAuthenticated,
+	errHandler,
+	internalMiddlewares,
+} from "./middlewares/index.js";
 import { webhook } from "../webhook/index.js";
 import { mapQuery } from "../collection/index.js";
-import { pluginsRouter } from "./routers/index.js";
+import { authRouter, pluginsRouter } from "./routers/index.js";
 import {
 	Collections,
 	Config,
@@ -14,24 +21,31 @@ import {
 	Method,
 	MiddlewareHandler,
 	MutableProps,
+	NormalizedAuthFields,
 	nullIfEmpty,
 	SystemPandaError,
 	Webhook,
 } from "../util/index.js";
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 async function server(
 	config: Config,
 	prisma: PrismaClient,
 	collections: Collections,
 	models: any,
+	normalizedAuthFields: NormalizedAuthFields,
 	globalWebhooks?: Webhook[]
 ) {
 	console.log("🐼 Setting up the server...");
-	const { db, port, defaultMiddlewares, extendServer, healthCheck } = config;
+	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession } = config;
 	const app = express();
 
-	const beforeMiddlewares = beforeMiddlewaresHandler(defaultMiddlewares || {});
-	const afterMiddlewares: (MiddlewareHandler | ErrorRequestHandler)[] = [errHandler];
+	const beforeMiddlewares = beforeMiddlewaresHandler(
+		defaultMiddlewares || {},
+		authSession,
+		prisma
+	);
+	const afterMiddlewares: MiddlewareHandler[] = [];
 
 	console.log("🐼 Loading plugins...");
 	const initialPlugins = await plugin(prisma).load();
@@ -46,11 +60,9 @@ async function server(
 		},
 		collections,
 		prisma,
-		sessionData: [],
+		sessionData: undefined,
 		customVars: {},
-		bools: {
-			isLocalhost: false,
-		},
+		bools: {},
 		util: {
 			currentHook: "beforeOperation",
 		},
@@ -58,15 +70,20 @@ async function server(
 
 	app
 		// ...
-		.use(internalMiddlewares(ctx))
+		.set("view engine", "ejs")
+		.set("views", path.resolve(__dirname, "views"))
 		.use(beforeMiddlewares)
+		.use(internalMiddlewares(ctx, authSession))
 		.get("/", (req, res) => {
-			res.json({
+			res.render("index", {
+				title: "SystemPanda - Dashboard",
+				page: "index",
 				plugins: mutableProps.plugins,
 				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
 			});
 		})
-		.use("/plugins", pluginsRouter(mutableProps, prisma));
+		.use("/auth", authRouter(prisma, normalizedAuthFields))
+		.use("/plugins", ifAuthenticated, pluginsRouter(mutableProps, prisma));
 
 	if (healthCheck !== false)
 		app.get(healthCheck?.path || "/health-check", (req, res) => {
@@ -140,7 +157,6 @@ async function server(
 					let mergeData = isArr
 						? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
 						: Object.assign({}, models[cKey], inputData.data);
-
 					mergeData = nullIfEmpty(mergeData);
 
 					if (reqMethod === "POST") {
@@ -206,7 +222,7 @@ async function server(
 						name: cKey,
 						slug: slugOrKey,
 					},
-					data: nullIfEmpty(resultData),
+					data: nullIfEmpty(resultData) || null,
 					timestamp: new Date().toISOString(),
 				};
 
@@ -215,7 +231,7 @@ async function server(
 						webhook(obj).trigger(webhookTriggerPayload);
 					}
 				});
-			} catch (err) {
+			} catch (err: unknown) {
 				next(err);
 			}
 		});
@@ -223,10 +239,13 @@ async function server(
 
 	if (extendServer) extendServer(app, ctx);
 
+	app.all("*", (req, res) => res.status(404).json({ success: false, message: "Not Found." }));
+
+	if (afterMiddlewares.length > 0) app.use(afterMiddlewares);
+
 	app
 		// ...
-		.all("*", (req, res) => res.status(404).json({ success: false, message: "Not Found." }))
-		.use(afterMiddlewares)
+		.use(errHandler)
 		.listen(port, () => {
 			console.log(
 				`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
