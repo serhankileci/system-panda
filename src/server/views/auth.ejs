@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><%= title %></title>
+</head>
+<body>
+	<% if (page === "login") { %>
+		<form method="POST" action="/auth/login">
+			<div>
+				<label for="email">Email</label>
+				<input type="email" id="email" name="email" required>
+			</div>
+			<div>
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" required>
+			</div>
+			<div>
+				<button type="submit">Submit</button>
+			</div>
+		</form>
+	<% } else if (page === "logout") { %>
+		<form method="POST" action="/auth/logout">
+			<button type="submit">Logout</button>
+		</form>
+	<% } %>
+</body>
+</html>

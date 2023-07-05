@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><%= title %></title>
+</head>
+
+<body>
+	<% if (plugins) { %>
+		<h2>Plugins</h2>
+		<h3>Active</h3>
+		<% if (plugins.active.length > 0) { %>
+			<ul>
+				<% plugins.active.map(plugin => { -%>
+					<li><%= plugin.title %> (<%= plugin.version %>)</li>
+				<% }) -%>
+			</ul>
+		<% } else { -%>
+			<p>No plugins.</p>
+		<% } -%>
+		<h3>Inactive</h3>
+		<% if (plugins.inactive.length > 0) { %>
+			<ul>
+				<% plugins.inactive.map(plugin => { -%>
+					<li><%= plugin.title %> (<%= plugin.version %>)</li>
+				<% }) -%>
+			</ul>
+		<% } else { -%>
+			<p>No plugins.</p>
+		<% } -%>
+	<% } -%>
+
+	<br />
+
+	<h2>Collections</h2>
+	<% if (collections) { %>
+		<ul>
+			<% collections.map(collection => { -%>
+				<li>
+						<a href="<%= collection %>">
+							<%= collection.slice(1) %>
+						</a>
+				</li>
+			<% }) -%>
+		</ul>
+	<% } -%>
+</body>
+
+</html>
