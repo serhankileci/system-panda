@@ -23,13 +23,18 @@ function internalMiddlewares(ctx: Context, authSession: AuthSession) {
 					},
 				});
 
-				if (authSession.sessionData === "*") {
-					ctx.sessionData = data.relation_users;
-				} else if (
-					Array.isArray(authSession.sessionData) &&
-					authSession.sessionData.length > 0
-				) {
-					ctx.sessionData = filterObjByKeys(data.relation_users, authSession.sessionData);
+				if (data?.relation_users) {
+					if (!authSession.sessionData || authSession.sessionData === "*") {
+						ctx.sessionData = data.relation_users;
+					} else if (
+						Array.isArray(authSession.sessionData) &&
+						authSession.sessionData.length > 0
+					) {
+						ctx.sessionData = filterObjByKeys(
+							data.relation_users,
+							authSession.sessionData
+						);
+					}
 				}
 			}
 
