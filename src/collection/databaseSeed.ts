@@ -1,27 +1,31 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { randomUUID } from "crypto";
-import { selectOnQuery } from "../util/index.js";
+import { AuthSession, NormalizedAuthFields, selectOnQuery } from "../util/index.js";
 
-async function databaseSeed(prisma: PrismaClient) {
+async function databaseSeed(
+	prisma: PrismaClient,
+	normalizedAuthFields: NormalizedAuthFields,
+	initFirstAuth: AuthSession["initFirstAuth"]
+) {
+	const { collectionKey, secretField } = normalizedAuthFields;
 	// await prisma.systemPandaSettings.createMany();
 	// await prisma.systemPandaPlugins.createMany();
 
-	if ((await prisma.users.count()) === 0) {
+	if ((await prisma[collectionKey].count()) === 0) {
 		console.log("🐼 Creating initial user...");
-		const pw = randomUUID();
-		const hash = await bcrypt.hash(pw, await bcrypt.genSalt(10));
-		const userData = {
-			email: "admin@systempanda.com",
-			name: "Admin",
-			password: hash,
+
+		const hash = await bcrypt.hash(initFirstAuth[secretField], await bcrypt.genSalt(10));
+		const data = {
+			...initFirstAuth,
+			[secretField]: hash,
 		};
-		await prisma.users.create({
-			data: userData,
-			select: selectOnQuery(userData, "*"),
+
+		await prisma[collectionKey].create({
+			data,
+			select: selectOnQuery(data, "*"),
 		});
 
-		console.log(`🐼 Initial user created. Email: admin@systempanda.com, password: ${hash}.`);
+		console.log("🐼 Initial user created with the specified credentials.");
 	}
 }
 
