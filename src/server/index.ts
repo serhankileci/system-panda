@@ -1,51 +1,47 @@
 import express from "express";
 import * as url from "node:url";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
-import { plugin } from "../plugin/index.js";
+import { plugins } from "../plugins/index.js";
 import {
 	beforeMiddlewaresHandler,
 	ifAuthenticated,
 	errHandler,
 	internalMiddlewares,
 } from "./middlewares/index.js";
-import { webhook } from "../webhook/index.js";
+import { webhook } from "../webhooks/index.js";
 import { authRouter, collection, pluginsRouter } from "./routers/index.js";
 import {
 	Collections,
-	Config,
+	Settings,
 	Context,
 	MiddlewareHandler,
-	MutableProps,
-	NormalizedAuthFields,
 	Webhook,
+	Models,
+	getDataStore,
+	setDataStore,
 } from "../util/index.js";
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 async function server(
-	config: Config,
-	prisma: PrismaClient,
+	settings: Settings,
 	collections: Collections,
-	models: any,
-	normalizedAuthFields: NormalizedAuthFields,
+	models: Models,
 	globalWebhooks?: Webhook[]
 ) {
-	console.log("🐼 Setting up the server...");
-	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession } = config;
-	const app = express();
+	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession } = settings;
 
-	const beforeMiddlewares = beforeMiddlewaresHandler(
-		defaultMiddlewares || {},
-		authSession,
-		prisma
-	);
-	const afterMiddlewares: MiddlewareHandler[] = [];
+	setDataStore({
+		pluginStore: await plugins.load(),
+	});
 
 	console.log("🐼 Loading plugins...");
-	const initialPlugins = await plugin(prisma).load();
-	const mutableProps: MutableProps = {
-		plugins: initialPlugins,
-	};
+	const { prisma, pluginStore } = getDataStore();
+
+	console.log("🐼 Setting up the server...");
+	const app = express();
+
+	const beforeMiddlewares = beforeMiddlewaresHandler(defaultMiddlewares || {}, authSession);
+	const afterMiddlewares: MiddlewareHandler[] = [];
 
 	const ctx: Context = {
 		express: {
@@ -67,17 +63,17 @@ async function server(
 		.set("view engine", "ejs")
 		.set("views", path.resolve(__dirname, "views"))
 		.use(beforeMiddlewares)
-		.use(internalMiddlewares(ctx, authSession))
+		.use(internalMiddlewares(ctx))
 		.get("/", (req, res) => {
 			res.render("index", {
 				title: "SystemPanda - Dashboard",
 				page: "index",
-				plugins: mutableProps.plugins,
+				plugins: pluginStore,
 				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
 			});
 		})
-		.use("/auth", authRouter(prisma, normalizedAuthFields))
-		.use("/plugins", ifAuthenticated, pluginsRouter(mutableProps, prisma));
+		.use("/auth", authRouter)
+		.use("/plugins", ifAuthenticated, pluginsRouter);
 
 	if (healthCheck !== false)
 		app.get(healthCheck?.path || "/health-check", (req, res) => {
@@ -100,7 +96,7 @@ async function server(
 
 		app.all(
 			`/${slugOrKey}`,
-			collection(query, mutableProps, ctx, hooks, models, mergedWebhooks, cKey, slugOrKey)
+			collection(query, ctx, hooks, models, mergedWebhooks, cKey, slugOrKey)
 		);
 	}
 
