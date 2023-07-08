@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { Collections, Database, pathExists, setDataStore, userProjectDir } from "../util/index.js";
-import { databaseSeed } from "../collections/index.js";
+import { seed } from "./seed.js";
 import { execPrismaScripts } from "./execPrismaScripts.js";
 import { getModels } from "./getModels.js";
 import { makePrismaModel } from "./makePrismaModel.js";
@@ -26,7 +26,7 @@ async function database(db: Database, collections: Collections) {
 
 	setDataStore({ prisma });
 
-	await databaseSeed();
+	await seed();
 
 	return models;
 }
