@@ -8,18 +8,17 @@ import {
 	AuthSession,
 	DefaultMiddlewares,
 	MiddlewareHandler,
-	SESSION_COOKIE_NAME,
+	SESSION,
+	getDataStore,
 } from "../../util/index.js";
 import session from "express-session";
 import { randomUUID } from "crypto";
 import cookieParser from "cookie-parser";
-import { PrismaClient } from "@prisma/client";
-import { PrismaSessionStore } from "../../db/index.js";
+import { PrismaSessionStore } from "../../database/index.js";
 
 const beforeMiddlewaresHandler = (
 	defaultMiddlewares: DefaultMiddlewares,
-	authSession: AuthSession,
-	prisma: PrismaClient
+	authSession: AuthSession
 ): MiddlewareHandler[] => {
 	const {
 		compression: compressionOpt,
@@ -41,12 +40,12 @@ const beforeMiddlewaresHandler = (
 		compression(compressionOpt || {}),
 		cors(corsOpt || {}),
 		session({
-			name: SESSION_COOKIE_NAME,
-			store: new PrismaSessionStore(prisma),
+			name: SESSION.COOKIE_NAME,
+			store: new PrismaSessionStore(getDataStore().prisma),
 			secret: secret || randomUUID(),
 			cookie: {
 				httpOnly: true,
-				maxAge: maxAge || 24 * 60 * 60 * 1000,
+				maxAge: maxAge || SESSION.MAX_AGE,
 				secure: process.env.NODE_ENV === "production",
 			},
 			saveUninitialized: false,
