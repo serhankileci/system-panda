@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { SessionData, Store } from "express-session";
-import { CustomSessionData } from "../util/types.js";
-import { getDataStore } from "../util/config.js";
+import { CustomSessionData, getDataStore } from "../util/index.js";
 
 class PrismaSessionStore extends Store {
 	constructor(private prisma: PrismaClient) {
