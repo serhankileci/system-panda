@@ -1,37 +1,43 @@
 import { Request, Response, NextFunction, static as serveStatic } from "express";
 import {
-	AuthSession,
 	Context,
-	SESSION_COOKIE_NAME,
+	SESSION,
 	filterObjByKeys,
+	getConfigStore,
+	getDataStore,
 	packageProjectDir,
 } from "../../util/index.js";
 import path from "node:path";
 
-function internalMiddlewares(ctx: Context, authSession: AuthSession) {
+function internalMiddlewares(ctx: Context) {
+	const {
+		settings: { authSession },
+	} = getConfigStore();
 	const loadCtxWithData = async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			const relationKey = getDataStore().authFields.relationKey;
+
 			if (!ctx.express) ctx.express = { req, res };
 
-			if (req.cookies[SESSION_COOKIE_NAME]) {
+			if (req.cookies[SESSION.COOKIE_NAME]) {
 				const data = await ctx.prisma.systemPandaSession.findUnique({
 					where: {
-						id: req.cookies[SESSION_COOKIE_NAME],
+						id: req.cookies[SESSION.COOKIE_NAME],
 					},
 					include: {
-						relation_users: true,
+						[relationKey]: true,
 					},
 				});
 
-				if (data?.relation_users) {
+				if (data?.[relationKey]) {
 					if (!authSession.sessionData || authSession.sessionData === "*") {
-						ctx.sessionData = data.relation_users;
+						ctx.sessionData = data[relationKey];
 					} else if (
 						Array.isArray(authSession.sessionData) &&
 						authSession.sessionData.length > 0
 					) {
 						ctx.sessionData = filterObjByKeys(
-							data.relation_users,
+							data[relationKey],
 							authSession.sessionData
 						);
 					}
