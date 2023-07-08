@@ -16,7 +16,10 @@ const crudMapping = {
 } as const;
 const flip = (data: object) => Object.fromEntries(Object.entries(data).map(([k, v]) => [v, k]));
 const flippedCrudMapping = flip(crudMapping);
-const SESSION_COOKIE_NAME = "system-panda-sid";
+const SESSION = {
+	COOKIE_NAME: "system-panda-sid",
+	MAX_AGE: 60 * 60 * 24 * 30,
+};
 
 export {
 	PLUGINS_API,
@@ -26,6 +29,6 @@ export {
 	pluginsDir,
 	logfile,
 	packageProjectDir,
-	SESSION_COOKIE_NAME,
+	SESSION,
 };
 export const { NODE_ENV } = process.env;
