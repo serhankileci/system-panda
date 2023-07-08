@@ -28,7 +28,6 @@ import { SessionData } from "express-session";
 
 /* ********** PLUGINS ********** */
 type PluginExportFn = (ctx: Context) => Context | Promise<Context>;
-type PluginFn = (prisma: PrismaClient) => PluginOperations;
 
 type DatabasePlugin = {
 	active: boolean;
@@ -37,9 +36,10 @@ type DatabasePlugin = {
 	version: string;
 	fn: PluginExportFn;
 };
-type Plugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
-type PluginOperations = {
-	load: () => Promise<Plugins>;
+type ActiveInactivePlugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
+type Plugins = {
+	prisma: () => PrismaClient;
+	load: () => Promise<ActiveInactivePlugins>;
 	enable: (title: string) => Promise<void>;
 	disable: (title: string) => Promise<void>;
 	install: (title: string) => Promise<void>;
@@ -64,7 +64,7 @@ type EventTriggerPayload = {
 		slug: string;
 	};
 };
-type WebhookFn = (webhook: Webhook) => {
+type WebhookFunc = (webhook: Webhook) => {
 	init: () => void;
 	trigger: (obj: EventTriggerPayload) => void;
 };
@@ -202,6 +202,23 @@ type Database = {
 type ExtendServer = (app: Express, ctx: Context) => void;
 
 type AuthSession = {
+	authFields?: AuthFields;
+	initFirstAuth: { [key: string]: any };
+	/**
+	 * add collection fields to include in the session
+	 * default: "*"
+	 */
+	sessionData?: "*" | string[];
+	options: {
+		/**
+		 * default: 60 * 60 * 24 * 30 (30 days)
+		 */
+		maxAge?: number;
+		secret: string;
+	};
+};
+
+type AuthFields = {
 	/**
 	 * default: "user"
 	 */
@@ -215,28 +232,11 @@ type AuthSession = {
 	 * rename password field
 	 */
 	secretField?: string;
-	initFirstAuth: { [key: string]: any };
-	/**
-	 * add collection fields to include in the session
-	 * default: "*"
-	 */
-	sessionData?: "*" | string[];
-	options: {
-		/**
-		 * default: 24 * 60 * 60 * 1000 (30 days)
-		 */
-		maxAge?: number;
-		secret: string;
-	};
 };
 
-type NormalizedAuthFields = {
-	collectionKey: string;
-	secretField: string;
-	uniqueIdentifierField: string;
-};
+type Models = { [key: string]: { [key: string]: undefined } };
 
-type Config = {
+type Settings = {
 	db: Database;
 	authSession: AuthSession;
 	port: number;
@@ -255,15 +255,18 @@ type Options = {
 		collections: Collections;
 		webhooks?: Webhook[];
 	};
-	config: Config;
+	settings: Settings;
 };
 type SP = (args: Options) => Promise<void>;
 /* ******************** */
 
 /* ********** MISC. ********** */
-type MutableProps = {
-	plugins: Plugins;
-};
+type MutableDataStore = Partial<{
+	prisma: PrismaClient;
+	models: Models;
+	initFirstAuth: AuthSession["initFirstAuth"];
+}> & { authFields: Required<AuthFields>; pluginStore: ActiveInactivePlugins };
+
 type CRUD_Operation = {
 	readonly operation: "create" | "read" | "update" | "delete";
 };
@@ -331,21 +334,23 @@ export {
 	PrismaClientUnknownRequestError,
 	PrismaClientValidationError,
 	Webhook,
-	WebhookFn,
+	WebhookFunc,
 	EventTriggerPayload,
-	Plugins,
+	ActiveInactivePlugins,
 	PluginExportFn,
-	PluginOperations,
-	PluginFn,
+	Plugins,
 	DatabasePlugin,
 	CRUDHooks,
 	BeforeAfterOperation,
 	ModifyValidateInputOperation,
-	MutableProps,
 	Field,
-	Config,
+	Settings,
 	AuthSession,
-	NormalizedAuthFields,
+	AuthFields,
 	RelationField,
 	CustomSessionData,
+	Models,
+	ExistingData,
+	InputData,
+	MutableDataStore,
 };
