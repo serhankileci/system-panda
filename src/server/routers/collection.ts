@@ -3,31 +3,38 @@ import {
 	Collection,
 	Context,
 	EventTriggerPayload,
+	ExistingData,
+	InputData,
 	Method,
-	MutableProps,
+	Models,
 	Webhook,
 } from "../../util/types.js";
-import { flippedCrudMapping, nullIfEmpty, SystemPandaError } from "../../util/index.js";
-import { mapQuery } from "../../collection/index.js";
+import {
+	flippedCrudMapping,
+	getDataStore,
+	nullIfEmpty,
+	SystemPandaError,
+} from "../../util/index.js";
+import { mapQuery } from "../../collections/index.js";
 import { PrismaClient } from "@prisma/client";
-import { webhook } from "../../webhook/index.js";
+import { webhook } from "../../webhooks/index.js";
 
 function collection(
 	query: PrismaClient,
-	mutableProps: MutableProps,
 	ctx: Context,
 	hooks: Collection["hooks"],
-	models: any,
+	models: Models,
 	mergedWebhooks: Webhook[],
 	cKey: string,
 	slugOrKey: string
 ) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const inputData = req.body;
-			const reqMethod = req.method as Method;
-			const existingData: any = null;
+			const { pluginStore } = getDataStore();
 			let resultData;
+			const existingData: ExistingData = null;
+			const inputData: InputData = req.body;
+			const reqMethod = req.method as Method;
 			const isArr = Array.isArray(inputData.data);
 			const operation = flippedCrudMapping[reqMethod];
 			const operationArgs = {
@@ -38,7 +45,7 @@ function collection(
 			};
 
 			const handleHookAndPlugin = async () => {
-				for (const obj of mutableProps.plugins.active) {
+				for (const obj of pluginStore.active) {
 					obj.fn(ctx);
 				}
 
