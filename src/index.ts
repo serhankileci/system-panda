@@ -1,33 +1,51 @@
-import { database } from "./db/index.js";
-import { defaultCollections } from "./collection/index.js";
-import { SystemPandaError, logger, logfile, SP, Collections } from "./util/index.js";
+import { database } from "./database/index.js";
+import { defaultCollections } from "./collections/index.js";
+import {
+	SystemPandaError,
+	logger,
+	logfile,
+	SP,
+	Collections,
+	getConfigStore,
+	setConfigStore,
+	dataStore,
+	setDataStore,
+} from "./util/index.js";
 import { server } from "./server/index.js";
 
-const SystemPanda: SP = async function ({ content, config }) {
+const SystemPanda: SP = async function (options) {
 	try {
 		console.log("🐼 Building SystemPanda...");
+
+		setConfigStore(options);
+		const { content, settings } = getConfigStore();
+
 		const { systemPandaPlugins, systemPandaSession, systemPandaSettings, systemPandaUsers } =
 			defaultCollections || {};
 		const { collections, webhooks: globalWebhooks } = content || {};
 		const {
-			authSession: { collectionKey, uniqueIdentifierField, secretField, initFirstAuth },
-		} = config;
-		const normalizedAuthFields = {
-			collectionKey: collectionKey || "users",
-			uniqueIdentifierField: uniqueIdentifierField || "email",
-			secretField: secretField || "password",
-		};
+			authSession: { authFields, initFirstAuth },
+		} = settings;
+
+		setDataStore({
+			authFields: {
+				...authFields,
+				...dataStore.authFields,
+			},
+			initFirstAuth,
+		});
+
 		const authCollection: Collections = {
-			[normalizedAuthFields.collectionKey]: {
+			[dataStore.authFields.collectionKey]: {
 				...systemPandaUsers,
 				fields: {
-					[normalizedAuthFields.uniqueIdentifierField]: {
+					[dataStore.authFields.uniqueIdentifierField]: {
 						type: "String",
 						required: true,
 						unique: true,
 						index: true,
 					},
-					[normalizedAuthFields.secretField]: { type: "String", required: true },
+					[dataStore.authFields.secretField]: { type: "String", required: true },
 					relation_session: {
 						type: "relation",
 						many: true,
@@ -36,7 +54,6 @@ const SystemPanda: SP = async function ({ content, config }) {
 				},
 			},
 		};
-
 		const internalCollections: Collections = {
 			systemPandaSettings,
 			systemPandaPlugins,
@@ -44,34 +61,20 @@ const SystemPanda: SP = async function ({ content, config }) {
 				...systemPandaSession,
 				fields: {
 					...systemPandaSession.fields,
-					[`relation_${normalizedAuthFields.collectionKey}`]: {
+					[`relation_${dataStore.authFields.collectionKey}`]: {
 						type: "relation",
 						many: false,
-						ref: `${normalizedAuthFields.collectionKey}.id`,
+						ref: `${dataStore.authFields.collectionKey}.id`,
 					},
 				},
 			},
 		};
 		const visibleCollections = { ...collections, ...authCollection };
-
-		const { prisma, models } = await database(
-			config.db,
-			{
-				...visibleCollections,
-				...internalCollections,
-			},
-			normalizedAuthFields,
-			initFirstAuth
-		);
-
-		await server(
-			config,
-			prisma,
-			visibleCollections,
-			models,
-			normalizedAuthFields,
-			globalWebhooks
-		);
+		const models = await database(settings.db, {
+			...visibleCollections,
+			...internalCollections,
+		});
+		await server(settings, visibleCollections, models, globalWebhooks);
 	} catch (err: unknown) {
 		await logger(logfile, err as SystemPandaError | Error);
 	}
