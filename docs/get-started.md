@@ -1,16 +1,49 @@
 # **Get Started**
-***Not up-to-date yet, will be updated soon.***
-
 Here is a basic, example application that uses most of what SystemPanda has to offer.
 
 ```ts
 import SystemPanda from "system-panda";
-    
+import "dotenv/config";
+
 SystemPanda({
     content: {
         // define your data models
-        // 2 example collections with one-to-many relation
         collections: {
+            student: {
+                id: {
+                    name: "id",
+                    type: "uuid",
+                },
+                fields: {
+                    name: {
+                        type: "String",
+                    },
+                    relation_classroom: {
+                        type: "relation",
+                        many: true,
+                        ref: "classroom.id",
+                    },
+                },
+            },
+            classroom: {
+                hooks: {
+                    beforeOperation: [],
+                    modifyInput: [],
+                    validateInput: [],
+                    afterOperation: [],
+                },
+                fields: {
+                    name: {
+                        type: "String",
+                        required: true,
+                    },
+                    relation_student: {
+                        type: "relation",
+                        many: true,
+                        ref: "student.id",
+                    },
+                },
+            },
             song: {
                 fields: {
                     title: {
@@ -19,72 +52,74 @@ SystemPanda({
                     },
                     relation_album: {
                         type: "relation",
-                        ref: "album.id",
+                        ref: "album.relation_song",
                         many: false,
                     },
                 },
             },
             album: {
-                id: {
-                    name: "id",
-                    type: "uuid",
-                },
-
-                // map custom name for collection
-                slug: "records",
+                // slug: "is-it-tho",
                 fields: {
                     relation_song: {
                         type: "relation",
-                        ref: "song",
+                        ref: "song.relation_album",
                         many: true,
                     },
-                    name: {
+                    year: {
+                        type: "number",
+                        subtype: "Int",
+                        required: true,
+                    },
+                    title: {
                         type: "String",
                         required: true,
                         unique: true,
                         index: true,
                     },
-                    year: {
-                        type: "number",
-                        kind: "Int",
-                        required: true,
-                    },
                     dateCreated: {
                         type: "DateTime",
                         defaultValue: {
-                            kind: "now"
-                        }
+                            kind: "now",
+                        },
                     },
-                    someJson: {
+                    mJson: {
                         type: "Json",
                         defaultValue: JSON.stringify({ hello: "world" }),
                     },
                 },
                 webhooks: [
                     {
-                        api: process.env.HOST + "/webhook",
+                        api: localhost + "/webhook",
                         name: "All Operations",
 
                         // pick which operations should trigger the webhook
-                        onOperation: ["create", "read", "update", "delete"],
+                        onOperation: ["create"],
                     },
                 ],
                 hooks: {
                     beforeOperation: [
                         async ({ ctx, operation, existingData, inputData }) => {
                             // cause side-effect
-                        }
+
+                            const userType = ctx.sessionData?.userType;
+                            const isUserAndReadOp = userType === "user" && operation === "read";
+                            consts isAdmin = userType === "admin";
+
+                            return isUserAndReadOp || isAdmin;
+                        },
                     ],
                     modifyInput: [
                         async ({ ctx, operation, existingData, inputData }) => {
-                            inputData.foobar = inputData.barbaz;
+                            // modify request body
+                            inputData.title = formatAlbumTitle(input.title);
 
                             return inputData;
                         },
                     ],
                     validateInput: [
                         async ({ ctx, operation, existingData, inputData }) => {
-                            if (!someRegex.test(inputData.foobar)) {
+                            // some kind of validation
+                            if (!/\s/.test(inputData)) {
                                 throw "Validation error!";
                             }
 
@@ -94,13 +129,13 @@ SystemPanda({
                     afterOperation: [
                         async ({ ctx, operation, existingData, inputData }) => {
                             // cause side-effect
-                        }
+                        },
                     ],
                 },
             },
         },
     },
-    config: {
+    settings: {
         port: Number(process.env.PORT),
         db: {
             URI: process.env.DATABASE_URL!,
@@ -109,10 +144,8 @@ SystemPanda({
             // add custom server logic
 
             app.post("/webhook", (req, res, next) => {
-                console.log(req.body);
-
                 /*
-                when, for example, a POST request is made:
+                when, for example, a POST request is received with the following request body:
                 {
                     event: 'create',
                     collection: 'album',
@@ -125,8 +158,20 @@ SystemPanda({
             });
         },
 
-        // popular middlewares already enabled by default
-        // configure their options or turn them off
+        authSession: {
+            options: {
+                secret: String(process.env.SECRET),
+            },
+            initFirstAuth: {
+                email: "admin@system-panda.com",
+                password: "1234",
+            },
+        },
+
+        /*
+            popular middlewares enabled by default
+            configure their options or turn them off
+        */
         defaultMiddlewares: {
             morgan: false,
         },

@@ -1,9 +1,11 @@
 # **Hooks**
 Hooks are arrays of functions to cause side-effects, validate, and modify input throughout the lifecycle of CRUD operations.
 
-- **beforeOperation** and **afterOperation** hooks don't need to return data.
-- **modifyInput** and **validateInput** must return the *inputData* argument after either validating or modifying it.
-- You can throw an error in any of the hooks until the **afterOperation** hook to cancel the current operation.
+- **beforeOperation** needs to return a boolean to indicate if the operation should be allowed.
+- **modifyInput** and **validateInput** must return the *inputData* argument after either modifying/validating it.
+**afterOperation** hooks don't need to return data.
+
+Tip: You can throw an error on any hook except an **afterOperation** hook to cancel the current operation.
 
 ## **Order of execution**
 1. beforeOperation
@@ -18,17 +20,23 @@ Hooks are arrays of functions to cause side-effects, validate, and modify input 
         beforeOperation: [
             ({ context, operation, existingData, inputData }) => {
                 // cause side-effect
+
+                const userType = ctx.sessionData?.userType;
+                const isUserAndReadOp = userType === "user" && operation === "read";
+                consts isAdmin = userType === "admin";
+
+                return isUserAndReadOp || isAdmin;
             },
         ],
         modifyInput: [
-            ({context, inputData, operation, existingData}) => {
+            ({ context, operation, existingData, inputData }) => {
                 inputData.foo = "bar";
 
                 return inputData;
             }
         ],
         validateInput: [
-            ({ context, inputData, operation, existingData}) => {
+            ({ context, operation, existingData, inputData }) => {
                 if (!someRegex.test(inputData.baz)) {
                     throw new Error("Validation error!");
                 }
