@@ -5,7 +5,17 @@ const defaultCollections: Record<
 	Collection
 > = {
 	systemPandaUsers: {
-		fields: {},
+		fields: {
+			userType: {
+				type: "String",
+				required: true,
+			},
+			relation_session: {
+				type: "relation",
+				many: true,
+				ref: "systemPandaSession.id",
+			},
+		},
 	},
 	systemPandaSession: {
 		id: {

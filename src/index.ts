@@ -21,7 +21,7 @@ const SystemPanda: SP = async function (options) {
 		const { content, settings } = getConfigStore();
 
 		const { systemPandaPlugins, systemPandaSession, systemPandaSettings, systemPandaUsers } =
-			defaultCollections || {};
+			defaultCollections;
 		const { collections, webhooks: globalWebhooks } = content || {};
 		const {
 			authSession: { authFields, initFirstAuth },
@@ -39,6 +39,7 @@ const SystemPanda: SP = async function (options) {
 			[dataStore.authFields.collectionKey]: {
 				...systemPandaUsers,
 				fields: {
+					...systemPandaUsers.fields,
 					[dataStore.authFields.uniqueIdentifierField]: {
 						type: "String",
 						required: true,
@@ -46,11 +47,6 @@ const SystemPanda: SP = async function (options) {
 						index: true,
 					},
 					[dataStore.authFields.secretField]: { type: "String", required: true },
-					relation_session: {
-						type: "relation",
-						many: true,
-						ref: "systemPandaSession.id",
-					},
 				},
 			},
 		};
