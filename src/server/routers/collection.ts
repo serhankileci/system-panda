@@ -56,7 +56,13 @@ function collection(
 						ctx: { ...ctx, customVars: ctx.customVars },
 					};
 
-					await op(frozenOperationArgs);
+					const hookReturn = await op(frozenOperationArgs);
+					const beforeOpAndDenied =
+						ctx.util.currentHook === "beforeOperation" && hookReturn === false;
+
+					if (beforeOpAndDenied) {
+						throw "Access denied.";
+					}
 				}
 			};
 
