@@ -58,7 +58,7 @@ SystemPanda({
                 },
             },
             album: {
-                // slug: "is-it-tho",
+                slug: "record",
                 fields: {
                     relation_song: {
                         type: "relation",
