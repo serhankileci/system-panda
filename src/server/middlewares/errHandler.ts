@@ -15,7 +15,6 @@ const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
 	}
 
 	await logger(logfile, err as SystemPandaError | Error);
-	console.log(err);
 };
 
 export { errHandler };
