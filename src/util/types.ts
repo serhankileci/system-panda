@@ -92,10 +92,10 @@ type ExistingData = any;
 type InputData = any;
 
 type CRUDHooks = {
-	beforeOperation?: BeforeAfterOperation[];
+	beforeOperation?: BeforeOperation[];
 	validateInput?: ModifyValidateInputOperation[];
 	modifyInput?: ModifyValidateInputOperation[];
-	afterOperation?: BeforeAfterOperation[];
+	afterOperation?: AfterOperation[];
 };
 
 type ReadonlyHookOperationArgs = {
@@ -113,8 +113,9 @@ type ReadonlyHookOperationArgs = {
 
 type Hook<T> = ({ ctx, operation, existingData, inputData }: ReadonlyHookOperationArgs) => T;
 
-type BeforeAfterOperation = Hook<void>;
+type BeforeOperation = Hook<boolean | Promise<boolean>>;
 type ModifyValidateInputOperation = Hook<InputData | Promise<InputData>>;
+type AfterOperation = Hook<void | Promise<void>>;
 
 /* ********** COLLECTIONS ********** */
 type Collections = Record<string, Collection>;
@@ -211,7 +212,7 @@ type AuthSession = {
 	sessionData?: "*" | string[];
 	options: {
 		/**
-		 * default: 60 * 60 * 24 * 30 (30 days)
+		 * default: 60 * 60 * 24 * 30 * 1000 (30 days)
 		 */
 		maxAge?: number;
 		secret: string;
@@ -341,7 +342,8 @@ export {
 	Plugins,
 	DatabasePlugin,
 	CRUDHooks,
-	BeforeAfterOperation,
+	BeforeOperation,
+	AfterOperation,
 	ModifyValidateInputOperation,
 	Field,
 	Settings,
