@@ -18,6 +18,7 @@ async function seed() {
 		const data = {
 			...initFirstAuth,
 			[secretField]: hash,
+			userType: "admin",
 		};
 
 		await prisma[collectionKey].create({
