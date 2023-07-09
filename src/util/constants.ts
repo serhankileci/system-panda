@@ -18,7 +18,7 @@ const flip = (data: object) => Object.fromEntries(Object.entries(data).map(([k, 
 const flippedCrudMapping = flip(crudMapping);
 const SESSION = {
 	COOKIE_NAME: "system-panda-sid",
-	MAX_AGE: 60 * 60 * 24 * 30,
+	MAX_AGE: 60 * 60 * 24 * 30 * 1000,
 };
 
 export {
