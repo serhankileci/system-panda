@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
 	Collection,
+	CollectionMethod,
 	Context,
 	EventTriggerPayload,
 	ExistingData,
@@ -9,12 +10,7 @@ import {
 	Models,
 	Webhook,
 } from "../../util/types.js";
-import {
-	flippedCrudMapping,
-	getDataStore,
-	nullIfEmpty,
-	SystemPandaError,
-} from "../../util/index.js";
+import { methodMapping, getDataStore, nullIfEmpty, SystemPandaError } from "../../util/index.js";
 import { mapQuery } from "../../collections/index.js";
 import { PrismaClient } from "@prisma/client";
 import { webhook } from "../../webhooks/index.js";
@@ -30,13 +26,21 @@ function collection(
 ) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			if (!["get", "post", "put", "delete"].includes(req.method.toLocaleLowerCase())) {
+				throw new SystemPandaError({
+					level: "warning",
+					status: 405,
+					message: "Method not allowed.",
+				});
+			}
+
 			const { pluginStore } = getDataStore();
 			let resultData;
 			const existingData: ExistingData = null;
 			const inputData: InputData = req.body;
-			const reqMethod = req.method as Method;
+			const reqMethod = req.method as CollectionMethod;
 			const isArr = Array.isArray(inputData.data);
-			const operation = flippedCrudMapping[reqMethod];
+			const operation = methodMapping[reqMethod];
 			const operationArgs = {
 				existingData,
 				inputData,
@@ -148,7 +152,7 @@ function collection(
 			res.json({ success: true, data: resultData });
 
 			const webhookTriggerPayload: EventTriggerPayload = {
-				event: flippedCrudMapping[reqMethod],
+				event: methodMapping[reqMethod],
 				collection: {
 					name: cKey,
 					slug: slugOrKey,
@@ -158,7 +162,7 @@ function collection(
 			};
 
 			mergedWebhooks?.forEach(obj => {
-				if (obj.onOperation.includes(flippedCrudMapping[reqMethod])) {
+				if (obj.onOperation.includes(methodMapping[reqMethod])) {
 					webhook(obj).trigger(webhookTriggerPayload);
 				}
 			});
