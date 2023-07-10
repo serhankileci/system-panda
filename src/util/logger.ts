@@ -12,9 +12,9 @@ async function logger(path: string, err: SystemPandaError | Error) {
 	let content = "####################\n";
 
 	if (err instanceof SystemPandaError)
-		content = `${content}[${hour} - ${date}]:\n\t[type]: ${err.name}\n\t[level]: ${err.level}\n\t[status]: ${err.status}\n\t[message]:${err.message}\n####################\n`;
+		content = `${content}[${hour} - ${date}]:\n\t[type]: ${err.name}\n\t[level]: ${err.level}\n\t[status]: ${err.status}\n\t[message]: ${err.message}\n####################\n\n`;
 	else
-		content = `${content}[${hour} - ${date}]:\n[type]: Unintentional Error\n${err}\n####################\n`;
+		content = `${content}[${hour} - ${date}]:\n\t[type]: Error\n\t[message]: ${err}\n####################\n\n`;
 
 	await appendFile(path, content, { flag: await writeOrAppend(path) });
 }
