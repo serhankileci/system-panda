@@ -1,4 +1,4 @@
-import express from "express";
+import express, { static as serveStatic } from "express";
 import * as url from "node:url";
 import path from "node:path";
 import { plugins } from "../plugins/index.js";
@@ -9,7 +9,8 @@ import {
 	internalMiddlewares,
 } from "./middlewares/index.js";
 import { webhook } from "../webhooks/index.js";
-import { authRouter, collection, pluginsRouter } from "./routers/index.js";
+import { authRouter, pluginsRouter } from "./routers/index.js";
+import { collection } from "./controllers/index.js";
 import {
 	Collections,
 	Settings,
@@ -19,6 +20,7 @@ import {
 	Models,
 	getDataStore,
 	setDataStore,
+	staticDir,
 } from "../util/index.js";
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -64,6 +66,12 @@ async function server(
 		.set("views", path.resolve(__dirname, "views"))
 		.use(beforeMiddlewares)
 		.use(internalMiddlewares(ctx))
+		.use(
+			"/system-panda-static",
+			serveStatic(staticDir, {
+				extensions: ["html"],
+			})
+		)
 		.get("/", (req, res) => {
 			res.render("index", {
 				title: "SystemPanda - Dashboard",
