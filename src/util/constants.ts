@@ -5,6 +5,7 @@ const PLUGINS_API =
 	process.env.PLUGINS_API ||
 	"https://mmhsc5ce5v3hv4qt64p4dpodom0msylf.lambda-url.eu-central-1.on.aws/plugins";
 const packageProjectDir = __dirname;
+const staticDir = `${packageProjectDir}server/static`;
 const userProjectDir = process.cwd();
 const pluginsDir = `${userProjectDir}/plugins`;
 const logfile = `${userProjectDir}/system-panda.log` as const;
@@ -14,8 +15,12 @@ const crudMapping = {
 	update: "PUT",
 	delete: "DELETE",
 } as const;
-const flip = (data: object) => Object.fromEntries(Object.entries(data).map(([k, v]) => [v, k]));
-const flippedCrudMapping = flip(crudMapping);
+const methodMapping = {
+	POST: "create",
+	GET: "read",
+	PUT: "update",
+	DELETE: "delete",
+} as const;
 const SESSION = {
 	COOKIE_NAME: "system-panda-sid",
 	MAX_AGE: 60 * 60 * 24 * 30 * 1000,
@@ -24,11 +29,12 @@ const SESSION = {
 export {
 	PLUGINS_API,
 	crudMapping,
-	flippedCrudMapping,
+	methodMapping,
 	userProjectDir,
 	pluginsDir,
 	logfile,
 	packageProjectDir,
 	SESSION,
+	staticDir,
 };
 export const { NODE_ENV } = process.env;
