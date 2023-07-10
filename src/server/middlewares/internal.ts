@@ -1,13 +1,11 @@
-import { Request, Response, NextFunction, static as serveStatic } from "express";
+import { Request, Response, NextFunction } from "express";
 import {
 	Context,
 	SESSION,
 	filterObjByKeys,
 	getConfigStore,
 	getDataStore,
-	packageProjectDir,
 } from "../../util/index.js";
-import path from "node:path";
 
 function internalMiddlewares(ctx: Context) {
 	const {
@@ -49,11 +47,8 @@ function internalMiddlewares(ctx: Context) {
 			next(err);
 		}
 	};
-	const systemPandaStatic = serveStatic(path.join(packageProjectDir, "system-panda-static"), {
-		extensions: ["html"],
-	});
 
-	return [loadCtxWithData, systemPandaStatic];
+	return [loadCtxWithData];
 }
 
 export { internalMiddlewares };
