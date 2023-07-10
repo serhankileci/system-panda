@@ -280,16 +280,8 @@ type RequestHeaders = {
 } & Record<string, string>;
 
 type LogLevel = "informative" | "warning" | "error";
-type Method =
-	| "GET"
-	| "POST"
-	| "PUT"
-	| "PATCH"
-	| "DELETE"
-	| "HEAD"
-	| "OPTIONS"
-	| "TRACE"
-	| "CONNECT";
+type CollectionMethod = "GET" | "POST" | "PUT" | "DELETE";
+type Method = CollectionMethod | "PATCH" | "HEAD" | "OPTIONS" | "TRACE" | "CONNECT";
 
 declare global {
 	/* eslint-disable no-var */
@@ -355,4 +347,5 @@ export {
 	ExistingData,
 	InputData,
 	MutableDataStore,
+	CollectionMethod,
 };
