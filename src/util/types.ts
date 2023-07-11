@@ -34,7 +34,7 @@ type DatabasePlugin = {
 	title: string;
 	author: string;
 	version: string;
-	fn: PluginExportFn;
+	sourceCode: PluginExportFn;
 };
 type ActiveInactivePlugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
 type Plugins = {
@@ -221,7 +221,7 @@ type AuthSession = {
 
 type AuthFields = {
 	/**
-	 * default: "user"
+	 * default: "users"
 	 */
 	collectionKey?: string;
 	/**
