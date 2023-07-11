@@ -7,7 +7,6 @@ const PLUGINS_API =
 const packageProjectDir = __dirname;
 const staticDir = `${packageProjectDir}server/static`;
 const userProjectDir = process.cwd();
-const pluginsDir = `${userProjectDir}/plugins`;
 const logfile = `${userProjectDir}/system-panda.log` as const;
 const crudMapping = {
 	create: "POST",
@@ -31,7 +30,6 @@ export {
 	crudMapping,
 	methodMapping,
 	userProjectDir,
-	pluginsDir,
 	logfile,
 	packageProjectDir,
 	SESSION,
