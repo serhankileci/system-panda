@@ -18,7 +18,7 @@ function internalMiddlewares(ctx: Context) {
 			if (!ctx.express) ctx.express = { req, res };
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
-				const data = await ctx.prisma.systemPandaSession.findUnique({
+				const data = await ctx.prisma.system_panda_sessions.findUnique({
 					where: {
 						id: req.cookies[SESSION.COOKIE_NAME],
 					},
