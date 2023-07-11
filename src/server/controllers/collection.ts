@@ -50,7 +50,7 @@ function collection(
 
 			const handleHookAndPlugin = async () => {
 				for (const obj of pluginStore.active) {
-					obj.fn(ctx);
+					obj.sourceCode(ctx);
 				}
 
 				for (const op of (hooks || {})[ctx.util.currentHook] || []) {
