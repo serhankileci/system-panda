@@ -1,7 +1,5 @@
 # **Plugins**
-Plugins are reusable snippets of code stored in your project's ```/plugins``` directory and in the database, imported and evaluated at runtime, and their default export function is executed on their specified hook for every collection route.
-
-Until the UI is built, some operations will have to be done a bit more manually.
+Plugins are reusable snippets of code stored in your database, imported and evaluated at runtime, and their default export function is executed. Until the UI is built, the following operations have to be done manually. At this stage of the application, public plugins are **NOT** vetted, use them at your own risk.
 
 ## **How to install**
 1. Head over to your app's "/plugins" route to fetch a list of public plugins.
@@ -20,7 +18,7 @@ Then the plugin will be loaded into your app, no reload necessary.
 
 ## **How to publish**
 1. Bundle your plugin application (using a bundler such as "esbuild").
-2. Make a POST request with JSON data to SystemPanda's AWS Lambda service
+2. Make a POST request with JSON data to SystemPanda's AWS Lambda service:
 ```
 https://mmhsc5ce5v3hv4qt64p4dpodom0msylf.lambda-url.eu-central-1.on.aws/plugins
 ```
@@ -30,14 +28,11 @@ with the following JSON schema:
     title: "My Plugin",
     author: "John Doe",
     description: "Demonstrates the possible functionalities of a plugin.",
-    // valid SemVer format
     version: "0.1.0",
-    // bundle string
     sourceCode: "var data = \"some data\";\nconsole.log(\"I am executed once at build-time!\");\nvar bundle_default = (context) => {\n  if (context.util.currentHook === \"afterOperation\") {\n    console.log(\"I am executed at run-time, for every afterOperation!\");\n    if (!context.customVars.testing) {\n      console.log(\"This should appear once.\");\n      context.customVars.testing = data;\n    }\n  }\n  console.log(\"This should log for every operation.\");\n};\nexport {\n  bundle_default as default\n};"
 }
 ```
-
-At this stage of the application, public plugins are **NOT** vetted, use them at your own risk.
+The version property must be valid SemVer, and the sourceCode property must be a bundle string.
 
 ## **Example (pre-bundle)**
 ```ts
