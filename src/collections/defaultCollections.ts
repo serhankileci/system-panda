@@ -1,23 +1,26 @@
 import { Collection } from "../util/index.js";
 
 const defaultCollections: Record<
-	"systemPandaUsers" | "systemPandaSession" | "systemPandaPlugins" | "systemPandaSettings",
+	| "system_panda_users"
+	| "system_panda_sessions"
+	| "system_panda_plugins"
+	| "system_panda_settings",
 	Collection
 > = {
-	systemPandaUsers: {
+	system_panda_users: {
 		fields: {
-			userType: {
+			user_type: {
 				type: "String",
 				required: true,
 			},
 			relation_session: {
 				type: "relation",
 				many: true,
-				ref: "systemPandaSession.id",
+				ref: "system_panda_sessions.id",
 			},
 		},
 	},
-	systemPandaSession: {
+	system_panda_sessions: {
 		id: {
 			type: "cuid",
 		},
@@ -25,13 +28,13 @@ const defaultCollections: Record<
 			data: {
 				type: "Json",
 			},
-			createdAt: {
+			created_at: {
 				type: "DateTime",
 				defaultValue: {
 					kind: "now",
 				},
 			},
-			updatedAt: {
+			updated_at: {
 				type: "DateTime",
 				defaultValue: {
 					kind: "updatedAt",
@@ -39,7 +42,7 @@ const defaultCollections: Record<
 			},
 		},
 	},
-	systemPandaPlugins: {
+	system_panda_plugins: {
 		fields: {
 			title: { required: true, type: "String", unique: true },
 			description: { required: true, type: "String" },
@@ -49,7 +52,7 @@ const defaultCollections: Record<
 			active: { required: true, type: "Boolean" },
 		},
 	},
-	systemPandaSettings: {
+	system_panda_settings: {
 		fields: {
 			name: {
 				type: "String",
