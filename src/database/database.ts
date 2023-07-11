@@ -9,8 +9,10 @@ import { makePrismaModel } from "./makePrismaModel.js";
 async function database(db: Database, collections: Collections) {
 	const generatedSchemaString = makePrismaModel(db, collections);
 
+	console.log("🐼 Checking for Prisma files...");
 	if (!(await pathExists(`${userProjectDir}/prisma`))) await mkdir(`${userProjectDir}/prisma`);
 	await writeFile(path.resolve(`${userProjectDir}/prisma/schema.prisma`), generatedSchemaString);
+
 	await execPrismaScripts();
 
 	const models = getModels(generatedSchemaString);
