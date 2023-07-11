@@ -16,8 +16,8 @@ const setConfigStore = (obj: Partial<Options>) => {
 */
 const dataStore: MutableDataStore & { authFields: { relationKey: string } } = {
 	authFields: {
-		collectionKey: "user",
-		relationKey: "relation_user",
+		collectionKey: "users",
+		relationKey: "relation_users",
 		secretField: "password",
 		uniqueIdentifierField: "email",
 	},
