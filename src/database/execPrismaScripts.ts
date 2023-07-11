@@ -1,5 +1,5 @@
 import { Options as ExecaOptions, execa } from "execa";
-import { SystemPandaError, pathExists, userProjectDir } from "../util/index.js";
+import { SystemPandaError, userProjectDir } from "../util/index.js";
 
 async function execPrismaScripts() {
 	const options: ExecaOptions = {
@@ -7,15 +7,9 @@ async function execPrismaScripts() {
 		stdio: ["inherit", "inherit", "pipe"],
 	};
 
-	console.log("🐼 Checking for Prisma files...");
-	if (!pathExists("prisma") && !pathExists("prisma/schema.prisma")) {
-		console.log("🐼 Executing: 'prisma init'...");
-		const initCmd = await execa("npx", ["prisma", "init"], options);
-
-		if (initCmd.failed) {
-			throw new SystemPandaError({ level: "error", message: initCmd.stderr?.toString() });
-		}
-	}
+	const formatSchema = await execa("npx", ["prisma", "format"]);
+	if (formatSchema.failed)
+		throw new SystemPandaError({ level: "error", message: formatSchema.stderr?.toString() });
 
 	console.log("🐼 Executing: 'prisma migrate dev'...");
 	const migrateCmd = await execa(
