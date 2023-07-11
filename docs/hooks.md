@@ -21,9 +21,9 @@ Tip: You can throw an error on any hook except an **afterOperation** hook to can
             ({ context, operation, existingData, inputData }) => {
                 // cause side-effect
 
-                const userType = ctx.sessionData?.userType;
-                const isUserAndReadOp = userType === "user" && operation === "read";
-                consts isAdmin = userType === "admin";
+                const user_type = ctx.sessionData?.user_type;
+                const isUserAndReadOp = user_type === "user" && operation === "read";
+                consts isAdmin = user_type === "admin";
 
                 return isUserAndReadOp || isAdmin;
             },
