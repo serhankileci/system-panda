@@ -9,7 +9,7 @@ class PrismaSessionStore extends Store {
 
 	private async findSessionById(sid: string) {
 		try {
-			const session = await this.prisma.systemPandaSession.findUnique({
+			const session = await this.prisma.system_panda_sessions.findUnique({
 				where: { id: sid },
 			});
 
@@ -32,13 +32,14 @@ class PrismaSessionStore extends Store {
 	async set(sid: string, session: CustomSessionData, callback: (err?: any) => void) {
 		try {
 			const { userID, ...rest } = session;
+			const relationKey = getDataStore().authFields.relationKey;
 
-			await this.prisma.systemPandaSession.upsert({
+			await this.prisma.system_panda_sessions.upsert({
 				where: { id: sid },
 				create: {
 					id: sid,
 					data: rest,
-					[getDataStore().authFields.relationKey]: {
+					[relationKey]: {
 						connect: { id: Number(userID) },
 					},
 				},
@@ -53,7 +54,7 @@ class PrismaSessionStore extends Store {
 
 	async destroy(sid: string, callback: (err?: any) => void) {
 		try {
-			await this.prisma.systemPandaSession.delete({ where: { id: sid } });
+			await this.prisma.system_panda_sessions.delete({ where: { id: sid } });
 
 			callback();
 		} catch (err) {
