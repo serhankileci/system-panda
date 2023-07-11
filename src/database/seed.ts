@@ -5,8 +5,8 @@ async function seed() {
 	const { prisma, initFirstAuth, authFields } = getDataStore();
 	const { collectionKey, secretField } = authFields;
 
-	// await prisma.systemPandaSettings.createMany();
-	// await prisma.systemPandaPlugins.createMany();
+	// await prisma.system_panda_settings.createMany();
+	// await prisma.system_panda_plugins.createMany();
 
 	if ((await prisma[collectionKey].count()) === 0) {
 		console.log("🐼 Creating initial user...");
@@ -18,7 +18,7 @@ async function seed() {
 		const data = {
 			...initFirstAuth,
 			[secretField]: hash,
-			userType: "admin",
+			user_type: "admin",
 		};
 
 		await prisma[collectionKey].create({
