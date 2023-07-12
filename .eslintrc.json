@@ -15,7 +15,16 @@
 		"indent": ["warn", "tab"],
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
-		"no-mixed-spaces-and-tabs": "warn"
+		"no-mixed-spaces-and-tabs": "warn",
+		"no-unused-vars": "off",
+		"@typescript-eslint/no-unused-vars": [
+			"warn", // or "error"
+			{
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_",
+				"caughtErrorsIgnorePattern": "^_"
+			}
+		]
 	},
 	"ignorePatterns": ["**/build/*", "**/node_modules/*"]
 }
