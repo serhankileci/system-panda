@@ -103,7 +103,7 @@ SystemPanda({
 
                             const user_type = ctx.sessionData?.user_type;
                             const isUserAndReadOp = user_type === "user" && operation === "read";
-                            consts isAdmin = user_type === "admin";
+                            const isAdmin = user_type === "admin";
 
                             return isUserAndReadOp || isAdmin;
                         },
