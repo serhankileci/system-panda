@@ -6,11 +6,13 @@ import {
 	EventTriggerPayload,
 	ExistingData,
 	InputData,
-	Method,
 	Models,
 	Webhook,
-} from "../../util/types.js";
-import { methodMapping, getDataStore, nullIfEmpty, SystemPandaError } from "../../util/index.js";
+	methodMapping,
+	getDataStore,
+	nullIfEmpty,
+	SystemPandaError,
+} from "../../util/index.js";
 import { mapQuery } from "../../collections/index.js";
 import { PrismaClient } from "@prisma/client";
 import { webhook } from "../../webhooks/index.js";
