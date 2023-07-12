@@ -31,13 +31,12 @@ async function server(
 	globalWebhooks?: Webhook[]
 ) {
 	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession } = settings;
+	const prisma = getDataStore().prisma;
 
+	console.log("🐼 Loading plugins...");
 	setDataStore({
 		pluginStore: await plugins.load(),
 	});
-
-	console.log("🐼 Loading plugins...");
-	const { prisma, pluginStore } = getDataStore();
 
 	console.log("🐼 Setting up the server...");
 	const app = express();
@@ -76,7 +75,7 @@ async function server(
 			res.render("index", {
 				title: "SystemPanda - Dashboard",
 				page: "index",
-				plugins: pluginStore,
+				plugins: getDataStore().pluginStore,
 				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
 			});
 		})
