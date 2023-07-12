@@ -32,7 +32,6 @@ Check out the [**example app**](https://github.com/serhankileci/system-panda/blo
 	Authentication and Access Control.
 
 ## **Planned Features**
-- Access Control
 - Dashboard (to manage CRUD operations, users, plugins)
 - Content media support
 - Standard library of plugins
