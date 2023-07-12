@@ -9,14 +9,14 @@ async function logger(path: string, err: SystemPandaError | Error) {
 		hour: "2-digit",
 		minute: "2-digit",
 	});
-	let content = "####################\n";
+	let delimiter = "####################\n";
 
 	if (err instanceof SystemPandaError)
-		content = `${content}[${hour} - ${date}]:\n\t[type]: ${err.name}\n\t[level]: ${err.level}\n\t[status]: ${err.status}\n\t[message]: ${err.message}\n####################\n\n`;
+		delimiter = `${delimiter}[${hour} - ${date}]:\n\t[type]: ${err.name}\n\t[level]: ${err.level}\n\t[status]: ${err.status}\n\t[message]: ${err.message}\n####################\n\n`;
 	else
-		content = `${content}[${hour} - ${date}]:\n\t[type]: Error\n\t[message]: ${err}\n####################\n\n`;
+		delimiter = `${delimiter}[${hour} - ${date}]:\n\t[type]: Error\n\t[message]: ${err}\n####################\n\n`;
 
-	await appendFile(path, content, { flag: await writeOrAppend(path) });
+	await appendFile(path, delimiter, { flag: await writeOrAppend(path) });
 }
 
 export { logger };
