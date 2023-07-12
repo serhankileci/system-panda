@@ -33,8 +33,6 @@ const makePrismaModel = (db: Database, collections: Collections) => {
 					const fieldType = type === "number" ? key.subtype : type;
 
 					if (type === "relation") {
-						/* relation field */
-
 						const { ref, many } = key;
 						const baseRef =
 							ref.indexOf(".") === -1 ? ref : ref.slice(0, ref.indexOf("."));
@@ -117,7 +115,7 @@ const makePrismaModel = (db: Database, collections: Collections) => {
 					model.push(parts.join(" "));
 				}
 
-				// @index attribute
+				// index attribute
 				for (const field in fields) {
 					const val = fields[field];
 
