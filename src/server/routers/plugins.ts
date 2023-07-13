@@ -13,9 +13,7 @@ pluginsRouter
 	})
 	.get("/:title?", async (req, res, next) => {
 		try {
-			const { title } = req.params;
-
-			return res.json(await (await fetch(`${PLUGINS_API}/${title}`)).json());
+			return res.json(await (await fetch(`${PLUGINS_API}/${req.params.title}`)).json());
 		} catch (err) {
 			next(err);
 		}
