@@ -1,6 +1,4 @@
 import express, { static as serveStatic } from "express";
-import * as url from "node:url";
-import path from "node:path";
 import { plugins } from "../plugins/index.js";
 import {
 	beforeMiddlewaresHandler,
@@ -22,7 +20,6 @@ import {
 	setDataStore,
 	staticDir,
 } from "../util/index.js";
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 async function server(
 	settings: Settings,
@@ -61,8 +58,6 @@ async function server(
 
 	app
 		// ...
-		.set("view engine", "ejs")
-		.set("views", path.resolve(__dirname, "views"))
 		.use(beforeMiddlewares)
 		.use(internalMiddlewares(ctx))
 		.use(
@@ -71,16 +66,17 @@ async function server(
 				extensions: ["html"],
 			})
 		)
-		.get("/", (req, res) => {
-			res.render("index", {
-				title: "SystemPanda - Dashboard",
-				page: "index",
-				plugins: getDataStore().pluginStore,
-				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
+		.get("/metadata", (req, res) => {
+			res.json({
+				data: {
+					plugins: getDataStore().pluginStore,
+					collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
+				},
 			});
 		})
 		.use("/auth", authRouter)
-		.use("/plugins", ifAuthenticated, pluginsRouter);
+		.use("/plugins", ifAuthenticated, pluginsRouter)
+		.get("*", (req, res) => res.sendFile(staticDir + "/index.html"));
 
 	if (healthCheck !== false)
 		app.get(healthCheck?.path || "/health-check", (req, res) => {
