@@ -7,7 +7,9 @@ const PLUGINS_API =
 const packageProjectDir = __dirname;
 const staticDir = `${packageProjectDir}server/static`;
 const userProjectDir = process.cwd();
-const logfile = `${userProjectDir}/system-panda.log` as const;
+const cmsTablePrefix = "system_panda";
+const cmsNamePrefix = "system-panda";
+const logfile = `${userProjectDir}/${cmsNamePrefix}.log` as const;
 const crudMapping = {
 	create: "POST",
 	read: "GET",
@@ -21,11 +23,18 @@ const methodMapping = {
 	DELETE: "delete",
 } as const;
 const SESSION = {
-	COOKIE_NAME: "system-panda-sid",
+	COOKIE_NAME: `${cmsNamePrefix}-sid`,
 	MAX_AGE: 60 * 60 * 24 * 30 * 1000,
 };
+const routes = {
+	static: `/${cmsNamePrefix}-static`,
+	api: `/${cmsNamePrefix}-api`,
+} as const;
 
 export {
+	cmsNamePrefix,
+	cmsTablePrefix,
+	routes,
 	PLUGINS_API,
 	crudMapping,
 	methodMapping,
