@@ -16,7 +16,7 @@ SystemPanda uses cookie authentication. When you login, a session is created, it
 ```
 
 ## **Access Control**
-Inside a collection's **beforeOperation** hooks (refer to [**Hooks**](https://github.com/serhankileci/system-panda/blob/main/docs/hooks.md)), you can return a boolean to allow or deny access to an operation. Here's a role-based permission and operation-specific example with conditions:
+Inside a collection's **beforeOperation** hooks (refer to [**Hooks**](https://github.com/serhankileci/system-panda/blob/main/docs/hooks.md)), you can return a boolean to allow or deny access to an operation. Here is a hook that employs role-based and rule-based permissions:
 ```ts
 {
     hooks: {
