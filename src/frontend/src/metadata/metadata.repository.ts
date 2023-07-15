@@ -15,7 +15,7 @@ export class MetaDataRepository {
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get("/metadata");
+		const metaDataDTO = await this.gateway.get("/system-panda-api/metadata");
 
 		this.collectionsPM!.value = metaDataDTO.data.collections.map((collectionDto: unknown) => {
 			return collectionDto;
