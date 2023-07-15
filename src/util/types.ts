@@ -22,7 +22,7 @@ import {
 	PrismaClientValidationError,
 	PrismaClientOptions,
 } from "@prisma/client/runtime/index.js";
-import { crudMapping } from "./index.js";
+import { crudMapping, cmsTablePrefix } from "./index.js";
 import { DeepReadonly } from "utility-types";
 import { SessionData } from "express-session";
 
@@ -207,7 +207,7 @@ type AuthSession = {
 	initFirstAuth: { [key: string]: any };
 	/**
 	 * add collection fields to include in the session
-	 * default: "*"
+	 * default: everything except secretField (password)
 	 */
 	sessionData?: "*" | string[];
 	options: {
@@ -233,9 +233,18 @@ type AuthFields = {
 	 * rename password field
 	 */
 	secretField?: string;
+	/**
+	 * default: "user_type"
+	 */
+	roleField?: string;
 };
 
 type Models = { [key: string]: { [key: string]: undefined } };
+
+type InternalTablesKeys =
+	| `${typeof cmsTablePrefix}_users`
+	| `${typeof cmsTablePrefix}_sessions`
+	| `${typeof cmsTablePrefix}_plugins`;
 
 type Settings = {
 	db: Database;
@@ -243,6 +252,7 @@ type Settings = {
 	port: number;
 	defaultMiddlewares?: DefaultMiddlewares;
 	extendServer?: ExtendServer;
+	disableAdminUI?: boolean;
 	healthCheck?:
 		| {
 				path?: string;
@@ -348,4 +358,5 @@ export {
 	InputData,
 	MutableDataStore,
 	CollectionMethod,
+	InternalTablesKeys,
 };
