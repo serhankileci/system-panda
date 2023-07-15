@@ -38,7 +38,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
 					httpOnly,
 				});
 
-				return res.redirect("/");
+				return res.sendStatus(200);
 			}
 		);
 	} catch (err) {

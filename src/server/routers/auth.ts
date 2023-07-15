@@ -11,7 +11,7 @@ authRouter
 			if (err) next(err);
 
 			res.clearCookie(SESSION.COOKIE_NAME);
-			res.send("Logged out.");
+			res.sendStatus(200);
 		});
 	});
 
