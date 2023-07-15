@@ -6,7 +6,7 @@ function ifAuthenticated(req: Request, res: Response, next: NextFunction) {
 		if (err) return next(err);
 
 		if (session) return next();
-		else return res.redirect("/auth/login");
+		else return res.sendStatus(401);
 	});
 }
 
@@ -14,7 +14,7 @@ function ifNotAuthenticated(req: Request, res: Response, next: NextFunction) {
 	req.sessionStore.get(req.cookies[SESSION.COOKIE_NAME], (err, session) => {
 		if (err) return next(err);
 
-		if (session) return res.redirect("/");
+		if (session) return res.sendStatus(200);
 		else return next();
 	});
 }
