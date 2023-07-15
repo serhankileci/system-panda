@@ -31,7 +31,7 @@
 		"test": "jest",
 		"build": "npm run build:api && npm run build:ui",
 		"build:api": "npm run format && npm run lint && tsc && cp -r ./src/server/static ./build/server",
-		"build:ui": "cd src/ui && npm run build"
+		"build:ui": "cd src/frontend && npm run build"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.15.0",
