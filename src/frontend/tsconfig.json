@@ -26,7 +26,8 @@
 		"./vite.config.ts",
 		"./.eslintrc.cjs",
 		"./tailwind.config.ts",
-		"./postcss.config.js"
+		"./postcss.config.js",
+		"src/shared/types"
 	],
 	"exclude": ["./node_modules"],
 	"references": [{ "path": "./tsconfig.node.json" }]

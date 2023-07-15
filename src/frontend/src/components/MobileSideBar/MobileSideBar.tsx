@@ -2,7 +2,7 @@ import { block } from "million/react";
 import { useMobileSideBar } from "./use-mobile-sidebar";
 
 const Icon = ({ show }: any) => {
-	return <span>{show ? "x" : "="}</span>;
+	return <span className="relative bottom-[1px]">{show ? "x" : "="}</span>;
 };
 
 const MobileSideBar = block(() => {

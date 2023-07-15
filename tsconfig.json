@@ -17,6 +17,6 @@
 		"noImplicitAny": true,
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/frontend/src/shared/types"],
 	"exclude": ["./node_modules", "src/frontend"]
 }
