@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { block } from "million/react";
 import { useMobileSideBar } from "./use-mobile-sidebar";
+import baseUrl from "../../shared/constants/baseUrl";
 
 interface MenuIconProps {
 	open: boolean;
@@ -9,7 +13,12 @@ const MenuIcon = ({ open }: MenuIconProps) => {
 	return <span className="relative bottom-[1px]">{open ? "x" : "="}</span>;
 };
 
-const MobileSideBar = block(() => {
+interface MobileSideBarProps {
+	viewModel: any;
+}
+
+const MobileSideBar = block((props: MobileSideBarProps) => {
+	const { viewModel } = props;
 	const { showMenu, setShowMenu } = useMobileSideBar(false);
 
 	const backdropClassName = [
@@ -49,13 +58,32 @@ const MobileSideBar = block(() => {
 			<aside className="fixed inset-x-0 z-10 max-w-lg p-3 mx-auto text-black bottom-2">
 				<div className={menuContainerClassName}>
 					<div className={listContainerClassName}>
-						<ul>
-							<li>Overview</li>
-							<li>Plugins</li>
-							<li>Collections</li>
-							<li>Settings</li>
-							<li>Log out</li>
-						</ul>
+						<nav className="px-6 py-3">
+							<a href={baseUrl} className="block mb-2 text-lg font-medium">
+								Dashboard
+							</a>
+							<h2 className="text-lg font-medium">Collections</h2>
+							<ul className="mb-2">
+								{viewModel.collections.length ? (
+									viewModel.collections.map(
+										(collection: string, index: number) => {
+											return (
+												<li key={index} className="ml-6">
+													<a href={`${baseUrl}/collections${collection}`}>
+														{collection.replace("/", "")}
+													</a>
+												</li>
+											);
+										}
+									)
+								) : (
+									<p>No collections have been detected</p>
+								)}
+							</ul>
+							<a href={`${baseUrl}/plugins`} className="text-lg font-medium">
+								Plugins
+							</a>
+						</nav>
 					</div>
 				</div>
 			</aside>
