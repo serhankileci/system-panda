@@ -7,12 +7,16 @@ const authRouter = express.Router();
 authRouter
 	.post("/login", ifNotAuthenticated, authenticate)
 	.post("/logout", ifAuthenticated, (req, res, next) => {
-		req.sessionStore.destroy(req.cookies[SESSION.COOKIE_NAME], err => {
-			if (err) next(err);
+		try {
+			req.sessionStore.destroy(req.cookies[SESSION.COOKIE_NAME], err => {
+				if (err) next(err);
 
-			res.clearCookie(SESSION.COOKIE_NAME);
-			res.sendStatus(200);
-		});
+				res.clearCookie(SESSION.COOKIE_NAME);
+				res.sendStatus(200);
+			});
+		} catch (err) {
+			next(err);
+		}
 	});
 
 export { authRouter };
