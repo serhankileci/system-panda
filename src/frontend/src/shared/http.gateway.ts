@@ -1,4 +1,4 @@
-import { MetaDataResponse } from "./types/metadata.types";
+import { MetaDataResponse } from "../metadata/metadata.types";
 
 export class HttpGateway {
 	headers = {

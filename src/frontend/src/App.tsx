@@ -1,36 +1,28 @@
-import MobileSideBar from "./components/MobileSideBar/MobileSideBar";
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { useEffect, useState } from "react";
+// import MobileSideBar from "./components/MobileSideBar/MobileSideBar";
 import { auth } from "./auth.tsx";
-import { useState } from "react";
+// import { useState } from "react";
+import { MetaDataPresenter } from "./metadata/metadata.presenter.ts";
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(
 		Boolean(JSON.parse(localStorage.getItem("logged_in") || "false"))
 	);
 
-	// const routes: Record<string, React.JSX.Element> = {
-	// 	"/": <h1>Dashboard</h1>,
-	// 	"/users": <h1>Users</h1>,
-	// 	"/plugins": <h1>Plugins</h1>,
-	// 	"/404": <p>Not found</p>,
-	// };
+	const metaDataPresenter = new MetaDataPresenter();
 
-	// get collections data from the metadata route
-	// collections?.forEach(collection => {
-	// 	function Collection() {
-	// 		const [data, setData] = useState<unknown>(null);
+	const [collectionsVM, setCollectionsVM] = useState([]);
 
-	// 		useEffect(() => {
-	// 			(async () => {
-	// 				const res = await fetch(`/system-panda-api/${collection}`);
-	// 				if (res.ok) setData(await res.json());
-	// 			})();
-	// 		}, []);
+	useEffect(() => {
+		async function loadCollections() {
+			await metaDataPresenter.loadCollections((vm: any) => {
+				setCollectionsVM(vm);
+			});
+		}
 
-	// 		return <DataTable ...somePropsHere />
-	// 	}
-
-	// 	routes[collection] = <Collection />;
-	// });
+		void loadCollections();
+	}, []);
 
 	return (
 		<>
@@ -53,13 +45,29 @@ function App() {
 					<aside className="invisible hidden w-auto p-3 bg-white rounded-lg opacity-0 lg:visible lg:block lg:opacity-100">
 						<h1 className="text-xl font-bold">🐼 System Panda</h1>
 						<ul>
-							<li>Overview</li>
-							<li>Plugins</li>
-							<li>Collections</li>
-							<li>Settings</li>
+							<li className="font-medium">Overview</li>
+							<li className="font-medium">Plugins</li>
+							<li className="font-medium">
+								<h1 className="font-medium">Collections</h1>
+								<ul className="ml-4">
+									{collectionsVM.map((col, index) => {
+										return (
+											<li key={index} className="text-slate-600">
+												{col}
+											</li>
+										);
+									})}
+								</ul>
+							</li>
+							<li className="font-medium">Settings</li>
+							<li className="font-medium">Log out</li>
 						</ul>
 					</aside>
-					<article className="p-4 bg-white rounded-lg">table goes here</article>
+					<article className="p-4 bg-white rounded-lg">
+						{collectionsVM.map((col, index) => {
+							return <p key={index}>{col}</p>;
+						})}
+					</article>
 				</div>
 			</div>
 			{/* <MobileSideBar /> */}

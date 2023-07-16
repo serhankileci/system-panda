@@ -1,13 +1,20 @@
-export interface CustomPlugin {
-	active: unknown[];
-	inactive: unknown[];
+type DatabasePlugin = {
+	active: boolean;
+	title: string;
+	author: string;
+	version: string;
+};
+
+export interface Plugins {
+	active: DatabasePlugin[];
+	inactive: DatabasePlugin[];
 }
 
-export type Collection = string[];
+export type Collections = string[];
 
 export interface MetaDataResponse {
 	data: {
-		plugins: CustomPlugin;
-		collections: Collection;
+		plugins: Plugins;
+		collections: Collections;
 	};
 }

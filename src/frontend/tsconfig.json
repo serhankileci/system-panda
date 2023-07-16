@@ -32,7 +32,8 @@
 		"./tailwind.config.ts",
 		"./postcss.config.js",
 		"./jest.config.ts",
-		"src/shared/types"
+		"src/shared/types",
+		"../../src/util/types/"
 	],
 	"exclude": ["./node_modules"],
 	"references": [{ "path": "./tsconfig.node.json" }]
