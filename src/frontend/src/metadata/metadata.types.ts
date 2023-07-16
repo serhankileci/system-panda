@@ -1,4 +1,4 @@
-type DatabasePlugin = {
+export type DatabasePlugin = {
 	active: boolean;
 	title: string;
 	author: string;

@@ -1,18 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ReactNode, useEffect, useState } from "react";
-import { block } from "million/react";
 import baseUrl from "../shared/constants/baseUrl";
+import { observer } from "mobx-react";
+import { MetaDataPresenter } from "../metadata/metadata.presenter";
 
 interface DashboardLayoutProps {
 	children: ReactNode | ReactNode[];
-	viewModel: any;
 }
 
-export const DashboardLayout = block((props: DashboardLayoutProps) => {
-	const { children, viewModel } = props;
+export const DashboardLayout = observer((props: DashboardLayoutProps) => {
+	const { children } = props;
 	const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+
+	const presenter = new MetaDataPresenter();
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -36,7 +35,7 @@ export const DashboardLayout = block((props: DashboardLayoutProps) => {
 		.join(" ");
 
 	return (
-		<div className={dashboardClassName} style={{ border: "1px solid red" }}>
+		<div className={dashboardClassName}>
 			{isNavbarOpen && (
 				<aside className="invisible hidden w-auto h-full bg-white rounded-lg opacity-0 lg:visible lg:block lg:opacity-100">
 					<header className="px-6 pt-6">
@@ -48,16 +47,18 @@ export const DashboardLayout = block((props: DashboardLayoutProps) => {
 						</a>
 						<h2 className="text-lg font-medium">Collections</h2>
 						<ul className="mb-2">
-							{viewModel.collections.length ? (
-								viewModel.collections.map((collection: string, index: number) => {
-									return (
-										<li key={index} className="ml-6">
-											<a href={`${baseUrl}/collections${collection}`}>
-												{collection.replace("/", "")}
-											</a>
-										</li>
-									);
-								})
+							{presenter.viewModel.collections.length ? (
+								presenter.viewModel.collections.map(
+									(collection: string, index: number) => {
+										return (
+											<li key={index} className="ml-6">
+												<a href={`${baseUrl}/collections${collection}`}>
+													{collection.replace("/", "")}
+												</a>
+											</li>
+										);
+									}
+								)
 							) : (
 								<p>No collections have been detected</p>
 							)}

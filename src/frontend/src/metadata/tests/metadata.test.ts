@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/await-thenable */
 import { loadFeature, defineFeature } from "jest-cucumber";
-import { Observable } from "../../shared/Observable";
 import { getMetaDataStub } from "../../test-tools/metadata.stub";
 import { MetaDataPresenter } from "../metadata.presenter";
 import metaDataRepository from "../metadata.repository";
@@ -31,19 +30,20 @@ defineFeature(feature, test => {
 		};
 		metaDataLoadStub = null;
 		metaDataPresenter = new MetaDataPresenter();
-		metaDataRepository.pluginsPM = new Observable([]);
-		metaDataRepository.collectionsPM = new Observable([]);
+		metaDataRepository.pluginsPM = {
+			activePlugins: [],
+			inactivePlugins: [],
+		};
+		metaDataRepository.collectionsPM = [];
 
 		metaDataLoadStub = getMetaDataStub;
 
 		metaDataRepository.gateway.get = jest.fn().mockImplementation(path => {
-			console.log("path: ", path);
 			return Promise.resolve(metaDataLoadStub);
 		});
 	});
 
 	const testSuite = async () => {
-		console.log("hit: ", viewModel);
 		await metaDataPresenter.loadPlugins((result: any) => {
 			console.error("result: ", result);
 			viewModel = Object.assign({}, viewModel, {

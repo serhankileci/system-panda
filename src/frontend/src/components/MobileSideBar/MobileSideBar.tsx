@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { block } from "million/react";
 import { useMobileSideBar } from "./use-mobile-sidebar";
 import baseUrl from "../../shared/constants/baseUrl";
+import { block } from "million/react";
+import { ViewModel } from "src/shared/types/viewmodel";
+import { CollectionsBlock } from "../CollectionsBlock";
 
 interface MenuIconProps {
 	open: boolean;
@@ -14,13 +13,13 @@ const MenuIcon = ({ open }: MenuIconProps) => {
 };
 
 interface MobileSideBarProps {
-	viewModel: any;
+	viewModel: ViewModel;
 }
 
 const MobileSideBar = block((props: MobileSideBarProps) => {
 	const { viewModel } = props;
-	const { showMenu, setShowMenu } = useMobileSideBar(false);
 
+	const { showMenu, setShowMenu } = useMobileSideBar(false);
 	const backdropClassName = [
 		"cursor-default transition fixed inset-0 bg-slate-100 transition-all ease-in-out delay-150",
 		showMenu ? "visible opacity-75" : "invisible opacity-0",
@@ -64,21 +63,7 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 							</a>
 							<h2 className="text-lg font-medium">Collections</h2>
 							<ul className="mb-2">
-								{viewModel.collections.length ? (
-									viewModel.collections.map(
-										(collection: string, index: number) => {
-											return (
-												<li key={index} className="ml-6">
-													<a href={`${baseUrl}/collections${collection}`}>
-														{collection.replace("/", "")}
-													</a>
-												</li>
-											);
-										}
-									)
-								) : (
-									<p>No collections have been detected</p>
-								)}
+								<CollectionsBlock collections={viewModel.collections} />
 							</ul>
 							<a href={`${baseUrl}/plugins`} className="text-lg font-medium">
 								Plugins

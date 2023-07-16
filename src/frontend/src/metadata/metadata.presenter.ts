@@ -1,35 +1,50 @@
-/* eslint-disable @typescript-eslint/await-thenable */
 import metaDataRepository from "./metadata.repository";
-import { Collections, Plugins } from "./metadata.types";
 
-interface PluginsCallbackFn {
-	(arg?: any): void;
-}
-
-interface CollectionsCallbackFn {
+interface CallbackFunction {
 	(arg?: any): void;
 }
 
 export class MetaDataPresenter {
-	loadPlugins = async (callbackFn: PluginsCallbackFn) => {
-		console.log(callbackFn);
-		await metaDataRepository.getPlugins((pluginsProgrammersModel: Plugins) => {
-			console.log("HIT3: ", pluginsProgrammersModel);
-			const pluginsViewModel = {
-				activePlugins: pluginsProgrammersModel.active.map(pluginPm => pluginPm),
-				inactivePlugins: pluginsProgrammersModel.inactive.map(pluginPm => pluginPm),
-			};
+	get viewModel() {
+		const pluginsViewModel = {
+			enabledPlugins: this.plugins.activePlugins,
+			disabledPlugins: this.plugins.inactivePlugins,
+		};
 
-			callbackFn(pluginsViewModel);
-		});
+		return {
+			plugins: pluginsViewModel,
+			collections: metaDataRepository.collectionsPM,
+		};
+	}
+
+	load = async () => {
+		await metaDataRepository.loadMetaData();
 	};
 
-	loadCollections = async (callbackFn: CollectionsCallbackFn) => {
-		await metaDataRepository.getCollections((collectionsPM: Collections) => {
-			console.log("BAM: ", collectionsPM);
-			const collectionsViewModel = collectionsPM.map(collectionPM => collectionPM);
+	loadPlugins = async (callbackFn: CallbackFunction) => {
+		await metaDataRepository.loadMetaData();
 
-			callbackFn(collectionsViewModel);
-		});
+		const pluginsViewModel = {
+			enabledPlugins: this.plugins.activePlugins,
+			disabledPlugins: this.plugins.inactivePlugins,
+		};
+
+		callbackFn(pluginsViewModel);
 	};
+
+	loadCollections = async (callbackFn: CallbackFunction) => {
+		await metaDataRepository.loadMetaData();
+
+		const collectionsVM = this.collections;
+
+		callbackFn(collectionsVM);
+	};
+
+	get plugins() {
+		return metaDataRepository.pluginsPM;
+	}
+
+	get collections() {
+		return metaDataRepository.collectionsPM;
+	}
 }

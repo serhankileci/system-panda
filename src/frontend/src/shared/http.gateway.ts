@@ -6,7 +6,7 @@ export class HttpGateway {
 	};
 
 	get = async (path: string) => {
-		const response = await fetch(path, {
+		const response = await fetch("/system-panda-api" + path, {
 			method: "GET",
 			headers: this.headers,
 		});

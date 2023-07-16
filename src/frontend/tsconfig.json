@@ -22,7 +22,9 @@
 		"noFallthroughCasesInSwitch": true,
 
 		"esModuleInterop": true,
-		"allowJs": true
+		"allowJs": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true
 	},
 	"include": [
 		"src/**/*.ts",
@@ -33,7 +35,8 @@
 		"./postcss.config.js",
 		"./jest.config.ts",
 		"src/shared/types",
-		"../../src/util/types/"
+		"../../src/util/types/",
+		"./public/mockServiceWorker.js"
 	],
 	"exclude": ["./node_modules"],
 	"references": [{ "path": "./tsconfig.node.json" }]

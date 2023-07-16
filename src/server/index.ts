@@ -69,6 +69,8 @@ async function server(
 			console.log(
 				`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
 			);
+
+			console.log(`🐼 Visit the dashboard on http://localhost:${port}/system-panda-static/.`);
 		});
 
 	return { app };
