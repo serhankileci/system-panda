@@ -1,35 +1,46 @@
-import { Observable } from "../shared/Observable";
 import { HttpGateway } from "../shared/http.gateway";
+import { observable } from "mobx";
+import { DatabasePlugin } from "./metadata.types";
+
+interface PluginsProgrammersModel {
+	activePlugins: DatabasePlugin[];
+	inactivePlugins: DatabasePlugin[];
+}
+
+type CollectionsProgrammersModel = string[];
 
 export class MetaDataRepository {
 	httpGateway: unknown;
 	gateway!: InstanceType<typeof HttpGateway>;
 
-	pluginsPM: Observable | null = null;
-	collectionsPM: Observable | null = null;
+	@observable pluginsPM: PluginsProgrammersModel = {
+		activePlugins: [],
+		inactivePlugins: [],
+	};
+
+	@observable collectionsPM: CollectionsProgrammersModel = [];
 
 	constructor() {
 		this.gateway = new HttpGateway();
-		this.pluginsPM = new Observable({});
-		this.collectionsPM = new Observable([]);
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get("/system-panda-api/metadata");
+		console.log("hit");
+		const metaDataDTO = await this.gateway.get("/metadata");
 
-		this.collectionsPM!.value = metaDataDTO.data.collections.map((collectionDto: unknown) => {
+		this.collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
 			return collectionDto;
 		});
 
-		const activePlugins = metaDataDTO.data.plugins.active.map(plugin => {
-			return plugin;
+		const activePlugins = metaDataDTO.data.plugins.active.map(pluginDto => {
+			return pluginDto;
 		});
 
-		const inactivePlugins = metaDataDTO.data.plugins.active.map(plugin => {
-			return plugin;
+		const inactivePlugins = metaDataDTO.data.plugins.inactive.map(pluginDto => {
+			return pluginDto;
 		});
 
-		this.pluginsPM!.value = {
+		this.pluginsPM = {
 			activePlugins,
 			inactivePlugins,
 		};

@@ -1,10 +1,7 @@
 import { useState } from "react";
 
 export const useMobileSideBar = (initialState = true) => {
-	const [show, setShow] = useState<boolean>(initialState);
+	const [showMenu, setShowMenu] = useState<boolean>(initialState);
 
-	return {
-		show,
-		setShow,
-	};
+	return { showMenu, setShowMenu };
 };
