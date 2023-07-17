@@ -1,16 +1,6 @@
 import express, { static as serveStatic } from "express";
-import * as url from "node:url";
-import path from "node:path";
 import { plugins } from "../plugins/index.js";
-import {
-	beforeMiddlewaresHandler,
-	ifAuthenticated,
-	errHandler,
-	internalMiddlewares,
-} from "./middlewares/index.js";
-import { webhook } from "../webhooks/index.js";
-import { authRouter, pluginsRouter } from "./routers/index.js";
-import { collection } from "./controllers/index.js";
+import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
 import {
 	Collections,
 	Settings,
@@ -21,8 +11,9 @@ import {
 	getDataStore,
 	setDataStore,
 	staticDir,
+	routes,
 } from "../util/index.js";
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+import { apiHandler } from "./routers/index.js";
 
 async function server(
 	settings: Settings,
@@ -30,7 +21,7 @@ async function server(
 	models: Models,
 	globalWebhooks?: Webhook[]
 ) {
-	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession } = settings;
+	const { db, port, defaultMiddlewares, extendServer, authSession, isAccessAllowed } = settings;
 	const prisma = getDataStore().prisma;
 
 	console.log("🐼 Loading plugins...");
@@ -59,68 +50,21 @@ async function server(
 		},
 	};
 
-	app
-		// ...
-		.set("view engine", "ejs")
-		.set("views", path.resolve(__dirname, "views"))
-		.use(beforeMiddlewares)
-		.use(internalMiddlewares(ctx))
-		.use(
-			"/system-panda-static",
-			serveStatic(staticDir, {
-				extensions: ["html"],
-			})
-		)
-		.get("/", (req, res) => {
-			res.render("index", {
-				title: "SystemPanda - Dashboard",
-				page: "index",
-				plugins: getDataStore().pluginStore,
-				collections: Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)),
-			});
-		})
-		.use("/auth", authRouter)
-		.use("/plugins", ifAuthenticated, pluginsRouter);
-
-	if (healthCheck !== false)
-		app.get(healthCheck?.path || "/health-check", (req, res) => {
-			res.json(
-				healthCheck?.data || {
-					status: "healthy",
-					timestamp: new Date().toISOString(),
-					uptime: process.uptime(),
-				}
-			);
-		});
-
-	for (const [cKey, cValue] of Object.entries(collections)) {
-		const { hooks, slug, webhooks } = cValue;
-		const slugOrKey = slug || cKey;
-		const query = prisma[cKey];
-		const mergedWebhooks = [...(globalWebhooks || []), ...(webhooks || [])];
-
-		mergedWebhooks?.forEach(obj => webhook(obj).init());
-
-		app.all(
-			`/${slugOrKey}`,
-			collection(query, ctx, hooks, models, mergedWebhooks, cKey, slugOrKey)
-		);
-	}
-
+	app.use(beforeMiddlewares, internalMiddlewares(ctx));
+	app.use((req, res, next) =>
+		isAccessAllowed && !isAccessAllowed(ctx) ? res.sendStatus(401) : next()
+	);
+	app.use(routes.api, apiHandler(ctx, globalWebhooks || [], models));
 	if (extendServer) extendServer(app, ctx);
-
 	app.all("*", (req, res) => res.status(404).json({ success: false, message: "Not Found." }));
-
 	if (afterMiddlewares.length > 0) app.use(afterMiddlewares);
+	app.use(errHandler);
 
-	app
-		// ...
-		.use(errHandler)
-		.listen(port, () => {
-			console.log(
-				`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
-			);
-		});
+	app.listen(port, () => {
+		console.log(
+			`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
+		);
+	});
 
 	return { app };
 }
