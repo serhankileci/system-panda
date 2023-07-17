@@ -140,6 +140,10 @@ SystemPanda({
         db: {
             URI: process.env.DATABASE_URL!,
         },
+        isAccessAllowed: ctx => {
+            // allow access if authenticated
+            return !!ctx.sessionData;
+        },
         extendServer: async (app, ctx) => {
             // add custom server logic
 
