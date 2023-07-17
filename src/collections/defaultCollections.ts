@@ -1,12 +1,6 @@
-import { Collection } from "../util/index.js";
+import { Collection, InternalTablesKeys } from "../util/index.js";
 
-const defaultCollections: Record<
-	| "system_panda_users"
-	| "system_panda_sessions"
-	| "system_panda_plugins"
-	| "system_panda_settings",
-	Collection
-> = {
+const defaultCollections: Record<InternalTablesKeys, Collection> = {
 	system_panda_users: {
 		fields: {
 			user_type: {
@@ -50,23 +44,6 @@ const defaultCollections: Record<
 			version: { required: true, type: "String" },
 			sourceCode: { required: true, type: "String" },
 			active: { required: true, type: "Boolean" },
-		},
-	},
-	system_panda_settings: {
-		fields: {
-			name: {
-				type: "String",
-				required: true,
-				unique: true,
-			},
-			value: {
-				type: "String",
-				required: true,
-				defaultValue: "null",
-			},
-			type: {
-				type: "String",
-			},
 		},
 	},
 };
