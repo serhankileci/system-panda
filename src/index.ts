@@ -20,12 +20,8 @@ const SystemPanda: SP = async function (options) {
 		setConfigStore(options);
 		const { content, settings } = getConfigStore();
 
-		const {
-			system_panda_plugins,
-			system_panda_sessions,
-			system_panda_settings,
-			system_panda_users,
-		} = defaultCollections;
+		const { system_panda_plugins, system_panda_sessions, system_panda_users } =
+			defaultCollections;
 		const { collections, webhooks: globalWebhooks } = content || {};
 		const {
 			authSession: { authFields, initFirstAuth },
@@ -55,7 +51,6 @@ const SystemPanda: SP = async function (options) {
 			},
 		};
 		const internalCollections: Collections = {
-			system_panda_settings,
 			system_panda_plugins,
 			system_panda_sessions: {
 				...system_panda_sessions,
