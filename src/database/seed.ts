@@ -3,7 +3,7 @@ import { selectOnQuery, getDataStore } from "../util/index.js";
 
 async function seed() {
 	const { prisma, initFirstAuth, authFields } = getDataStore();
-	const { collectionKey, secretField } = authFields;
+	const { collectionKey, secretField, roleField } = authFields;
 
 	// await prisma.system_panda_settings.createMany();
 	// await prisma.system_panda_plugins.createMany();
@@ -18,7 +18,7 @@ async function seed() {
 		const data = {
 			...initFirstAuth,
 			[secretField]: hash,
-			user_type: "admin",
+			[roleField]: "admin",
 		};
 
 		await prisma[collectionKey].create({
