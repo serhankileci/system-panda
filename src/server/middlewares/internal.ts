@@ -15,7 +15,7 @@ function internalMiddlewares(ctx: Context) {
 		try {
 			const { relationKey, secretField } = getDataStore().authFields;
 
-			if (!ctx.express) ctx.express = { req, res };
+			ctx.express = { req, res };
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
 				const data = await ctx.prisma.system_panda_sessions.findUnique({
