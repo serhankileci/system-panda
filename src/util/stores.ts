@@ -20,6 +20,7 @@ const dataStore: MutableDataStore & { authFields: { relationKey: string } } = {
 		relationKey: "relation_users",
 		secretField: "password",
 		uniqueIdentifierField: "email",
+		roleField: "user_type",
 	},
 	pluginStore: { active: [], inactive: [] },
 };
