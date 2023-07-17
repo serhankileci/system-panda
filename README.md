@@ -6,8 +6,6 @@
 # **SystemPanda** 🐼
 Headless CMS for Node.js, written in TypeScript.
 
-A hobby project that could turn into a production-grade Headless CMS, and will likely go through major changes until it's the way I originally planned it, which is an opinionated, architecturally rigid, deeply customizable system that aims to solve the limitations of Headless CMS' that hold developers back.
-
 ## **Installation**
 ```
 npm install system-panda
@@ -31,11 +29,10 @@ Check out the [**example app**](https://github.com/serhankileci/system-panda/blo
 - ### [**User Management**](https://github.com/serhankileci/system-panda/blob/main/docs/user-management.md)
 	Authentication and Access Control.
 
-## **Planned Features**
-- Dashboard (to manage CRUD operations, users, plugins)
+## **Working On**
 - Content media support
 - Standard library of plugins
-- Plugin system revisited
+- Revisit plugin system (routes for uploading plugins to remote repository, etc.)
 - Custom Hooks/Events
 - Version Control (for rollbacks, etc.)
 - Task scheduling (at specified times/conditions)
