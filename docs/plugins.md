@@ -1,12 +1,14 @@
 # **Plugins**
-Plugins are reusable snippets of code stored in your database, imported and evaluated at runtime, and their default export function is executed. Until the UI is built, the following operations have to be done manually. At this stage of the application, public plugins are **NOT** vetted, use them at your own risk.
+Plugins are reusable snippets of code stored in your database, imported and evaluated at runtime, and their default export function is executed. At this stage of the application, public plugins are **NOT** vetted, use them at your own risk.
 
 ## **How to install**
-1. Head over to your app's "/plugins" route to fetch a list of public plugins.
-2. Pick one by name, then:
-	- "/plugins/foobar" for plugin info
-	- "/plugins/foobar/install (or uninstall)
-	- After installing, "/plugins/foobar/enable" (or disable)
+Plugins are served through "/local" (plugins installed in your app) and "/remote" (plugins in the remote plugin repository) paths.
+
+1. Head over to "/plugins/remote" to fetch a list of available, remote plugins ("/plugins/local" for installed).
+2. Install/uninstall/enable/disable by name:
+	- "/plugins/remote/Example" for plugin info,
+	- "/plugins/remote/Example/install" to install,
+	- "/plugins/local/Example/(uninstall|enable|disable)"
 
 Then the plugin will be loaded into your app, no reload necessary.
 
