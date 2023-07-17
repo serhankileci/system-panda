@@ -1,11 +1,5 @@
 # **Rest API**
-A REST API for your collections are automatically generated for CRUD operations.
-
-Until the next version which will include an UI panel to handle your collections, plugins, etc. you can make HTTP requests with the following API interface.
-
-For GET, include the data as the query string. For the rest, as the request body.
-
-Query keywords are Prisma query method args. The where clause must be JSON. All four CRUD operations are executed with the ...many Prisma argument, but you can write your queries to affect one datum.
+A REST API for your collections are automatically generated for CRUD operations that you can make HTTP requests to. For GET, include the data as the query string. For the rest, as the request body. Query keywords are Prisma query method args. The where clause must be JSON. All four CRUD operations are executed with the ...many Prisma argument, but you can write your queries to affect one datum.
 
 Example GET request (newlined the query string for readability):
 ```
