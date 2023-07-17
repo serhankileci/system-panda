@@ -47,7 +47,7 @@ function apiHandler(ctx: Context, globalWebhooks: Webhook[], models: Models) {
 		mergedWebhooks?.forEach(obj => webhook(obj).init());
 
 		apiRouter.all(
-			`/${slugOrKey}`,
+			`/collections/${slugOrKey}`,
 			collection(query, ctx, hooks, models, mergedWebhooks, cKey, slugOrKey)
 		);
 	}
