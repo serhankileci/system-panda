@@ -21,8 +21,15 @@ async function server(
 	models: Models,
 	globalWebhooks?: Webhook[]
 ) {
-	const { db, port, defaultMiddlewares, extendServer, healthCheck, authSession, disableAdminUI } =
-		settings;
+	const {
+		db,
+		port,
+		defaultMiddlewares,
+		extendServer,
+		authSession,
+		disableAdminUI,
+		isAccessAllowed,
+	} = settings;
 	const prisma = getDataStore().prisma;
 
 	console.log("🐼 Loading plugins...");
@@ -51,10 +58,18 @@ async function server(
 		},
 	};
 
-	app.use(beforeMiddlewares, internalMiddlewares(ctx));
+	app
+		// ...
+		.use(beforeMiddlewares, internalMiddlewares(ctx))
+		.use((req, res, next) =>
+			isAccessAllowed && !isAccessAllowed(ctx) ? res.sendStatus(401) : next()
+		);
+
 	if (!disableAdminUI) app.use(routes.static, serveStatic(staticDir, { extensions: ["html"] }));
+
 	app.use(routes.api, apiHandler(ctx, globalWebhooks || [], models));
-	if (!disableAdminUI) app.get("*", (req, res) => res.sendFile(staticDir + "/index.html"));
+
+	if (!disableAdminUI) app.get("*", (req, res) => res.sendFile(`${staticDir}/index.html`));
 
 	if (extendServer) extendServer(app, ctx);
 
@@ -62,16 +77,13 @@ async function server(
 
 	if (afterMiddlewares.length > 0) app.use(afterMiddlewares);
 
-	app
-		// ...
-		.use(errHandler)
-		.listen(port, () => {
-			console.log(
-				`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
-			);
+	app.use(errHandler);
 
-			console.log(`🐼 Visit the dashboard on http://localhost:${port}/system-panda-static/.`);
-		});
+	app.listen(port, () => {
+		console.log(
+			`🐼 Connected to ${db.URI} via Prisma ORM.\n🐼 SystemPanda live on http://localhost:${port}.`
+		);
+	});
 
 	return { app };
 }

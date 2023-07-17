@@ -253,6 +253,7 @@ type Settings = {
 	defaultMiddlewares?: DefaultMiddlewares;
 	extendServer?: ExtendServer;
 	disableAdminUI?: boolean;
+	isAccessAllowed?: (options: Context) => boolean;
 	healthCheck?:
 		| {
 				path?: string;
