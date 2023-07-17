@@ -13,9 +13,9 @@ function internalMiddlewares(ctx: Context) {
 	} = getConfigStore();
 	const loadCtxWithData = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const relationKey = getDataStore().authFields.relationKey;
+			const { relationKey, secretField } = getDataStore().authFields;
 
-			if (!ctx.express) ctx.express = { req, res };
+			ctx.express = { req, res };
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
 				const data = await ctx.prisma.system_panda_sessions.findUnique({
@@ -29,7 +29,7 @@ function internalMiddlewares(ctx: Context) {
 
 				if (data?.[relationKey]) {
 					if (!authSession.sessionData || authSession.sessionData === "*") {
-						ctx.sessionData = data[relationKey];
+						ctx.sessionData = { ...data[relationKey], [secretField]: null };
 					} else if (
 						Array.isArray(authSession.sessionData) &&
 						authSession.sessionData.length > 0
