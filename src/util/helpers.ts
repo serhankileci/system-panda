@@ -28,7 +28,7 @@ const selectOnQuery = (obj: object, keys: "*" | string[]) =>
 		)
 	);
 
-const nullIfEmpty = (x: unknown[] | Record<string, unknown>) =>
+const nullIfEmptyArrOrObj = (x: unknown[] | Record<string, unknown>) =>
 	(Array.isArray(x) && x.length > 0) || Object.keys(x).length > 0 ? x : null;
 
 const isPrismaErr = (err: unknown) =>
@@ -47,4 +47,11 @@ function filterObjByKeys(obj: Record<string, unknown>, keys: string[]) {
 	}, {});
 }
 
-export { writeOrAppend, pathExists, selectOnQuery, nullIfEmpty, isPrismaErr, filterObjByKeys };
+export {
+	writeOrAppend,
+	pathExists,
+	selectOnQuery,
+	nullIfEmptyArrOrObj,
+	isPrismaErr,
+	filterObjByKeys,
+};
