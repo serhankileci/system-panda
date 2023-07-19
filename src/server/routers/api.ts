@@ -17,7 +17,7 @@ function apiHandler(ctx: Context, globalWebhooks: Webhook[], models: Models) {
 	apiRouter
 		// ...
 		.use("/auth", authRouter)
-		.use("/plugins", pluginsRouter);
+		.use("/plugins", ifAuthenticated, pluginsRouter);
 
 	if (healthCheck !== false)
 		apiRouter.get(healthCheck?.path || "/health-check", (req, res) => {
@@ -30,7 +30,7 @@ function apiHandler(ctx: Context, globalWebhooks: Webhook[], models: Models) {
 			);
 		});
 
-	apiRouter.get("/collections", (req, res) =>
+	apiRouter.get("/collections", ifAuthenticated, (req, res) =>
 		res.json(Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)))
 	);
 
@@ -44,6 +44,7 @@ function apiHandler(ctx: Context, globalWebhooks: Webhook[], models: Models) {
 
 		apiRouter.all(
 			`/collections/${slugOrKey}`,
+			ifAuthenticated,
 			collection(query, ctx, hooks, models, mergedWebhooks, cKey, slugOrKey)
 		);
 	}
