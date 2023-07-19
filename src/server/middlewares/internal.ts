@@ -19,12 +19,8 @@ function internalMiddlewares(ctx: Context) {
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
 				const data = await ctx.prisma.system_panda_sessions.findUnique({
-					where: {
-						id: req.cookies[SESSION.COOKIE_NAME],
-					},
-					include: {
-						[relationKey]: true,
-					},
+					where: { id: req.cookies[SESSION.COOKIE_NAME] },
+					include: { [relationKey]: true },
 				});
 
 				if (data?.[relationKey]) {
