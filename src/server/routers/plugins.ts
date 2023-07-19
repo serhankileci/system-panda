@@ -40,7 +40,7 @@ localPluginsRouter
 			});
 
 			return res.json({
-				message: `Enabled plugin: ${title} and reloaded the plugins().`,
+				message: `Enabled plugin: ${title} and reloaded the plugins.`,
 			});
 		} catch (err) {
 			next(err);
@@ -57,7 +57,7 @@ localPluginsRouter
 			});
 
 			res.json({
-				message: `Disabled plugin: ${title} and reloaded the plugins().`,
+				message: `Disabled plugin: ${title} and reloaded the plugins.`,
 			});
 		} catch (err) {
 			next(err);
