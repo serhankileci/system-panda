@@ -1,4 +1,4 @@
-import express, { static as serveStatic } from "express";
+import express from "express";
 import { plugins } from "../plugins/index.js";
 import { beforeMiddlewaresHandler, errHandler, internalMiddlewares } from "./middlewares/index.js";
 import {
@@ -10,7 +10,6 @@ import {
 	Models,
 	getDataStore,
 	setDataStore,
-	staticDir,
 	routes,
 } from "../util/index.js";
 import { apiHandler } from "./routers/index.js";
