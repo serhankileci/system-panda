@@ -71,6 +71,8 @@ type WebhookFunc = (webhook: Webhook) => {
 /* ******************** */
 
 /* ********** CONTEXT ********** */
+type CurrentHook = keyof CRUDHooks;
+
 type Context = {
 	prisma: PrismaClient;
 	collections: Collections;
@@ -81,7 +83,7 @@ type Context = {
 	sessionData: Record<string, unknown> | undefined;
 	bools: Record<string, boolean>;
 	util: {
-		currentHook: keyof CRUDHooks;
+		currentHook: CurrentHook;
 	};
 	customVars: Record<string, unknown>;
 };
@@ -98,6 +100,17 @@ type CRUDHooks = {
 	afterOperation?: AfterOperation[];
 };
 
+type HookOperationArgs = {
+	ctx: {
+		express: {
+			req: ExpressRequest;
+			res: ExpressResponse;
+		};
+		customVars: Record<string, unknown>;
+	};
+	existingData?: ExistingData;
+	inputData?: InputData;
+} & CRUD_Operation;
 type ReadonlyHookOperationArgs = {
 	ctx: DeepReadonly<Omit<Context, "express" | "customVars">> & {
 		express: {
@@ -366,4 +379,6 @@ export {
 	MutableDataStore,
 	CollectionMethod,
 	InternalTablesKeys,
+	CurrentHook,
+	HookOperationArgs,
 };
