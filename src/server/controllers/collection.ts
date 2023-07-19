@@ -9,9 +9,9 @@ import {
 	Models,
 	Webhook,
 	methodMapping,
-	getDataStore,
-	nullIfEmpty,
+	nullIfEmptyArrOrObj,
 	SystemPandaError,
+	handleHooksPlugins,
 } from "../../util/index.js";
 import { mapQuery } from "../../collections/index.js";
 import { PrismaClient } from "@prisma/client";
@@ -36,7 +36,6 @@ function collection(
 				});
 			}
 
-			const { pluginStore } = getDataStore();
 			let resultData;
 			const existingData: ExistingData = null;
 			const inputData: InputData = req.body;
@@ -50,30 +49,15 @@ function collection(
 				ctx,
 			};
 
-			const handleHookAndPlugin = async () => {
-				for (const obj of pluginStore.active) {
-					obj.sourceCode(ctx);
-				}
-
-				for (const op of (hooks || {})[ctx.util.currentHook] || []) {
-					const frozenOperationArgs = {
-						...Object.freeze(Object.assign({}, operationArgs)),
-						inputData: inputData.data,
-						ctx: { ...ctx, customVars: ctx.customVars },
-					};
-
-					const hookReturn = await op(frozenOperationArgs);
-					const beforeOpAndDenied =
-						ctx.util.currentHook === "beforeOperation" && hookReturn === false;
-
-					if (beforeOpAndDenied) {
-						throw "Access denied.";
-					}
-				}
-			};
+			const triggerHooksPlugins = await handleHooksPlugins(
+				ctx,
+				hooks,
+				inputData,
+				operationArgs
+			);
 
 			ctx.util.currentHook = "beforeOperation";
-			await handleHookAndPlugin();
+			await triggerHooksPlugins();
 
 			if (reqMethod === "GET") {
 				const mappedQuery = mapQuery(req.query);
@@ -83,18 +67,18 @@ function collection(
 					where: inputData.where,
 				});
 
-				operationArgs.existingData = nullIfEmpty(data);
+				operationArgs.existingData = nullIfEmptyArrOrObj(data);
 
 				ctx.util.currentHook = "modifyInput";
-				await handleHookAndPlugin();
+				await triggerHooksPlugins();
 
 				ctx.util.currentHook = "validateInput";
-				await handleHookAndPlugin();
+				await triggerHooksPlugins();
 
 				let mergeData = isArr
 					? inputData.data.map((x: unknown) => Object.assign({}, models[cKey], x))
 					: Object.assign({}, models[cKey], inputData.data);
-				mergeData = nullIfEmpty(mergeData);
+				mergeData = nullIfEmptyArrOrObj(mergeData);
 
 				if (reqMethod === "POST") {
 					await query.createMany({
@@ -149,7 +133,7 @@ function collection(
 			}
 
 			ctx.util.currentHook = "afterOperation";
-			await handleHookAndPlugin();
+			await triggerHooksPlugins();
 
 			res.json({ success: true, data: resultData });
 
@@ -159,7 +143,7 @@ function collection(
 					name: cKey,
 					slug: slugOrKey,
 				},
-				data: nullIfEmpty(resultData) || null,
+				data: nullIfEmptyArrOrObj(resultData),
 				timestamp: new Date().toISOString(),
 			};
 
