@@ -135,7 +135,7 @@ const config: Config = {
 	// runner: "jest-runner",
 
 	// The paths to modules that run some code to configure or set up the testing environment before each test
-	// setupFiles: [],
+	setupFiles: ["jest-localstorage-mock"],
 
 	// A list of paths to modules that run some code to configure or set up the testing framework before each test
 	// setupFilesAfterEnv: [],
@@ -173,7 +173,29 @@ const config: Config = {
 	// testRunner: "jest-circus/runner",
 
 	// A map from regular expressions to paths to transformers
-	// transform: undefined,
+	transform: {
+		"^.+\\.tsx?$": [
+			"ts-jest",
+			{
+				diagnostics: {
+					ignoreCodes: [1343],
+				},
+				astTransformers: {
+					before: [
+						{
+							path: "node_modules/ts-jest-mock-import-meta", // or, alternatively, 'ts-jest-mock-import-meta' directly, without node_modules.
+							options: {
+								env: {
+									PROD: false,
+									DEV: true,
+								},
+							},
+						},
+					],
+				},
+			},
+		],
+	},
 
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
 	// transformIgnorePatterns: ["/node_modules/", "\\.pnp\\.[^\\/]+$"],

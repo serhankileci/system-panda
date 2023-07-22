@@ -1,6 +1,8 @@
 import { HttpGateway } from "../shared/http.gateway";
-import { observable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import { DatabasePlugin } from "./metadata.types";
+import { makeLoggable } from "mobx-log";
+import config from "../shared/config";
 
 interface PluginsProgrammersModel {
 	activePlugins: DatabasePlugin[];
@@ -10,22 +12,33 @@ interface PluginsProgrammersModel {
 type CollectionsProgrammersModel = string[];
 
 export class MetaDataRepository {
-	httpGateway: unknown;
+	config = config;
 	gateway!: InstanceType<typeof HttpGateway>;
 
-	@observable pluginsPM: PluginsProgrammersModel = {
+	pluginsPM: PluginsProgrammersModel = {
 		activePlugins: [],
 		inactivePlugins: [],
 	};
 
-	@observable collectionsPM: CollectionsProgrammersModel = [];
+	collectionsPM: CollectionsProgrammersModel = [];
 
 	constructor() {
 		this.gateway = new HttpGateway();
+		makeAutoObservable(this);
+
+		!config.isEnvironmentProd &&
+			makeLoggable(this, {
+				filters: {
+					events: {
+						computeds: true,
+						observables: true,
+						actions: true,
+					},
+				},
+			});
 	}
 
 	loadMetaData = async () => {
-		console.log("hit");
 		const metaDataDTO = await this.gateway.get("/metadata");
 
 		this.collectionsPM = metaDataDTO.data.collections.map(collectionDto => {

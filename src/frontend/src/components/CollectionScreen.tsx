@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 
 export const CollectionScreen = observer(
 	(props: { useParams: () => { collection_name: string } }) => {
-		const { collection_name } = props.useParams();
+		const { collection_name = "" } = props.useParams();
 
 		return (
 			<article>

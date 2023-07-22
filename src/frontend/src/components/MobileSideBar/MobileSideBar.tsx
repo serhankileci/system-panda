@@ -1,7 +1,8 @@
 import { useMobileSideBar } from "./use-mobile-sidebar";
-import config from "../../shared/config";
 import { block } from "million/react";
 import { ViewModel } from "src/shared/types/viewmodel";
+import { router } from "../../routing/router";
+import { LoginPresenter } from "../../auth/login.presenter";
 import { CollectionsBlock } from "../CollectionsBlock";
 
 interface MenuIconProps {
@@ -19,7 +20,9 @@ interface MobileSideBarProps {
 const MobileSideBar = block((props: MobileSideBarProps) => {
 	const { viewModel } = props;
 
-	const { showMenu, setShowMenu } = useMobileSideBar(false);
+	const loginPresenter = new LoginPresenter();
+
+	const [showMenu, setMenuState] = useMobileSideBar(false);
 	const backdropClassName = [
 		"cursor-default transition fixed inset-0 bg-slate-100 transition-all ease-in-out delay-150",
 		showMenu ? "visible opacity-75" : "invisible opacity-0",
@@ -28,15 +31,22 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 		.join(" ");
 
 	const menuContainerClassName = [
-		"h-auto px-4 pt-4 pb-16 mx-auto transition-all ease-in-out delay-150 rounded-lg bg-slate-700",
-		showMenu ? "w-3/4" : "w-3/5",
+		"h-auto px-4 pt-0.25 sm:pt-1 pb-16 mx-auto relative bottom-2 transition-all ease-in-out delay-50 rounded-lg bg-slate-700",
+		showMenu ? "max-h-[600px] w-full sm:w-3/4" : "max-h-[0px] w-2/3 sm:w-1/2",
 	]
 		.filter(Boolean)
 		.join(" ");
 
 	const listContainerClassName = [
 		"pb-4 mb-3 text-white border-b-2 border-slate-600",
-		showMenu ? "visible relative" : "invisible absolute",
+		showMenu ? "visible relative delay-[150ms]" : "invisible absolute",
+	]
+		.filter(Boolean)
+		.join(" ");
+
+	const logoutBtnClassName = [
+		"bg-blue-100 h-full rounded-lg transition-all",
+		showMenu ? "visible delay-[150ms] px-2 text-normal" : "invisible px-0 text-[0px]",
 	]
 		.filter(Boolean)
 		.join(" ");
@@ -51,23 +61,43 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 			<button
 				className={backdropClassName}
 				onClick={() => {
-					setShowMenu(false);
+					setMenuState(false);
 				}}
 			/>
 			<aside className="fixed inset-x-0 z-10 max-w-lg p-3 mx-auto text-black bottom-2">
 				<div className={menuContainerClassName}>
 					<div className={listContainerClassName}>
 						<nav className="px-6 py-3">
-							<a href={config.baseUrl} className="block mb-2 text-lg font-medium">
+							<button
+								className="block mb-2 text-lg font-medium"
+								onClick={() => {
+									router.navigate({
+										to: "/app",
+									});
+									setMenuState(false);
+								}}
+							>
 								Dashboard
-							</a>
+							</button>
 							<h2 className="text-lg font-medium">Collections</h2>
-							<ul className="mb-2">
-								<CollectionsBlock collections={viewModel.collections} />
+							<ul className="mb-2 overflow-auto max-h-[20rem]">
+								<CollectionsBlock
+									collections={viewModel.collections}
+									setState={setMenuState}
+								/>
 							</ul>
-							<a href={`${config.baseUrl}/plugins`} className="text-lg font-medium">
+							<button
+								className="block mb-2 text-lg font-medium"
+								onClick={() => {
+									router.navigate({
+										to: "/app/plugins",
+									});
+
+									setMenuState(false);
+								}}
+							>
 								Plugins
-							</a>
+							</button>
 						</nav>
 					</div>
 				</div>
@@ -78,10 +108,18 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 					<button
 						className="px-3 py-1 mx-auto bg-blue-200 rounded-lg"
 						onClick={() => {
-							setShowMenu(!showMenu);
+							setMenuState(!showMenu);
 						}}
 					>
 						<MenuIcon open={showMenu} />
+					</button>
+					<button
+						className={logoutBtnClassName}
+						onClick={() => {
+							loginPresenter.logout();
+						}}
+					>
+						<span style={{ filter: "grayscale(100%)" }}>🚪</span>
 					</button>
 				</div>
 			</div>

@@ -4,9 +4,9 @@ export class Config {
 	baseUrl = "/";
 
 	constructor() {
-		this.isEnvironmentProd = import.meta.env.PROD;
+		this.isEnvironmentProd = import.meta.env?.PROD;
 		this.apiUrl = "/system-panda-api";
-		this.baseUrl = import.meta.env.BASE_URL;
+		this.baseUrl = import.meta.env?.BASE_URL;
 	}
 }
 

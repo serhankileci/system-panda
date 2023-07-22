@@ -1,3 +1,4 @@
+import { AuthResponse } from "../auth/auth.types";
 import { MetaDataResponse } from "../metadata/metadata.types";
 import config, { ConfigType } from "./config";
 
@@ -21,6 +22,21 @@ export class HttpGateway {
 		const dto = (await response.json()) as MetaDataResponse;
 
 		return dto;
+	};
+
+	post = async (path: string, body: unknown, sendDto = true) => {
+		const response = await fetch(this.config.apiUrl + path, {
+			method: "POST",
+			headers: this.headers,
+			body: JSON.stringify(body),
+			credentials: "same-origin",
+		});
+
+		if (sendDto) {
+			return (await response.json()) as AuthResponse;
+		}
+
+		return response;
 	};
 }
 

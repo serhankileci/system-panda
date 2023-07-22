@@ -1,8 +1,8 @@
 import { MetaDataPresenter } from "../metadata/metadata.presenter";
 import { useState, useEffect } from "react";
-import { CollectionsBlock } from "./CollectionsBlock";
+import { block, For } from "million/react";
 
-export const OverviewScreen = () => {
+export const OverviewScreen = block(() => {
 	const presenter = new MetaDataPresenter();
 
 	const [viewModel, setViewModel] = useState(presenter.viewModel);
@@ -39,9 +39,16 @@ export const OverviewScreen = () => {
 			<article>
 				<h2 className="mb-2 text-3xl font-bold">List of collections</h2>
 				<ul className="px-4 py-3 bg-white rounded-lg">
-					<CollectionsBlock collections={collections} />
+					<For each={collections}>
+						{(collection: string) => {
+							return <li className="mb-2 ml-4">{collection.replace("/", "")}</li>;
+						}}
+					</For>
+					<li className={`${collections.length === 0 ? "block" : "hidden"}`}>
+						There are no collections
+					</li>
 				</ul>
 			</article>
 		</article>
 	);
-};
+});

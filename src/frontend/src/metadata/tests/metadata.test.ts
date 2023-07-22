@@ -1,12 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/await-thenable */
 import { loadFeature, defineFeature } from "jest-cucumber";
 import { getMetaDataStub } from "../../test-tools/metadata.stub";
 import { MetaDataPresenter } from "../metadata.presenter";
 import metaDataRepository from "../metadata.repository";
 
-// require("src/metadata/tests/features/metadata.feature")
 const feature = loadFeature("src/metadata/tests/features/metadata.feature");
 
 let metaDataPresenter: InstanceType<typeof MetaDataPresenter>;
@@ -45,7 +41,6 @@ defineFeature(feature, test => {
 
 	const testSuite = async () => {
 		await metaDataPresenter.loadPlugins((result: any) => {
-			console.error("result: ", result);
 			viewModel = Object.assign({}, viewModel, {
 				plugins: result,
 			});
