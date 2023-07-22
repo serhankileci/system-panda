@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import baseUrl from "../shared/constants/baseUrl";
+import config from "../shared/config";
 import { observer } from "mobx-react";
 import { MetaDataPresenter } from "../metadata/metadata.presenter";
 
@@ -42,7 +42,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 						<h1 className="text-2xl font-bold">🐼 System Panda</h1>
 					</header>
 					<nav className="px-6 py-3">
-						<a href={baseUrl} className="block mb-2 text-lg font-medium">
+						<a href={config.baseUrl} className="block mb-2 text-lg font-medium">
 							Dashboard
 						</a>
 						<h2 className="text-lg font-medium">Collections</h2>
@@ -52,7 +52,9 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 									(collection: string, index: number) => {
 										return (
 											<li key={index} className="ml-6">
-												<a href={`${baseUrl}/collections${collection}`}>
+												<a
+													href={`${config.baseUrl}/collections${collection}`}
+												>
 													{collection.replace("/", "")}
 												</a>
 											</li>
@@ -63,7 +65,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 								<p>No collections have been detected</p>
 							)}
 						</ul>
-						<a href={`${baseUrl}/plugins`} className="text-lg font-medium">
+						<a href={`${config.baseUrl}/plugins`} className="text-lg font-medium">
 							Plugins
 						</a>
 					</nav>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { auth } from "./auth.tsx";
+import { Auth } from "./auth/Auth.tsx";
 import MobileSideBar from "./components/MobileSideBar/MobileSideBar";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import { Outlet } from "@tanstack/router";
@@ -27,12 +27,12 @@ const App = observer(() => {
 			<div className="bg-white p-4 fixed bottom-0 right-0 shadow shadow-md m-6">
 				{loggedIn ? (
 					<>
-						<auth.Logout setLoggedIn={setLoggedIn} />
+						<Auth.Logout setLoggedIn={setLoggedIn} />
 						{/* {routes[window.location.pathname] || routes["/404"]} */}
 					</>
 				) : (
 					<>
-						<auth.Login setLoggedIn={setLoggedIn} />
+						<Auth.Login setLoggedIn={setLoggedIn} />
 					</>
 				)}
 			</div>

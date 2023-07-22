@@ -1,12 +1,19 @@
 import { MetaDataResponse } from "../metadata/metadata.types";
+import config, { ConfigType } from "./config";
 
 export class HttpGateway {
 	headers = {
 		"Content-Type": "application/json",
 	};
 
+	config: ConfigType;
+
+	constructor() {
+		this.config = config;
+	}
+
 	get = async (path: string) => {
-		const response = await fetch("/system-panda-api" + path, {
+		const response = await fetch(this.config.apiUrl + path, {
 			method: "GET",
 			headers: this.headers,
 		});
@@ -18,4 +25,5 @@ export class HttpGateway {
 }
 
 const httpGateway = new HttpGateway();
+
 export default httpGateway;

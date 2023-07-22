@@ -1,6 +1,6 @@
 import { Router, Route, RootRoute } from "@tanstack/router";
 import App from "../App";
-import baseUrl from "../shared/constants/baseUrl";
+import config from "../shared/config";
 import { Root } from "./Root";
 import { CollectionScreen } from "../components/CollectionScreen";
 import { OverviewScreen } from "../components/OverviewScreen";
@@ -12,7 +12,7 @@ const rootRoute = new RootRoute({
 
 const indexRoute = new Route({
 	getParentRoute: () => rootRoute,
-	path: baseUrl,
+	path: config.baseUrl,
 	component: App,
 });
 

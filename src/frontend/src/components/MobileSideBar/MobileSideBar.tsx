@@ -1,5 +1,5 @@
 import { useMobileSideBar } from "./use-mobile-sidebar";
-import baseUrl from "../../shared/constants/baseUrl";
+import config from "../../shared/config";
 import { block } from "million/react";
 import { ViewModel } from "src/shared/types/viewmodel";
 import { CollectionsBlock } from "../CollectionsBlock";
@@ -58,14 +58,14 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 				<div className={menuContainerClassName}>
 					<div className={listContainerClassName}>
 						<nav className="px-6 py-3">
-							<a href={baseUrl} className="block mb-2 text-lg font-medium">
+							<a href={config.baseUrl} className="block mb-2 text-lg font-medium">
 								Dashboard
 							</a>
 							<h2 className="text-lg font-medium">Collections</h2>
 							<ul className="mb-2">
 								<CollectionsBlock collections={viewModel.collections} />
 							</ul>
-							<a href={`${baseUrl}/plugins`} className="text-lg font-medium">
+							<a href={`${config.baseUrl}/plugins`} className="text-lg font-medium">
 								Plugins
 							</a>
 						</nav>

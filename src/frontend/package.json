@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "npx msw init public && vite",
-		"build": "rm -rf public/mockServiceWorker.js && tsc && vite build",
+		"build": "tsc && vite build",
 		"lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"test": "jest --watchAll"
 	},

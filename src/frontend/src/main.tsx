@@ -5,8 +5,9 @@ import { StrictMode } from "react";
 import { Provider } from "mobx-react";
 import "./index.css";
 import TanStackRouterDevtools from "./routing/TanStackRouterDevtools.tsx";
+import config from "./shared/config.ts";
 
-if (process.env.NODE_ENV === "development") {
+if (!config.isEnvironmentProd) {
 	const { worker } = await import("./test-tools/mocks/browser.ts");
 	await worker.start();
 }

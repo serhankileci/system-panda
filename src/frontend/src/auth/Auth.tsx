@@ -1,12 +1,12 @@
 import { FormEvent } from "react";
-import { baseURL } from "./util.ts";
+import config from "../shared/config.ts";
 
-const auth = {
+export const Auth = {
 	Login: function ({ setLoggedIn }: { setLoggedIn: (bool: boolean) => void }) {
 		const handleForm = async (e: FormEvent<HTMLFormElement>) => {
 			e.preventDefault();
 
-			const res = await fetch(baseURL + "/system-panda-api/auth/login", {
+			const res = await fetch(config.apiUrl + "/auth/login", {
 				method: "post",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(Object.fromEntries(new FormData(e.currentTarget))),
@@ -42,7 +42,7 @@ const auth = {
 		const handleForm = async (e: FormEvent<HTMLFormElement>) => {
 			e.preventDefault();
 
-			const res = await fetch(baseURL + "/system-panda-api/auth/logout", {
+			const res = await fetch(config.apiUrl + "/auth/logout", {
 				method: "post",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(Object.fromEntries(new FormData(e.currentTarget))),
@@ -65,5 +65,3 @@ const auth = {
 		);
 	},
 };
-
-export { auth };
