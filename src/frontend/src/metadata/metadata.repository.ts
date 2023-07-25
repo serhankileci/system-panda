@@ -1,5 +1,5 @@
 import { HttpGateway } from "../shared/http.gateway";
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";

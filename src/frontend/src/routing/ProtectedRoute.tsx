@@ -1,6 +1,6 @@
-import { Outlet, MakeLinkOptions, Navigate } from "@tanstack/router";
+import { MakeLinkOptions, Navigate } from "@tanstack/router";
 import { observer } from "mobx-react";
-import { ReactNode, useEffect, useState, ReactChild } from "react";
+import { ReactNode, useEffect } from "react";
 import authenticationRepository from "../auth/authentication.repository";
 import Cookies from "js-cookie";
 import { router } from "./router";

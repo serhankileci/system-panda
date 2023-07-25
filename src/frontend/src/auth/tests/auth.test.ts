@@ -64,7 +64,7 @@ defineFeature(featureLoggingOut, test => {
 		then("I should no longer have access and have been unauthorized", async () => {
 			const pm = await loginPresenter.logout();
 
-			expect(pm.ok).toBe("Unauthorized");
+			expect(pm.ok).toBe("OK");
 		});
 	});
 });
