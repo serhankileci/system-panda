@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from "react";
 import authenticationRepository from "../auth/authentication.repository";
 import Cookies from "js-cookie";
 import { router } from "./router";
+import config from "../shared/config";
 
 interface ProtectedRouteProps {
 	to?: MakeLinkOptions["to"];
@@ -30,7 +31,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 
 			if (cookie === "false") {
 				authenticationRepository.authenticated = false;
-				Cookies.remove("system-panda-sid");
+				Cookies.remove("system-panda-sid", { path: config.baseUrl });
 				router.navigate({ to: "/" });
 			}
 		};

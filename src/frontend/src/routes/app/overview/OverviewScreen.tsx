@@ -1,4 +1,4 @@
-import { MetaDataPresenter } from "../metadata/metadata.presenter";
+import { MetaDataPresenter } from "../../../metadata/metadata.presenter";
 import { useState, useEffect } from "react";
 import { block, For } from "million/react";
 

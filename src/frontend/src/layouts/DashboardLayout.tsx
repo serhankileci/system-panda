@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { MetaDataPresenter } from "../metadata/metadata.presenter";
 import { Link } from "@tanstack/router";
-import { LoginPresenter } from "../auth/login.presenter";
+import { AuthPresenter } from "../auth/auth.presenter";
 
 interface DashboardLayoutProps {
 	children: ReactNode | ReactNode[];
@@ -13,7 +13,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 	const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
 	const presenter = new MetaDataPresenter();
-	const loginPresenter = new LoginPresenter();
+	const authPresenter = new AuthPresenter();
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -88,7 +88,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 						<button
 							className="block w-full text-lg px-12 bg-gray-200 py-2 rounded-lg text-gray-600 font-medium border border-1 border-white hover:border-black hover:bg-black hover:text-white"
 							onClick={() => {
-								loginPresenter.logout();
+								authPresenter.logout();
 							}}
 						>
 							Log out

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import MobileSideBar from "./components/MobileSideBar/MobileSideBar";
-import { DashboardLayout } from "./layouts/DashboardLayout";
+import MobileSideBar from "../../components/MobileSideBar/MobileSideBar";
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Outlet } from "@tanstack/router";
 import { observer } from "mobx-react";
-import { MetaDataPresenter } from "./metadata/metadata.presenter";
+import { MetaDataPresenter } from "../../metadata/metadata.presenter";
 
 const App = observer(() => {
 	const presenter = new MetaDataPresenter();

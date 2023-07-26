@@ -1,6 +1,6 @@
 import authRepository from "./authentication.repository";
 
-export class LoginPresenter {
+export class AuthPresenter {
 	message: string | null = null;
 
 	get email() {

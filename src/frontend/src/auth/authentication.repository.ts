@@ -55,8 +55,8 @@ export class AuthenticationRepository {
 		const response = await this.gateway.post("/auth/logout", {}, false);
 
 		if (response.ok) {
+			Cookies.remove("system-panda-sid", { path: config.baseUrl });
 			this.email = null;
-			Cookies.remove("system-panda-sid");
 			this.authenticated = false;
 		}
 

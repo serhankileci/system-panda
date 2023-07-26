@@ -70,5 +70,4 @@ const pluginsVm = {
 - Whatever component is not dynamic and just static content (dumb Components), we will create them as `Block` components
 
 ### Routing (Experimental)
-- As of right now, we're trying out the TanStack Router. We could load data via route, but we still need to find a way to minimal data requests and have the data persist using MobX
-- Other options could include using react router instead. We may want to do our own routing for scability, but for now we try tanstack router. 
+- Trying out TanStack Router and structuring our code to act like file-based routing.

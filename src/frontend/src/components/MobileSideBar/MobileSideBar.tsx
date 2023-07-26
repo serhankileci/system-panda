@@ -1,8 +1,8 @@
 import { useMobileSideBar } from "./use-mobile-sidebar";
 import { block } from "million/react";
-import { ViewModel } from "src/shared/types/viewmodel";
+import { ViewModel } from "../../shared/types/viewmodel";
 import { router } from "../../routing/router";
-import { LoginPresenter } from "../../auth/login.presenter";
+import { AuthPresenter } from "../../auth/auth.presenter";
 import { CollectionsBlock } from "../CollectionsBlock";
 
 interface MenuIconProps {
@@ -20,7 +20,7 @@ interface MobileSideBarProps {
 const MobileSideBar = block((props: MobileSideBarProps) => {
 	const { viewModel } = props;
 
-	const loginPresenter = new LoginPresenter();
+	const authPresenter = new AuthPresenter();
 
 	const [showMenu, setMenuState] = useMobileSideBar(false);
 	const backdropClassName = [
@@ -116,7 +116,7 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 					<button
 						className={logoutBtnClassName}
 						onClick={() => {
-							loginPresenter.logout();
+							authPresenter.logout();
 						}}
 					>
 						<span style={{ filter: "grayscale(100%)" }}>🚪</span>

@@ -1,18 +1,19 @@
 import { useForm } from "react-hook-form";
-import { LoginPresenter } from "./login.presenter";
+import { AuthPresenter } from "../auth/auth.presenter";
 import { observer } from "mobx-react";
 import { router } from "../routing/router";
 import { Outlet } from "@tanstack/router";
 import { useEffect } from "react";
-import authenticationRepository from "./authentication.repository";
+import authenticationRepository from "../auth/authentication.repository";
 import Cookies from "js-cookie";
+import config from "../shared/config";
 
 export const LoginPage = observer(() => {
 	const { handleSubmit, register } = useForm();
-	const loginPresenter = new LoginPresenter();
+	const authPresenter = new AuthPresenter();
 
 	const onSubmit = async (fieldValues: { [key: string]: string }) => {
-		const response = await loginPresenter.login(fieldValues.email, fieldValues.password);
+		const response = await authPresenter.login(fieldValues.email, fieldValues.password);
 
 		if (response.ok) {
 			router.navigate({
@@ -25,26 +26,20 @@ export const LoginPage = observer(() => {
 	useEffect(() => {
 		const cookie = Cookies.get("system-panda-sid");
 
-		if (authenticationRepository.authenticated) {
-			router.navigate({
-				from: "/",
-				to: "/app",
-			});
-		}
-
 		if (cookie?.length && cookie !== "false") {
 			authenticationRepository.authenticated = true;
-			router.navigate({
-				from: "/",
-				to: "/app",
-			});
 		}
 
 		if (cookie === "false") {
-			Cookies.remove("system-panda-sid");
+			Cookies.remove("system-panda-sid", { path: config.baseUrl });
+			authenticationRepository.authenticated = false;
 		}
 
-		console.log(Cookies.get());
+		if (authenticationRepository.authenticated) {
+			router.navigate({
+				to: "/app",
+			});
+		}
 	}, []);
 
 	return (

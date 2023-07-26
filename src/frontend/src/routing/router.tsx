@@ -1,58 +1,19 @@
-import { Router, Route, RootRoute } from "@tanstack/router";
-import App from "../App";
+import { Router } from "@tanstack/router";
 import config from "../shared/config";
-import { Root } from "./Root";
-import { CollectionScreen } from "../components/CollectionScreen";
-import { OverviewScreen } from "../components/OverviewScreen";
-import { PluginsScreen } from "../components/PluginsScreen";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { LoginPage } from "../auth/LoginPage";
+import { rootRoute } from "../routes/root.route";
+import { indexRoute } from "../routes";
+import { appRoute } from "../routes/app";
+import { overviewRoute } from "../routes/app/overview";
+import { collectionRoute } from "../routes/app/collections";
+import { pluginsRoute } from "../routes/app/plugins";
 
-const rootRoute = new RootRoute({
-	component: Root,
-});
-
-const indexRoute = new Route({
-	getParentRoute: () => rootRoute,
-	path: "/",
-	component: LoginPage,
-});
-
-const appRoute = new Route({
-	getParentRoute: () => rootRoute,
-	path: "app",
-	component: props => {
-		return (
-			<ProtectedRoute redirectTo="/">
-				<App />
-			</ProtectedRoute>
-		);
-	},
-});
-
-const overviewRoute = new Route({
-	getParentRoute: () => appRoute,
-	path: "/",
-	component: () => {
-		return <OverviewScreen />;
-	},
-});
-
-const collectionRoute = new Route({
-	getParentRoute: () => appRoute,
-	path: "/collections/$collection_name",
-	component: CollectionScreen,
-});
-
-const pluginsRoute = new Route({
-	getParentRoute: () => appRoute,
-	path: "/plugins",
-	component: PluginsScreen,
-});
-
-// Always insert routes with their children inside route tree, so to link options are automatically generated.
+/**
+ * Note: Always insert routes with their children inside our route tree.
+ * Why: Allows TanStack router to automatically generate types & to prop options.
+ @since 0.0.1-beta.108
+ */
 const routeTree = rootRoute.addChildren([
-	indexRoute.addChildren([]),
+	indexRoute,
 	appRoute.addChildren([overviewRoute, collectionRoute, pluginsRoute]),
 ]);
 

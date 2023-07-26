@@ -1,16 +1,16 @@
 import { loadFeature, defineFeature } from "jest-cucumber";
 import authRepository from "../authentication.repository";
-import { LoginPresenter } from "../login.presenter";
+import { AuthPresenter } from "../auth.presenter";
 import { LoginTestHarness } from "../../test-tools/harnesses/login.harness";
 
 const featureLoggingIn = loadFeature("src/auth/tests/features/login.feature");
 
 defineFeature(featureLoggingIn, test => {
 	test("Entering the correct password", ({ given, when, then }) => {
-		let loginPresenter: InstanceType<typeof LoginPresenter>;
+		let authPresenter: InstanceType<typeof AuthPresenter>;
 
 		beforeEach(() => {
-			loginPresenter = new LoginPresenter();
+			authPresenter = new AuthPresenter();
 			const testHarness = new LoginTestHarness();
 			testHarness.init({ mode: "LOGIN" });
 		});
@@ -20,10 +20,10 @@ defineFeature(featureLoggingIn, test => {
 		});
 
 		when("I enter my admin password correctly", async () => {
-			const pm = await loginPresenter.login("admin@system-panda.com", "1234");
+			const pm = await authPresenter.login("admin@system-panda.com", "1234");
 
 			expect(authRepository.gateway.post).toHaveBeenCalledTimes(1);
-			expect(loginPresenter.email).toBe("admin@system-panda.com");
+			expect(authPresenter.email).toBe("admin@system-panda.com");
 
 			expect(pm.ok).toBe("OK");
 		});
@@ -37,32 +37,32 @@ defineFeature(featureLoggingIn, test => {
 const featureLoggingOut = loadFeature("src/auth/tests/features/logout.feature");
 
 defineFeature(featureLoggingOut, test => {
-	let loginPresenter: InstanceType<typeof LoginPresenter>;
+	let authPresenter: InstanceType<typeof AuthPresenter>;
 
 	beforeEach(() => {
-		loginPresenter = new LoginPresenter();
+		authPresenter = new AuthPresenter();
 		const testHarness = new LoginTestHarness();
 		testHarness.init({ mode: "LOGOUT" });
 	});
 
 	test("Wanting to log out", ({ given, when, then }) => {
 		given("I am already logged in", async () => {
-			await loginPresenter.login("admin@system-panda.com", "1234");
+			await authPresenter.login("admin@system-panda.com", "1234");
 
-			expect(loginPresenter.email).not.toBe(null);
+			expect(authPresenter.email).not.toBe(null);
 			expect(authRepository.authenticated).toBe(true);
 		});
 
 		when("I click to log out", async () => {
-			const pm = await loginPresenter.logout();
+			const pm = await authPresenter.logout();
 
 			expect(pm.ok).toBe("OK");
-			expect(loginPresenter.email).toBe(null);
+			expect(authPresenter.email).toBe(null);
 			expect(authRepository.authenticated).toBeFalsy();
 		});
 
 		then("I should no longer have access and have been unauthorized", async () => {
-			const pm = await loginPresenter.logout();
+			const pm = await authPresenter.logout();
 
 			expect(pm.ok).toBe("OK");
 		});
