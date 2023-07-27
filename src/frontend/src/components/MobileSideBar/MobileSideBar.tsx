@@ -83,6 +83,7 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 							<ul className="mb-2 overflow-auto max-h-[20rem]">
 								<CollectionsBlock
 									collections={viewModel.collections}
+									hasCollections={viewModel.hasCollections}
 									setState={setMenuState}
 								/>
 							</ul>

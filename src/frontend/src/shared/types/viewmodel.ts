@@ -3,5 +3,9 @@ export interface ViewModel {
 		enabledPlugins: unknown[];
 		disabledPlugins: unknown[];
 	};
-	collections: string[];
+	collections: {
+		name: string;
+		endpoint: string;
+	}[];
+	hasCollections: boolean;
 }

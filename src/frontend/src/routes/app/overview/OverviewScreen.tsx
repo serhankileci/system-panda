@@ -7,7 +7,7 @@ export const OverviewScreen = block(() => {
 
 	const [viewModel, setViewModel] = useState(presenter.viewModel);
 
-	const { collections, plugins } = viewModel;
+	const { collections, plugins, hasCollections } = viewModel;
 
 	useEffect(() => {
 		async function load() {
@@ -40,12 +40,12 @@ export const OverviewScreen = block(() => {
 				<h2 className="mb-2 text-3xl font-bold">List of collections</h2>
 				<ul className="px-4 py-3 bg-white rounded-lg">
 					<For each={collections}>
-						{(collection: string) => {
-							return <li className="mb-2 ml-4">{collection.replace("/", "")}</li>;
+						{({ name }) => {
+							return <li className="mb-2 ml-4">{name}</li>;
 						}}
 					</For>
-					<li className={`${collections.length === 0 ? "block" : "hidden"}`}>
-						There are no collections
+					<li className={`${!hasCollections ? "block" : "hidden"}`}>
+						No collections have been detected
 					</li>
 				</ul>
 			</article>

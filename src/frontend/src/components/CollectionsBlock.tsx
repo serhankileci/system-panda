@@ -1,18 +1,20 @@
 import { For, block } from "million/react";
 import { router } from "../routing/router";
+import { ViewModel } from "../shared/types/viewmodel";
 
 interface CollectionsBlockProps {
-	collections: string[];
+	collections: ViewModel["collections"];
+	hasCollections: ViewModel["hasCollections"];
 	setState: (value: boolean) => void;
 }
 
 export const CollectionsBlock = block((props: CollectionsBlockProps) => {
-	const { collections = [], setState } = props;
+	const { collections = [], setState, hasCollections } = props;
 
 	return (
 		<>
 			<For each={collections}>
-				{(collection: string) => {
+				{({ name }) => {
 					return (
 						<li className="mb-2 ml-4">
 							<button
@@ -20,21 +22,21 @@ export const CollectionsBlock = block((props: CollectionsBlockProps) => {
 									router.navigate({
 										to: "/app/collections/$collection_name",
 										params: {
-											collection_name: collection.replace("/", ""),
+											collection_name: name,
 										},
 									});
 
 									setState(false);
 								}}
 							>
-								{collection.replace("/", "")}
+								{name}
 							</button>
 						</li>
 					);
 				}}
 			</For>
-			<li className={`${collections.length === 0 ? "block" : "hidden"}`}>
-				There are no collections
+			<li className={`${!hasCollections ? "block" : "hidden"}`}>
+				No collections have been detected
 			</li>
 		</>
 	);
