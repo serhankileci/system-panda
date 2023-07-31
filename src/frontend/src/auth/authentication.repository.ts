@@ -2,7 +2,7 @@ import { HttpGateway } from "../shared/http.gateway";
 import config, { ConfigType } from "../shared/config";
 import { makeAutoObservable } from "mobx";
 import { makeLoggable } from "mobx-log";
-import Cookies from "js-cookie";
+import dayjs from "dayjs";
 
 export class AuthenticationRepository {
 	config: ConfigType;
@@ -11,6 +11,8 @@ export class AuthenticationRepository {
 	email: string | null = null;
 	token: string | boolean = false;
 	authenticated = false;
+
+	ACCESS_TOKEN = "accessToken";
 
 	constructor() {
 		this.config = config;
@@ -41,9 +43,14 @@ export class AuthenticationRepository {
 		if (response.ok) {
 			this.email = email;
 
-			const cookie = Cookies.get("system-panda-sid");
+			localStorage.setItem(
+				"accessToken",
+				JSON.stringify({ expired: false, date: dayjs().toISOString() })
+			);
 
-			if (cookie?.length && cookie !== "false") {
+			const accessToken = !!localStorage.getItem(this.ACCESS_TOKEN);
+
+			if (accessToken) {
 				this.authenticated = true;
 			}
 		}
@@ -55,23 +62,12 @@ export class AuthenticationRepository {
 		const response = await this.gateway.post("/auth/logout", {}, false);
 
 		if (response.ok) {
-			Cookies.remove("system-panda-sid", { path: config.baseUrl });
+			localStorage.removeItem(this.ACCESS_TOKEN);
 			this.email = null;
 			this.authenticated = false;
 		}
 
 		return response;
-	};
-
-	checkCookieAuthentication = () => {
-		const cookie = Cookies.get("system-panda-sid");
-		if (!cookie) {
-			this.authenticated = false;
-			return cookie;
-		}
-
-		this.authenticated = true;
-		return cookie;
 	};
 }
 

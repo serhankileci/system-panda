@@ -41,7 +41,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 	return (
 		<div className={dashboardClassName}>
 			{isNavbarOpen && (
-				<aside className="invisible hidden w-auto h-full bg-white rounded-lg opacity-0 lg:visible lg:flex lg:flex-col lg:opacity-100">
+				<aside className="invisible hidden w-auto h-full bg-white rounded-lg opacity-0 lg:visible lg:flex lg:flex-col lg:opacity-100 shadow-lg shadow-[#c2ead5]">
 					<header className="px-6 pt-6 h-[10%] mb-4">
 						<h1 className="text-2xl font-bold">🐼 SystemPanda</h1>
 					</header>

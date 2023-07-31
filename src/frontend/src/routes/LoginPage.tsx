@@ -5,8 +5,12 @@ import { router } from "../routing/router";
 import { Outlet } from "@tanstack/router";
 import { useEffect } from "react";
 import authenticationRepository from "../auth/authentication.repository";
-import Cookies from "js-cookie";
-import config from "../shared/config";
+import dayjs from "dayjs";
+
+interface AccessTokenType {
+	expired: boolean;
+	date: string;
+}
 
 export const LoginPage = observer(() => {
 	const { handleSubmit, register } = useForm();
@@ -24,16 +28,39 @@ export const LoginPage = observer(() => {
 	};
 
 	useEffect(() => {
-		const cookie = Cookies.get("system-panda-sid");
+		const checkLocalStorage = () => {
+			const accessToken = localStorage.getItem("accessToken");
 
-		if (cookie?.length && cookie !== "false") {
+			if (!accessToken) {
+				authenticationRepository.authenticated = false;
+				return null;
+			}
+
+			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
+
+			if (accessTokenData.expired) {
+				authenticationRepository.authenticated = false;
+				return null;
+			}
+
+			const dateAfterExpiration = dayjs(accessTokenData.date).isAfter(dayjs().toISOString());
+
+			if (dateAfterExpiration) {
+				const updatedExpiredObj = Object.assign({}, accessToken, {
+					expired: true,
+				});
+
+				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
+
+				authenticationRepository.authenticated = false;
+
+				return null;
+			}
+
 			authenticationRepository.authenticated = true;
-		}
+		};
 
-		if (cookie === "false") {
-			Cookies.remove("system-panda-sid", { path: config.baseUrl });
-			authenticationRepository.authenticated = false;
-		}
+		checkLocalStorage();
 
 		if (authenticationRepository.authenticated) {
 			router.navigate({
@@ -43,9 +70,9 @@ export const LoginPage = observer(() => {
 	}, []);
 
 	return (
-		<div className="h-screen flex justify-center items-center bg-[#f0f8f1]">
+		<div className="h-screen flex justify-center items-center bg-transparent">
 			<Outlet />
-			<article className="bg-white rounded-lg w-[20rem]">
+			<article className="bg-white rounded-lg w-[20rem] shadow-lg shadow-[#c2ead5]">
 				<div className="text-6xl text-center relative h-[0px] bottom-[33px]">🐼</div>
 				<h1 className="text-center font-bold text-3xl pt-7">SystemPanda</h1>
 				<form

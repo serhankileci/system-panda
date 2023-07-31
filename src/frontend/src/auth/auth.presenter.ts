@@ -32,14 +32,4 @@ export class AuthPresenter {
 
 		return pm;
 	};
-
-	getCookie = () => {
-		const cookie = authRepository.checkCookieAuthentication();
-
-		this.message = "Authorized";
-
-		if (!cookie) {
-			this.message = "Unauthorized";
-		}
-	};
 }

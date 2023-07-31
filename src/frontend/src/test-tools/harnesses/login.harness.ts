@@ -1,6 +1,5 @@
 import authRepository from "../../auth/authentication.repository";
 import { getAuthorizedStub, getUnauthorizedStub } from "../stubs/login.stub";
-import Cookies from "js-cookie";
 
 export class LoginTestHarness {
 	LOGIN = "LOGIN";
@@ -11,6 +10,7 @@ export class LoginTestHarness {
 
 	init = ({ mode = this.LOGIN }) => {
 		jest.clearAllMocks();
+		localStorage.clear();
 
 		authRepository.email = null;
 		authRepository.authenticated = false;
@@ -21,25 +21,13 @@ export class LoginTestHarness {
 
 		authRepository.gateway.post = jest.fn().mockImplementation(path => {
 			if (path === "/auth/login") {
-				Cookies.set = jest.fn().mockImplementation(() => {
-					authRepository.authenticated = true;
-				});
-
-				Cookies.get = jest.fn().mockImplementation(() => {
-					authRepository.authenticated = true;
-				});
+				authRepository.authenticated = true;
 
 				return getAuthorizedStub();
 			}
 
 			if (path === "/auth/logout") {
-				Cookies.set = jest.fn().mockImplementation(() => {
-					authRepository.authenticated = false;
-				});
-
-				Cookies.get = jest.fn().mockImplementation(() => {
-					authRepository.authenticated = false;
-				});
+				authRepository.authenticated = false;
 
 				return getAuthorizedStub();
 			}

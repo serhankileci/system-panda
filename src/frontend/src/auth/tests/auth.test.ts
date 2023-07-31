@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { loadFeature, defineFeature } from "jest-cucumber";
 import authRepository from "../authentication.repository";
 import { AuthPresenter } from "../auth.presenter";
 import { LoginTestHarness } from "../../test-tools/harnesses/login.harness";
+import dayjs from "dayjs";
 
 const featureLoggingIn = loadFeature("src/auth/tests/features/login.feature");
 
@@ -10,6 +12,7 @@ defineFeature(featureLoggingIn, test => {
 		let authPresenter: InstanceType<typeof AuthPresenter>;
 
 		beforeEach(() => {
+			localStorage.clear();
 			authPresenter = new AuthPresenter();
 			const testHarness = new LoginTestHarness();
 			testHarness.init({ mode: "LOGIN" });
@@ -40,6 +43,7 @@ defineFeature(featureLoggingOut, test => {
 	let authPresenter: InstanceType<typeof AuthPresenter>;
 
 	beforeEach(() => {
+		localStorage.clear();
 		authPresenter = new AuthPresenter();
 		const testHarness = new LoginTestHarness();
 		testHarness.init({ mode: "LOGOUT" });
@@ -50,6 +54,13 @@ defineFeature(featureLoggingOut, test => {
 			await authPresenter.login("admin@system-panda.com", "1234");
 
 			expect(authPresenter.email).not.toBe(null);
+			expect(localStorage.setItem).toHaveBeenLastCalledWith(
+				"accessToken",
+				JSON.stringify({
+					expired: false,
+					date: dayjs().toISOString(),
+				})
+			);
 			expect(authRepository.authenticated).toBe(true);
 		});
 
@@ -58,6 +69,7 @@ defineFeature(featureLoggingOut, test => {
 
 			expect(pm.ok).toBe("OK");
 			expect(authPresenter.email).toBe(null);
+			expect(localStorage.getItem("accessToken")).toBeNull;
 			expect(authRepository.authenticated).toBeFalsy();
 		});
 

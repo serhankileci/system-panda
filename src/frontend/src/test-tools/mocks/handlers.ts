@@ -9,7 +9,6 @@ export const handlers = [
 
 	rest.post(config.apiUrl + "/auth/login", (req, res, ctx) => {
 		const { email, password } = req.body as any;
-		console.log(req.cookies);
 
 		if (email === "admin@system-panda.com" && password !== "1234") {
 			return res(
@@ -21,12 +20,7 @@ export const handlers = [
 		}
 
 		if (email === "admin@system-panda.com" && password === "1234") {
-			return res(
-				ctx.status(200, "OK"),
-				ctx.cookie("system-panda-sid", "true", {
-					expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000),
-				})
-			);
+			return res(ctx.status(200, "OK"));
 		}
 
 		return res(ctx.status(500));
