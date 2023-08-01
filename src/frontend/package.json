@@ -10,10 +10,10 @@
 	},
 	"dependencies": {
 		"@preact/signals": "^1.1.5",
-		"@tanstack/router": "^0.0.1-beta.108",
-		"@tanstack/router-devtools": "^0.0.1-beta.108",
+		"@tanstack/router": "^0.0.1-beta.119",
+		"@tanstack/router-devtools": "^0.0.1-beta.119",
 		"dayjs": "^1.11.9",
-		"million": "^2.5.1-beta.2",
+		"million": "^2.5.3",
 		"mobx": "^6.9.1",
 		"mobx-react": "^9.0.0",
 		"react": "^18.2.0",

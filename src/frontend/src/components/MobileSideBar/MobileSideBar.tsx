@@ -5,17 +5,17 @@ import { router } from "../../routing/router";
 import { AuthPresenter } from "../../auth/auth.presenter";
 import { CollectionsBlock } from "../CollectionsBlock";
 
-interface MenuIconProps {
+type MenuIconProps = {
 	open: boolean;
-}
+};
 
 const MenuIcon = ({ open }: MenuIconProps) => {
 	return <span className="relative bottom-[1px]">{open ? "x" : "="}</span>;
 };
 
-interface MobileSideBarProps {
+type MobileSideBarProps = {
 	viewModel: ViewModel;
-}
+};
 
 const MobileSideBar = block((props: MobileSideBarProps) => {
 	const { viewModel } = props;

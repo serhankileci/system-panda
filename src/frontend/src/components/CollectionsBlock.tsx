@@ -1,14 +1,14 @@
-import { For, block } from "million/react";
+import { For } from "million/react";
 import { router } from "../routing/router";
 import { ViewModel } from "../shared/types/viewmodel";
 
-interface CollectionsBlockProps {
+type CollectionsBlockProps = {
 	collections: ViewModel["collections"];
 	hasCollections: ViewModel["hasCollections"];
 	setState: (value: boolean) => void;
-}
+};
 
-export const CollectionsBlock = block((props: CollectionsBlockProps) => {
+export const CollectionsBlock = (props: CollectionsBlockProps) => {
 	const { collections = [], setState, hasCollections } = props;
 
 	return (
@@ -40,4 +40,4 @@ export const CollectionsBlock = block((props: CollectionsBlockProps) => {
 			</li>
 		</>
 	);
-});
+};

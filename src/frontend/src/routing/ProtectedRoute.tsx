@@ -5,11 +5,11 @@ import { router } from "./router";
 import dayjs from "dayjs";
 import { AuthPresenter } from "../auth/auth.presenter";
 
-interface ProtectedRouteProps {
+type ProtectedRouteProps = {
 	to?: MakeLinkOptions["to"];
 	redirectTo?: MakeLinkOptions["to"];
 	children?: ReactNode;
-}
+};
 
 interface AccessTokenType {
 	expired: boolean;

@@ -1,8 +1,8 @@
+import { For } from "million/react";
 import { MetaDataPresenter } from "../../../metadata/metadata.presenter";
 import { useState, useEffect } from "react";
-import { block, For } from "million/react";
 
-export const OverviewScreen = block(() => {
+export const OverviewScreen = () => {
 	const presenter = new MetaDataPresenter();
 
 	const [viewModel, setViewModel] = useState(presenter.viewModel);
@@ -41,14 +41,16 @@ export const OverviewScreen = block(() => {
 				<ul className="px-4 py-3 bg-white rounded-lg shadow-lg shadow-[#c2ead5]">
 					<For each={collections}>
 						{({ name }) => {
-							return <li className="mb-2 ml-4">{name}</li>;
+							return (
+								<li className="mb-2 ml-4" key={name}>
+									{name}
+								</li>
+							);
 						}}
 					</For>
-					<li className={`${!hasCollections ? "block" : "hidden"}`}>
-						No collections have been detected
-					</li>
+					{!hasCollections && <li>No collections have been detected</li>}
 				</ul>
 			</article>
 		</article>
 	);
-});
+};

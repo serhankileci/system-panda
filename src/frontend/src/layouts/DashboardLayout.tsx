@@ -4,9 +4,9 @@ import { MetaDataPresenter } from "../metadata/metadata.presenter";
 import { Link } from "@tanstack/router";
 import { AuthPresenter } from "../auth/auth.presenter";
 
-interface DashboardLayoutProps {
+type DashboardLayoutProps = {
 	children: ReactNode | ReactNode[];
-}
+};
 
 export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 	const { children } = props;
