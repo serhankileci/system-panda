@@ -5,15 +5,21 @@ import { router } from "../routing/router";
 import { Outlet } from "@tanstack/router";
 import { useEffect } from "react";
 import dayjs from "dayjs";
+import { emailRegex } from "../utilities/regex";
 
 interface AccessTokenType {
 	expired: boolean;
 	date: string;
 }
 
+const authPresenter = new AuthPresenter();
+
 export const LoginPage = observer(() => {
-	const { handleSubmit, register } = useForm();
-	const authPresenter = new AuthPresenter();
+	const {
+		handleSubmit,
+		register,
+		formState: { errors },
+	} = useForm();
 
 	const onSubmit = async (fieldValues: { [key: string]: string }) => {
 		const response = await authPresenter.login(fieldValues.email, fieldValues.password);
@@ -80,18 +86,42 @@ export const LoginPage = observer(() => {
 				>
 					<label htmlFor="email" className="w-full mb-1 text-sm">
 						Email
+						{errors.email?.type === "required" && (
+							<span role="alert" className="text-red-700">
+								*
+							</span>
+						)}
 					</label>
 					<input
 						type="email"
-						{...register("email")}
+						{...register("email", {
+							required: true,
+							pattern: emailRegex,
+						})}
 						className="mb-3 bg-white border border-1 px-3 py-2 rounded-[4px] w-full"
 					/>
+					{errors.email?.type === "pattern" && (
+						<p
+							role="alert"
+							className="text-red-700 text-sm inline text-left w-full mt-[-0.5rem] mb-3"
+						>
+							You've entered an invalid email.
+						</p>
+					)}
 					<label htmlFor="password" className="w-full mb-1 text-sm">
-						Password
+						Password{" "}
+						{errors.password?.type === "required" && (
+							<span role="alert" className="text-red-700">
+								*
+							</span>
+						)}
 					</label>
 					<input
 						type="password"
-						{...register("password")}
+						{...register("password", {
+							required: true,
+							minLength: 1,
+						})}
 						className="mb-6 bg-white border border-1 px-3 py-2 rounded-[4px] w-full"
 					/>
 					<button
@@ -100,6 +130,11 @@ export const LoginPage = observer(() => {
 					>
 						Login
 					</button>
+					{authPresenter.message && authPresenter.message?.length && (
+						<p role="alert" className="text-red-700 text-sm mt-2">
+							{authPresenter.authMessage}
+						</p>
+					)}
 				</form>
 			</article>
 		</div>

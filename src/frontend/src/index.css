@@ -35,3 +35,14 @@
 	backdrop-filter: blur(4px);
 	-webkit-backdrop-filter: blur(4px);
 }
+
+input:autofill {
+	box-shadow: 0 0 0 30px #f0f1f8 inset;
+	-webkit-text-fill-color: #242424;
+
+	-webkit-box-shadow: 0 0 0 30px #f0f1f8 inset;
+	-o-box-shadow: 0 0 0 30px #f0f1f8 inset;
+	-o-text-fill-color: #242424;
+	-moz-box-shadow: 0 0 0 30px #f0f1f8 inset;
+	-moz-text-fill-color: #242424;
+}

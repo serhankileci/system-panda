@@ -1,7 +1,8 @@
 import authRepository from "./authentication.repository";
+import { observable, action } from "mobx";
 
 export class AuthPresenter {
-	message: string | null = null;
+	@observable message: string | null = null;
 
 	get email() {
 		return authRepository.email;
@@ -9,6 +10,14 @@ export class AuthPresenter {
 
 	get isAuthenticated() {
 		return authRepository.authenticated;
+	}
+
+	@action setMessage(value: string | null) {
+		this.message = value;
+	}
+
+	get authMessage() {
+		return this.message;
 	}
 
 	setAuth(value: boolean) {
@@ -19,9 +28,9 @@ export class AuthPresenter {
 		const pm = await authRepository.login(email, password);
 
 		if (pm.ok) {
-			this.message = "Login successful";
+			this.setMessage(null);
 		} else {
-			this.message = "Invalid login credentials";
+			this.setMessage("Invalid login credentials");
 		}
 
 		return pm;
@@ -31,7 +40,7 @@ export class AuthPresenter {
 		const pm = await authRepository.logout();
 
 		if (pm.ok) {
-			this.message = "Log out successful";
+			this.setMessage("Log out successful");
 		}
 
 		return pm;
