@@ -1,9 +1,9 @@
 import { MakeLinkOptions, Navigate } from "@tanstack/router";
 import { observer } from "mobx-react";
 import { ReactNode, useEffect } from "react";
-import authenticationRepository from "../auth/authentication.repository";
 import { router } from "./router";
 import dayjs from "dayjs";
+import { AuthPresenter } from "../auth/auth.presenter";
 
 interface ProtectedRouteProps {
 	to?: MakeLinkOptions["to"];
@@ -18,13 +18,14 @@ interface AccessTokenType {
 
 export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 	const { redirectTo = "/", children } = props;
+	const authPresenter = new AuthPresenter();
 
 	useEffect(() => {
 		const checkLocalStorage = () => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -32,7 +33,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -46,7 +47,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 				router.navigate({ to: "/" });
 			}
 		};
@@ -54,7 +55,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 		checkLocalStorage();
 	}, []);
 
-	if (!authenticationRepository.authenticated) {
+	if (!authPresenter.isAuthenticated) {
 		return <Navigate to={redirectTo} />;
 	}
 

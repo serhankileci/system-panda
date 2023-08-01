@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 import { router } from "../routing/router";
 import { Outlet } from "@tanstack/router";
 import { useEffect } from "react";
-import authenticationRepository from "../auth/authentication.repository";
 import dayjs from "dayjs";
 
 interface AccessTokenType {
@@ -32,14 +31,14 @@ export const LoginPage = observer(() => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 				return null;
 			}
 
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 				return null;
 			}
 
@@ -52,17 +51,17 @@ export const LoginPage = observer(() => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authenticationRepository.authenticated = false;
+				authPresenter.setAuth(false);
 
 				return null;
 			}
 
-			authenticationRepository.authenticated = true;
+			authPresenter.setAuth(true);
 		};
 
 		checkLocalStorage();
 
-		if (authenticationRepository.authenticated) {
+		if (authPresenter.isAuthenticated) {
 			router.navigate({
 				to: "/app",
 			});

@@ -7,7 +7,7 @@ export class AuthPresenter {
 		return authRepository.email;
 	}
 
-	get authenticated() {
+	get isAuthenticated() {
 		return authRepository.authenticated;
 	}
 
@@ -32,4 +32,8 @@ export class AuthPresenter {
 
 		return pm;
 	};
+
+	setAuth(value: boolean) {
+		authRepository.authenticated = value;
+	}
 }
