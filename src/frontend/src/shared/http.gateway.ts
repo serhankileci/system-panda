@@ -1,12 +1,20 @@
+import { AuthResponse } from "../auth/auth.types";
 import { MetaDataResponse } from "../metadata/metadata.types";
+import config, { ConfigType } from "./config";
 
 export class HttpGateway {
 	headers = {
 		"Content-Type": "application/json",
 	};
 
+	config: ConfigType;
+
+	constructor() {
+		this.config = config;
+	}
+
 	get = async (path: string) => {
-		const response = await fetch("/system-panda-api" + path, {
+		const response = await fetch(this.config.apiUrl + path, {
 			method: "GET",
 			headers: this.headers,
 		});
@@ -15,7 +23,23 @@ export class HttpGateway {
 
 		return dto;
 	};
+
+	post = async (path: string, body: unknown, sendDto = true) => {
+		const response = await fetch(this.config.apiUrl + path, {
+			method: "POST",
+			headers: this.headers,
+			body: JSON.stringify(body),
+			credentials: "same-origin",
+		});
+
+		if (sendDto) {
+			return (await response.json()) as AuthResponse;
+		}
+
+		return response;
+	};
 }
 
 const httpGateway = new HttpGateway();
+
 export default httpGateway;

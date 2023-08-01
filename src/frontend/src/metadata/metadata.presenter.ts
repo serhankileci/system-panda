@@ -13,7 +13,13 @@ export class MetaDataPresenter {
 
 		return {
 			plugins: pluginsViewModel,
-			collections: metaDataRepository.collectionsPM,
+			collections: metaDataRepository.collectionsPM.map(collection => {
+				return {
+					name: collection.replace("/", ""),
+					endpoint: collection,
+				};
+			}),
+			hasCollections: metaDataRepository.collectionsPM.length ? true : false,
 		};
 	}
 

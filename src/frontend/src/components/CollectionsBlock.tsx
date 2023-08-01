@@ -1,18 +1,43 @@
-import { For, block } from "million/react";
+import { For } from "million/react";
+import { router } from "../routing/router";
+import { ViewModel } from "../shared/types/viewmodel";
 
-interface CollectionsBlockProps {
-	collections: string[];
-}
+type CollectionsBlockProps = {
+	collections: ViewModel["collections"];
+	hasCollections: ViewModel["hasCollections"];
+	setState: (value: boolean) => void;
+};
 
-export const CollectionsBlock = block((props: CollectionsBlockProps) => {
-	const { collections = [] } = props;
+export const CollectionsBlock = (props: CollectionsBlockProps) => {
+	const { collections = [], setState, hasCollections } = props;
 
 	return (
 		<>
-			<For each={collections}>{(item: string) => <li className="mb-2">{item}</li>}</For>
-			<li className={`${collections.length === 0 ? "block" : "hidden"}`}>
-				There are no collections
+			<For each={collections}>
+				{({ name }) => {
+					return (
+						<li className="mb-2 ml-4">
+							<button
+								onClick={() => {
+									router.navigate({
+										to: "/app/collections/$collection_name",
+										params: {
+											collection_name: name,
+										},
+									});
+
+									setState(false);
+								}}
+							>
+								{name}
+							</button>
+						</li>
+					);
+				}}
+			</For>
+			<li className={`${!hasCollections ? "block" : "hidden"}`}>
+				No collections have been detected
 			</li>
 		</>
 	);
-});
+};

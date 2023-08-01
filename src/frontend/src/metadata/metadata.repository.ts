@@ -1,6 +1,8 @@
 import { HttpGateway } from "../shared/http.gateway";
-import { observable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import { DatabasePlugin } from "./metadata.types";
+import { makeLoggable } from "mobx-log";
+import config from "../shared/config";
 
 interface PluginsProgrammersModel {
 	activePlugins: DatabasePlugin[];
@@ -10,27 +12,48 @@ interface PluginsProgrammersModel {
 type CollectionsProgrammersModel = string[];
 
 export class MetaDataRepository {
-	httpGateway: unknown;
+	config = config;
 	gateway!: InstanceType<typeof HttpGateway>;
 
-	@observable pluginsPM: PluginsProgrammersModel = {
+	pluginsPM: PluginsProgrammersModel = {
 		activePlugins: [],
 		inactivePlugins: [],
 	};
 
-	@observable collectionsPM: CollectionsProgrammersModel = [];
+	collectionsPM: CollectionsProgrammersModel = [];
 
 	constructor() {
 		this.gateway = new HttpGateway();
+		makeAutoObservable(this);
+
+		!config.isEnvironmentProd &&
+			makeLoggable(this, {
+				filters: {
+					events: {
+						computeds: true,
+						observables: true,
+						actions: true,
+					},
+				},
+			});
+	}
+
+	@action setPluginsProgrammersModel(value: PluginsProgrammersModel) {
+		this.pluginsPM = value;
+	}
+
+	@action setCollectionsProgrammersModel(value: CollectionsProgrammersModel) {
+		this.collectionsPM = value;
 	}
 
 	loadMetaData = async () => {
-		console.log("hit");
 		const metaDataDTO = await this.gateway.get("/metadata");
 
-		this.collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
+		const collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
 			return collectionDto;
 		});
+
+		this.setCollectionsProgrammersModel(collectionsPM);
 
 		const activePlugins = metaDataDTO.data.plugins.active.map(pluginDto => {
 			return pluginDto;
@@ -40,10 +63,10 @@ export class MetaDataRepository {
 			return pluginDto;
 		});
 
-		this.pluginsPM = {
+		this.setPluginsProgrammersModel({
 			activePlugins,
 			inactivePlugins,
-		};
+		});
 	};
 }
 

@@ -1,47 +1,25 @@
-import { Router, Route, RootRoute } from "@tanstack/router";
-import App from "../App";
-import baseUrl from "../shared/constants/baseUrl";
-import { Root } from "./Root";
-import { CollectionScreen } from "../components/CollectionScreen";
-import { OverviewScreen } from "../components/OverviewScreen";
-import { PluginsScreen } from "../components/PluginsScreen";
+import { Router } from "@tanstack/router";
+import config from "../shared/config";
+import { rootRoute } from "../routes/root.route";
+import { indexRoute } from "../routes";
+import { appRoute } from "../routes/app";
+import { overviewRoute } from "../routes/app/overview";
+import { collectionRoute } from "../routes/app/collections";
+import { pluginsRoute } from "../routes/app/plugins";
 
-const rootRoute = new RootRoute({
-	component: Root,
-});
-
-const indexRoute = new Route({
-	getParentRoute: () => rootRoute,
-	path: baseUrl,
-	component: App,
-});
-
-const overviewRoute = new Route({
-	getParentRoute: () => indexRoute,
-	path: "/",
-	component: () => {
-		return <OverviewScreen />;
-	},
-});
-
-const collectionRoute = new Route({
-	getParentRoute: () => indexRoute,
-	path: "/collections/$collection_name",
-	component: CollectionScreen,
-});
-
-const pluginsRoute = new Route({
-	getParentRoute: () => indexRoute,
-	path: "/plugins",
-	component: PluginsScreen,
-});
-
+/**
+ * Note: Always insert routes with their children inside our route tree.
+ * Why: Allows TanStack router to automatically generate types & to prop options.
+ @since 0.0.1-beta.108
+ */
 const routeTree = rootRoute.addChildren([
-	indexRoute.addChildren([overviewRoute, collectionRoute, pluginsRoute]),
+	indexRoute,
+	appRoute.addChildren([overviewRoute, collectionRoute, pluginsRoute]),
 ]);
 
 export const router = new Router({
 	routeTree,
+	basepath: config.baseUrl,
 });
 
 declare module "@tanstack/router" {
