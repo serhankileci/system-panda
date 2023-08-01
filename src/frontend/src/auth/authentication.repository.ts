@@ -1,6 +1,6 @@
 import { HttpGateway } from "../shared/http.gateway";
 import config, { ConfigType } from "../shared/config";
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import { makeLoggable } from "mobx-log";
 import dayjs from "dayjs";
 
@@ -32,6 +32,10 @@ export class AuthenticationRepository {
 			});
 	}
 
+	@action setAuthentication(newValue: boolean) {
+		this.authenticated = newValue;
+	}
+
 	login = async (email: string, password: string) => {
 		const dto = {
 			email,
@@ -51,7 +55,7 @@ export class AuthenticationRepository {
 			const accessToken = !!localStorage.getItem(this.ACCESS_TOKEN);
 
 			if (accessToken) {
-				this.authenticated = true;
+				this.setAuthentication(true);
 			}
 		}
 
@@ -64,7 +68,7 @@ export class AuthenticationRepository {
 		if (response.ok) {
 			localStorage.removeItem(this.ACCESS_TOKEN);
 			this.email = null;
-			this.authenticated = false;
+			this.setAuthentication(false);
 		}
 
 		return response;

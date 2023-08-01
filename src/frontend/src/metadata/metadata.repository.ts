@@ -1,5 +1,5 @@
 import { HttpGateway } from "../shared/http.gateway";
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
@@ -38,12 +38,22 @@ export class MetaDataRepository {
 			});
 	}
 
+	@action setPluginsProgrammersModel(value: PluginsProgrammersModel) {
+		this.pluginsPM = value;
+	}
+
+	@action setCollectionsProgrammersModel(value: CollectionsProgrammersModel) {
+		this.collectionsPM = value;
+	}
+
 	loadMetaData = async () => {
 		const metaDataDTO = await this.gateway.get("/metadata");
 
-		this.collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
+		const collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
 			return collectionDto;
 		});
+
+		this.setCollectionsProgrammersModel(collectionsPM);
 
 		const activePlugins = metaDataDTO.data.plugins.active.map(pluginDto => {
 			return pluginDto;
@@ -53,10 +63,10 @@ export class MetaDataRepository {
 			return pluginDto;
 		});
 
-		this.pluginsPM = {
+		this.setPluginsProgrammersModel({
 			activePlugins,
 			inactivePlugins,
-		};
+		});
 	};
 }
 

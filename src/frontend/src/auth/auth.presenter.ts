@@ -11,6 +11,10 @@ export class AuthPresenter {
 		return authRepository.authenticated;
 	}
 
+	setAuth(value: boolean) {
+		authRepository.setAuthentication(value);
+	}
+
 	login = async (email: string, password: string) => {
 		const pm = await authRepository.login(email, password);
 
@@ -32,8 +36,4 @@ export class AuthPresenter {
 
 		return pm;
 	};
-
-	setAuth(value: boolean) {
-		authRepository.authenticated = value;
-	}
 }
