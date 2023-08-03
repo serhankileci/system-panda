@@ -35,7 +35,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
 				res.cookie(SESSION.COOKIE_NAME, req.session.id, {
 					maxAge: Number(originalMaxAge),
 					secure: Boolean(secure),
-					httpOnly: false, // React app could not detect cookies since httpOnly was set to true.
+					httpOnly,
 				});
 
 				return res.sendStatus(200);
