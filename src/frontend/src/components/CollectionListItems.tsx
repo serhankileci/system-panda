@@ -1,14 +1,17 @@
 import { For } from "million/react";
-import { router } from "../routing/router";
-import { ViewModel } from "../shared/types/viewmodel";
 
-type CollectionsBlockProps = {
-	collections: ViewModel["collections"];
-	hasCollections: ViewModel["hasCollections"];
+import { collectionRoute } from "../routes/app/collections";
+import { router } from "../routing/router";
+
+import type { MetaDataViewModel } from "../shared/types/viewmodels";
+
+type CollectionListItemsProps = {
+	collections: MetaDataViewModel["collections"];
+	hasCollections: MetaDataViewModel["hasCollections"];
 	setState: (value: boolean) => void;
 };
 
-export const CollectionsBlock = (props: CollectionsBlockProps) => {
+export const CollectionListItems = (props: CollectionListItemsProps) => {
 	const { collections = [], setState, hasCollections } = props;
 
 	return (
@@ -20,7 +23,7 @@ export const CollectionsBlock = (props: CollectionsBlockProps) => {
 							<button
 								onClick={() => {
 									router.navigate({
-										to: "/app/collections/$collection_name",
+										to: collectionRoute.to,
 										params: {
 											collection_name: name,
 										},
@@ -40,4 +43,9 @@ export const CollectionsBlock = (props: CollectionsBlockProps) => {
 			</li>
 		</>
 	);
+};
+
+CollectionListItems.defaultProps = {
+	collections: [],
+	hasCollections: false,
 };

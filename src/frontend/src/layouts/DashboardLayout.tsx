@@ -1,21 +1,19 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import { MetaDataPresenter } from "../metadata/metadata.presenter";
 import { Link } from "@tanstack/router";
 import { AuthPresenter } from "../auth/auth.presenter";
+import { withInjection } from "../ioc/withInjection";
+import type { MetaDataViewModel } from "../shared/types/viewmodels";
 
-type DashboardLayoutProps = {
-	children: ReactNode | ReactNode[];
-};
+interface DashboardLayoutProps extends React.PropsWithChildren {
+	authPresenter?: InstanceType<typeof AuthPresenter>;
+	viewModel?: MetaDataViewModel;
+}
 
-export const DashboardLayout = observer((props: DashboardLayoutProps) => {
-	const { children } = props;
+const DashboardLayoutComponent = observer((props: DashboardLayoutProps) => {
+	const { children, authPresenter, viewModel } = props;
+
 	const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-
-	const metaDataPresenter = new MetaDataPresenter();
-	const authPresenter = new AuthPresenter();
-
-	const { viewModel } = metaDataPresenter;
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -52,8 +50,8 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 							</Link>
 							<h2 className="text-lg font-medium">Collections</h2>
 							<ul className="mb-2">
-								{viewModel.hasCollections &&
-									viewModel.collections.map(({ name }, index: number) => {
+								{viewModel?.hasCollections &&
+									viewModel?.collections.map(({ name }, index: number) => {
 										return (
 											<li
 												key={index}
@@ -70,7 +68,9 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 											</li>
 										);
 									})}
-								<li className={`${!viewModel.hasCollections ? "block" : "hidden"}`}>
+								<li
+									className={`${!viewModel?.hasCollections ? "block" : "hidden"}`}
+								>
 									No collections have been detected
 								</li>
 							</ul>
@@ -81,7 +81,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 						<button
 							className="block w-full text-lg px-12 bg-gray-200 py-2 rounded-lg text-gray-600 font-medium border border-1 border-white hover:border-black hover:bg-black hover:text-white"
 							onClick={() => {
-								authPresenter.logout();
+								authPresenter?.logout();
 							}}
 						>
 							Log out
@@ -94,3 +94,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 		</div>
 	);
 });
+
+export const DashboardLayout = withInjection({
+	authPresenter: AuthPresenter,
+})(DashboardLayoutComponent);

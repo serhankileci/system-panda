@@ -4,11 +4,13 @@ import { ReactNode, useEffect } from "react";
 import { router } from "./router";
 import dayjs from "dayjs";
 import { AuthPresenter } from "../auth/auth.presenter";
+import { withInjection } from "../ioc/withInjection";
 
 type ProtectedRouteProps = {
 	to?: MakeLinkOptions["to"];
 	redirectTo?: MakeLinkOptions["to"];
 	children?: ReactNode;
+	presenter?: InstanceType<typeof AuthPresenter>;
 };
 
 interface AccessTokenType {
@@ -16,16 +18,15 @@ interface AccessTokenType {
 	date: string;
 }
 
-export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
-	const { redirectTo = "/", children } = props;
-	const authPresenter = new AuthPresenter();
+const ProtectedRouteComponent = observer((props: ProtectedRouteProps) => {
+	const { redirectTo = "/", children, presenter: authPresenter } = props;
 
 	useEffect(() => {
 		const checkLocalStorage = () => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -33,7 +34,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -47,7 +48,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 				router.navigate({ to: "/" });
 			}
 		};
@@ -55,9 +56,13 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 		checkLocalStorage();
 	}, []);
 
-	if (!authPresenter.isAuthenticated) {
+	if (!authPresenter?.isAuthenticated) {
 		return <Navigate to={redirectTo} />;
 	}
 
 	return <>{children}</>;
 });
+
+export const ProtectedRoute = withInjection({
+	presenter: AuthPresenter,
+})(ProtectedRouteComponent);
