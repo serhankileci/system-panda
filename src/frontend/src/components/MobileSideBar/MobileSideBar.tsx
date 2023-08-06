@@ -1,9 +1,10 @@
-import { useMobileSideBar } from "./use-mobile-sidebar";
-import { block } from "million/react";
-import { ViewModel } from "../../shared/types/viewmodel";
-import { router } from "../../routing/router";
 import { AuthPresenter } from "../../auth/auth.presenter";
-import { CollectionsBlock } from "../CollectionsBlock";
+import { withInjection } from "../../ioc/withInjection";
+import { router } from "../../routing/router";
+import { CollectionListItems } from "../CollectionListItems";
+import { useMobileSideBar } from "./use-mobile-sidebar";
+
+import type { MetaDataViewModel } from "../../shared/types/viewmodels";
 
 type MenuIconProps = {
 	open: boolean;
@@ -14,39 +15,38 @@ const MenuIcon = ({ open }: MenuIconProps) => {
 };
 
 type MobileSideBarProps = {
-	viewModel: ViewModel;
+	viewModel?: MetaDataViewModel;
+	presenter?: InstanceType<typeof AuthPresenter>;
 };
 
-const MobileSideBar = block((props: MobileSideBarProps) => {
-	const { viewModel } = props;
+const MobileSideBarComponent = (props: MobileSideBarProps) => {
+	const { viewModel, presenter: authPresenter } = props;
 
-	const authPresenter = new AuthPresenter();
-
-	const [showMenu, setMenuState] = useMobileSideBar(false);
+	const [isSideBarOpen, setSideBarState] = useMobileSideBar(false);
 	const backdropClassName = [
 		"cursor-default transition fixed inset-0 bg-slate-100 transition-all ease-in-out delay-150",
-		showMenu ? "visible opacity-75" : "invisible opacity-0",
+		isSideBarOpen ? "visible opacity-75" : "invisible opacity-0",
 	]
 		.filter(Boolean)
 		.join(" ");
 
 	const menuContainerClassName = [
 		"h-auto px-4 pt-0.25 sm:pt-1 pb-16 mx-auto relative bottom-2 transition-all ease-in-out delay-50 rounded-lg bg-slate-700",
-		showMenu ? "max-h-[600px] w-full sm:w-3/4" : "max-h-[0px] w-2/3 sm:w-1/2",
+		isSideBarOpen ? "max-h-[600px] w-full sm:w-3/4" : "max-h-[0px] w-2/3 sm:w-1/2",
 	]
 		.filter(Boolean)
 		.join(" ");
 
 	const listContainerClassName = [
 		"pb-4 mb-3 text-white border-b-2 border-slate-600",
-		showMenu ? "visible relative delay-[150ms]" : "invisible absolute",
+		isSideBarOpen ? "visible relative delay-[150ms]" : "invisible absolute",
 	]
 		.filter(Boolean)
 		.join(" ");
 
 	const logoutBtnClassName = [
 		"bg-blue-100 h-full rounded-lg transition-all",
-		showMenu ? "visible delay-[150ms] px-2 text-normal" : "invisible px-0 text-[0px]",
+		isSideBarOpen ? "visible delay-[150ms] px-2 text-normal" : "invisible px-0 text-[0px]",
 	]
 		.filter(Boolean)
 		.join(" ");
@@ -55,13 +55,13 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 		<div
 			aria-labelledby="modal-title"
 			role="dialog"
-			aria-modal={showMenu}
+			aria-modal={isSideBarOpen}
 			className="lg:invisible lg:opacity-0"
 		>
 			<button
 				className={backdropClassName}
 				onClick={() => {
-					setMenuState(false);
+					setSideBarState(false);
 				}}
 			/>
 			<aside className="fixed inset-x-0 z-10 max-w-lg p-3 mx-auto text-black bottom-2">
@@ -74,17 +74,17 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 									router.navigate({
 										to: "/app",
 									});
-									setMenuState(false);
+									setSideBarState(false);
 								}}
 							>
 								Dashboard
 							</button>
 							<h2 className="text-lg font-medium">Collections</h2>
 							<ul className="mb-2 overflow-auto max-h-[20rem]">
-								<CollectionsBlock
-									collections={viewModel.collections}
-									hasCollections={viewModel.hasCollections}
-									setState={setMenuState}
+								<CollectionListItems
+									collections={viewModel!.collections}
+									hasCollections={viewModel!.hasCollections}
+									setState={setSideBarState}
 								/>
 							</ul>
 							<button
@@ -94,7 +94,7 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 										to: "/app/plugins",
 									});
 
-									setMenuState(false);
+									setSideBarState(false);
 								}}
 							>
 								Plugins
@@ -109,15 +109,15 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 					<button
 						className="px-3 py-1 mx-auto bg-blue-200 rounded-lg"
 						onClick={() => {
-							setMenuState(!showMenu);
+							setSideBarState(!isSideBarOpen);
 						}}
 					>
-						<MenuIcon open={showMenu} />
+						<MenuIcon open={isSideBarOpen} />
 					</button>
 					<button
 						className={logoutBtnClassName}
 						onClick={() => {
-							authPresenter.logout();
+							authPresenter?.logout();
 						}}
 					>
 						<span style={{ filter: "grayscale(100%)" }}>🚪</span>
@@ -126,6 +126,10 @@ const MobileSideBar = block((props: MobileSideBarProps) => {
 			</div>
 		</div>
 	);
-});
+};
+
+const MobileSideBar = withInjection({
+	presenter: AuthPresenter,
+})(MobileSideBarComponent);
 
 export default MobileSideBar;

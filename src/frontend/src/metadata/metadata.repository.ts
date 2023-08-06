@@ -3,17 +3,20 @@ import { action, makeAutoObservable } from "mobx";
 import { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
+import { injectable, inject } from "inversify";
+import { Types } from "../shared/types/ioc-types";
 
-interface PluginsProgrammersModel {
+export interface PluginsProgrammersModel {
 	activePlugins: DatabasePlugin[];
 	inactivePlugins: DatabasePlugin[];
 }
 
-type CollectionsProgrammersModel = string[];
+export type CollectionsProgrammersModel = string[];
 
+@injectable()
 export class MetaDataRepository {
 	config = config;
-	gateway!: InstanceType<typeof HttpGateway>;
+	@inject(Types.IHttpGateway) gateway!: InstanceType<typeof HttpGateway>;
 
 	pluginsPM: PluginsProgrammersModel = {
 		activePlugins: [],
@@ -69,7 +72,3 @@ export class MetaDataRepository {
 		});
 	};
 }
-
-const metaDataRepository = new MetaDataRepository();
-
-export default metaDataRepository;

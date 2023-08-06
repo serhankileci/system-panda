@@ -1,56 +1,41 @@
-import metaDataRepository from "./metadata.repository";
+import { inject, injectable } from "inversify";
+import { MetaDataRepository } from "./metadata.repository";
 
 interface CallbackFunction {
 	(arg?: any): void;
 }
 
+@injectable()
 export class MetaDataPresenter {
+	@inject(MetaDataRepository) metaDataRepository!: InstanceType<typeof MetaDataRepository>;
+
 	get viewModel() {
 		const pluginsViewModel = {
-			enabledPlugins: this.plugins.activePlugins,
-			disabledPlugins: this.plugins.inactivePlugins,
+			enabledPlugins: this.plugins.activePlugins || [],
+			disabledPlugins: this.plugins.inactivePlugins || [],
 		};
 
 		return {
 			plugins: pluginsViewModel,
-			collections: metaDataRepository.collectionsPM.map(collection => {
+			collections: this.metaDataRepository.collectionsPM.map(collection => {
 				return {
 					name: collection.replace("/", ""),
 					endpoint: collection,
 				};
 			}),
-			hasCollections: metaDataRepository.collectionsPM.length ? true : false,
+			hasCollections: this.metaDataRepository.collectionsPM.length ? true : false,
 		};
 	}
 
 	load = async () => {
-		await metaDataRepository.loadMetaData();
-	};
-
-	loadPlugins = async (callbackFn: CallbackFunction) => {
-		await metaDataRepository.loadMetaData();
-
-		const pluginsViewModel = {
-			enabledPlugins: this.plugins.activePlugins,
-			disabledPlugins: this.plugins.inactivePlugins,
-		};
-
-		callbackFn(pluginsViewModel);
-	};
-
-	loadCollections = async (callbackFn: CallbackFunction) => {
-		await metaDataRepository.loadMetaData();
-
-		const collectionsVM = this.collections;
-
-		callbackFn(collectionsVM);
+		await this.metaDataRepository.loadMetaData();
 	};
 
 	get plugins() {
-		return metaDataRepository.pluginsPM;
+		return this.metaDataRepository.pluginsPM;
 	}
 
 	get collections() {
-		return metaDataRepository.collectionsPM;
+		return this.metaDataRepository.collectionsPM;
 	}
 }

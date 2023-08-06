@@ -13,13 +13,15 @@
 		"@tanstack/router": "^0.0.1-beta.119",
 		"@tanstack/router-devtools": "^0.0.1-beta.119",
 		"dayjs": "^1.11.9",
+		"inversify": "^6.0.1",
 		"magic-regexp": "^0.7.0",
 		"million": "^2.5.3",
 		"mobx": "^6.9.1",
 		"mobx-react": "^9.0.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"react-hook-form": "^7.45.2"
+		"react-hook-form": "^7.45.2",
+		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.3",

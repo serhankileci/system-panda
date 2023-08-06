@@ -1,12 +1,17 @@
+import "reflect-metadata";
+
 import { HttpGateway } from "../shared/http.gateway";
 import config, { ConfigType } from "../shared/config";
 import { action, makeAutoObservable } from "mobx";
 import { makeLoggable } from "mobx-log";
 import dayjs from "dayjs";
+import { inject, injectable } from "inversify";
+import { Types } from "../shared/types/ioc-types";
 
+@injectable()
 export class AuthenticationRepository {
+	@inject(Types.IHttpGateway) gateway!: InstanceType<typeof HttpGateway>;
 	config: ConfigType;
-	gateway!: InstanceType<typeof HttpGateway>;
 
 	email: string | null = null;
 	token: string | boolean = false;
@@ -16,7 +21,6 @@ export class AuthenticationRepository {
 
 	constructor() {
 		this.config = config;
-		this.gateway = new HttpGateway();
 
 		makeAutoObservable(this);
 
@@ -74,7 +78,3 @@ export class AuthenticationRepository {
 		return response;
 	};
 }
-
-const authenticationRepository = new AuthenticationRepository();
-
-export default authenticationRepository;
