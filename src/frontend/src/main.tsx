@@ -1,10 +1,13 @@
-// million-ignore
-import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/router";
-import { router } from "./routing/router.tsx";
+import { configure } from "mobx";
 import { StrictMode } from "react";
-import { Provider } from "mobx-react";
+import ReactDOM from "react-dom/client";
+
+import { InversifyConfig } from "./ioc/InversifyConfig.ts";
+import { InjectionProvider } from "./ioc/InjectionProvider.tsx";
+import { router } from "./routing/router.tsx";
 import config from "./shared/config.ts";
+
 import "./index.css";
 
 if (!config.isEnvironmentProd) {
@@ -12,10 +15,24 @@ if (!config.isEnvironmentProd) {
 	await worker.start();
 }
 
+configure({
+	enforceActions: "never",
+	computedRequiresReaction: false,
+	reactionRequiresObservable: false,
+	observableRequiresReaction: false,
+	disableErrorBoundaries: false,
+});
+
+const inversifyConfig = new InversifyConfig();
+
+inversifyConfig.setupBindings();
+
+const container = inversifyConfig.container;
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<Provider>
+		<InjectionProvider container={container}>
 			<RouterProvider router={router} />
-		</Provider>
+		</InjectionProvider>
 	</StrictMode>
 );

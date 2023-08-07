@@ -1,15 +1,23 @@
-import authRepository from "./authentication.repository";
-import { observable, action } from "mobx";
+import { inject, injectable } from "inversify";
+import { action, observable } from "mobx";
 
+import { AuthenticationRepository } from "./authentication.repository";
+
+@injectable()
 export class AuthPresenter {
-	@observable message: string | null = null;
+	@inject(AuthenticationRepository) authRepository!: InstanceType<
+		typeof AuthenticationRepository
+	>;
+
+	@observable
+	message: string | null = null;
 
 	get email() {
-		return authRepository.email;
+		return this.authRepository.email;
 	}
 
 	get isAuthenticated() {
-		return authRepository.authenticated;
+		return this.authRepository.authenticated;
 	}
 
 	@action setMessage(value: string | null) {
@@ -21,11 +29,11 @@ export class AuthPresenter {
 	}
 
 	setAuth(value: boolean) {
-		authRepository.setAuthentication(value);
+		this.authRepository.setAuthentication(value);
 	}
 
 	login = async (email: string, password: string) => {
-		const pm = await authRepository.login(email, password);
+		const pm = await this.authRepository.login(email, password);
 
 		if (pm.ok) {
 			this.setMessage(null);
@@ -37,7 +45,7 @@ export class AuthPresenter {
 	};
 
 	logout = async () => {
-		const pm = await authRepository.logout();
+		const pm = await this.authRepository.logout();
 
 		if (pm.ok) {
 			this.setMessage("Log out successful");

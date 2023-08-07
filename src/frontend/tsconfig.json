@@ -23,7 +23,8 @@
 		"esModuleInterop": true,
 		"allowJs": true,
 		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"types": ["reflect-metadata", "jest"]
 	},
 	"include": [
 		"src/**/*.ts",
@@ -33,9 +34,12 @@
 		"./tailwind.config.ts",
 		"./postcss.config.js",
 		"./jest.config.ts",
+		"./jest.setup.ts",
 		"src/shared/types",
 		"../../src/util/types/",
-		"./public/mockServiceWorker.js"
+		"./public/mockServiceWorker.js",
+		"src/ioc/**/*.ts",
+		"src/ioc/**/*.tsx"
 	],
 	"exclude": ["./node_modules"],
 	"references": [{ "path": "./tsconfig.node.json" }]

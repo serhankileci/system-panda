@@ -6,15 +6,19 @@ import { Outlet } from "@tanstack/router";
 import { useEffect } from "react";
 import dayjs from "dayjs";
 import { emailRegex } from "../utilities/regex";
+import { withInjection } from "../ioc/withInjection";
 
 interface AccessTokenType {
 	expired: boolean;
 	date: string;
 }
 
-const authPresenter = new AuthPresenter();
+type LoginPageProps = {
+	presenter?: InstanceType<typeof AuthPresenter>;
+};
 
-export const LoginPage = observer(() => {
+const LoginPageComponent = observer((props: LoginPageProps) => {
+	const { presenter: authPresenter } = props;
 	const {
 		handleSubmit,
 		register,
@@ -22,9 +26,9 @@ export const LoginPage = observer(() => {
 	} = useForm();
 
 	const onSubmit = async (fieldValues: { [key: string]: string }) => {
-		const response = await authPresenter.login(fieldValues.email, fieldValues.password);
+		const response = await authPresenter?.login(fieldValues.email, fieldValues.password);
 
-		if (response.ok) {
+		if (response?.ok) {
 			router.navigate({
 				from: "/",
 				to: "/app",
@@ -37,14 +41,14 @@ export const LoginPage = observer(() => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 				return null;
 			}
 
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 				return null;
 			}
 
@@ -57,17 +61,17 @@ export const LoginPage = observer(() => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authPresenter.setAuth(false);
+				authPresenter?.setAuth(false);
 
 				return null;
 			}
 
-			authPresenter.setAuth(true);
+			authPresenter?.setAuth(true);
 		};
 
 		checkLocalStorage();
 
-		if (authPresenter.isAuthenticated) {
+		if (authPresenter?.isAuthenticated) {
 			router.navigate({
 				to: "/app",
 			});
@@ -130,9 +134,9 @@ export const LoginPage = observer(() => {
 					>
 						Login
 					</button>
-					{authPresenter.message && authPresenter.message?.length && (
+					{authPresenter?.message && authPresenter?.message?.length && (
 						<p role="alert" className="text-red-700 text-sm mt-2">
-							{authPresenter.authMessage}
+							{authPresenter?.authMessage}
 						</p>
 					)}
 				</form>
@@ -140,3 +144,7 @@ export const LoginPage = observer(() => {
 		</div>
 	);
 });
+
+export const LoginPage = withInjection({
+	presenter: AuthPresenter,
+})(LoginPageComponent);

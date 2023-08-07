@@ -1,7 +1,12 @@
-import { AuthResponse } from "../auth/auth.types";
-import { MetaDataResponse } from "../metadata/metadata.types";
-import config, { ConfigType } from "./config";
+import { injectable } from "inversify";
 
+import { AuthResponse } from "../../auth/auth.types";
+import { MetaDataResponse } from "../../metadata/metadata.types";
+import config, { ConfigType } from "../config";
+
+import "reflect-metadata";
+
+@injectable()
 export class HttpGateway {
 	headers = {
 		"Content-Type": "application/json",
@@ -39,7 +44,3 @@ export class HttpGateway {
 		return response;
 	};
 }
-
-const httpGateway = new HttpGateway();
-
-export default httpGateway;
