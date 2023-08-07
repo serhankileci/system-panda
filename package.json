@@ -32,7 +32,7 @@
 		"build": "npm run format; npm run lint; tsc && cp -r ./src/server/static ./build/server"
 	},
 	"dependencies": {
-		"@prisma/client": "^4.15.0",
+		"@prisma/client": "^5.1.1",
 		"@types/bcrypt": "^5.0.0",
 		"@types/compression": "^1.7.2",
 		"@types/cookie-parser": "^1.4.3",
