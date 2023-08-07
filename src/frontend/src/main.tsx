@@ -1,13 +1,14 @@
-// million-ignore
-import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/router";
-import { router } from "./routing/router.tsx";
-import { StrictMode } from "react";
 import { configure } from "mobx";
-import config from "./shared/config.ts";
-import { container } from "./ioc/container.ts";
-import "./index.css";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+
+import { InversifyConfig } from "./ioc/InversifyConfig.ts";
 import { InjectionProvider } from "./ioc/InjectionProvider.tsx";
+import { router } from "./routing/router.tsx";
+import config from "./shared/config.ts";
+
+import "./index.css";
 
 if (!config.isEnvironmentProd) {
 	const { worker } = await import("./test-tools/mocks/browser.ts");
@@ -21,6 +22,12 @@ configure({
 	observableRequiresReaction: false,
 	disableErrorBoundaries: false,
 });
+
+const inversifyConfig = new InversifyConfig();
+
+inversifyConfig.setupBindings();
+
+const container = inversifyConfig.container;
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<StrictMode>

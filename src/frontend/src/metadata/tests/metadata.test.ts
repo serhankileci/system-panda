@@ -1,11 +1,14 @@
-import { loadFeature, defineFeature } from "jest-cucumber";
+import { defineFeature, loadFeature } from "jest-cucumber";
+
+import { InversifyConfig } from "../../ioc/InversifyConfig";
 import { getMetaDataStub } from "../../test-tools/metadata.stub";
 import { MetaDataPresenter } from "../metadata.presenter";
-import metaDataRepository from "../metadata.repository";
+import { MetaDataRepository } from "../metadata.repository";
 
 const feature = loadFeature("src/metadata/tests/features/metadata.feature");
 
 let metaDataPresenter: InstanceType<typeof MetaDataPresenter>;
+
 let viewModel = {
 	collections: [],
 	plugins: {
@@ -13,9 +16,16 @@ let viewModel = {
 		inactivePlugins: [],
 	},
 };
+
 let metaDataLoadStub: unknown = null;
 
+const inversifyConfig = new InversifyConfig("test");
+inversifyConfig.setupBindings();
+const container = inversifyConfig.container;
+
 defineFeature(feature, test => {
+	const metaDataRepository = container.get(MetaDataRepository);
+
 	beforeEach(() => {
 		viewModel = {
 			collections: [],
@@ -25,7 +35,7 @@ defineFeature(feature, test => {
 			},
 		};
 		metaDataLoadStub = null;
-		metaDataPresenter = new MetaDataPresenter();
+		metaDataPresenter = container.get(MetaDataPresenter);
 		metaDataRepository.pluginsPM = {
 			activePlugins: [],
 			inactivePlugins: [],
@@ -34,22 +44,20 @@ defineFeature(feature, test => {
 
 		metaDataLoadStub = getMetaDataStub;
 
-		metaDataRepository.gateway.get = jest.fn().mockImplementation(path => {
+		metaDataRepository.gateway.get = jest.fn().mockImplementation(_path => {
 			return Promise.resolve(metaDataLoadStub);
 		});
 	});
 
 	const testSuite = async () => {
-		await metaDataPresenter.loadPlugins((result: any) => {
-			viewModel = Object.assign({}, viewModel, {
-				plugins: result,
-			});
+		await metaDataPresenter.load();
+
+		viewModel = Object.assign({}, viewModel, {
+			plugins: metaDataPresenter.plugins,
 		});
 
-		await metaDataPresenter.loadCollections(result => {
-			viewModel = Object.assign({}, viewModel, {
-				collections: result,
-			});
+		viewModel = Object.assign({}, viewModel, {
+			collections: metaDataPresenter.collections,
 		});
 	};
 

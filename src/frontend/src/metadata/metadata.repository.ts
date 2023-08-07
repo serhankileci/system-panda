@@ -1,6 +1,8 @@
-import { HttpGateway } from "../shared/http.gateway";
 import { action, makeAutoObservable } from "mobx";
-import { DatabasePlugin } from "./metadata.types";
+
+import { HttpGateway } from "../shared/gateways/http.gateway";
+
+import type { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
 import { injectable, inject } from "inversify";
