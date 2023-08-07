@@ -1,13 +1,16 @@
 import { inject, injectable } from "inversify";
+import { action, observable } from "mobx";
+
 import { AuthenticationRepository } from "./authentication.repository";
-import { observable, action } from "mobx";
 
 @injectable()
 export class AuthPresenter {
 	@inject(AuthenticationRepository) authRepository!: InstanceType<
 		typeof AuthenticationRepository
 	>;
-	@observable message: string | null = null;
+
+	@observable
+	message: string | null = null;
 
 	get email() {
 		return this.authRepository.email;

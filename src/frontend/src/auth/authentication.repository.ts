@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import { HttpGateway } from "../shared/http.gateway";
+import { HttpGateway } from "../shared/gateways/http.gateway";
 import config, { ConfigType } from "../shared/config";
 import { action, makeAutoObservable } from "mobx";
 import { makeLoggable } from "mobx-log";
