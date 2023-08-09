@@ -4,9 +4,9 @@ import { AuthPresenter } from "../auth/auth.presenter";
 import { AuthenticationRepository } from "../auth/authentication.repository";
 import { MetaDataPresenter } from "../metadata/metadata.presenter";
 import { MetaDataRepository } from "../metadata/metadata.repository";
+import { FakeHttpGateway } from "../shared/gateways/fakehttp.gateway";
 import { HttpGateway } from "../shared/gateways/http.gateway";
 import { Types } from "../shared/types/ioc-types";
-import { FakeHttpGateway } from "../shared/gateways/fakehttp.gateway";
 
 export class InversifyConfig {
 	container: InstanceType<typeof Container>;
