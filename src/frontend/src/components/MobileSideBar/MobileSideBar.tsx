@@ -1,10 +1,10 @@
 import { AuthPresenter } from "../../auth/auth.presenter";
-import { withInjection } from "../../ioc/withInjection";
 import { router } from "../../routing/router";
 import { CollectionListItems } from "../CollectionListItems";
 import { useMobileSideBar } from "./use-mobile-sidebar";
 
 import type { MetaDataViewModel } from "../../shared/types/viewmodels";
+import { useInjection } from "../../ioc/useInjection";
 
 type MenuIconProps = {
 	open: boolean;
@@ -16,11 +16,11 @@ const MenuIcon = ({ open }: MenuIconProps) => {
 
 type MobileSideBarProps = {
 	viewModel?: MetaDataViewModel;
-	presenter?: InstanceType<typeof AuthPresenter>;
 };
 
-const MobileSideBarComponent = (props: MobileSideBarProps) => {
-	const { viewModel, presenter: authPresenter } = props;
+export const MobileSideBar = (props: MobileSideBarProps) => {
+	const { viewModel } = props;
+	const presenter = useInjection(AuthPresenter);
 
 	const [isSideBarOpen, setSideBarState] = useMobileSideBar(false);
 	const backdropClassName = [
@@ -117,7 +117,7 @@ const MobileSideBarComponent = (props: MobileSideBarProps) => {
 					<button
 						className={logoutBtnClassName}
 						onClick={() => {
-							authPresenter?.logout();
+							presenter.logout();
 						}}
 					>
 						<span style={{ filter: "grayscale(100%)" }}>🚪</span>
@@ -127,9 +127,5 @@ const MobileSideBarComponent = (props: MobileSideBarProps) => {
 		</div>
 	);
 };
-
-const MobileSideBar = withInjection({
-	presenter: AuthPresenter,
-})(MobileSideBarComponent);
 
 export default MobileSideBar;

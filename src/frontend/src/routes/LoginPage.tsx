@@ -1,24 +1,22 @@
-import { useForm } from "react-hook-form";
-import { AuthPresenter } from "../auth/auth.presenter";
-import { observer } from "mobx-react";
-import { router } from "../routing/router";
 import { Outlet } from "@tanstack/router";
-import { useEffect } from "react";
 import dayjs from "dayjs";
+import { observer } from "mobx-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+import { AuthPresenter } from "../auth/auth.presenter";
+import { useInjection } from "../ioc/useInjection";
+import { router } from "../routing/router";
 import { emailRegex } from "../utilities/regex";
-import { withInjection } from "../ioc/withInjection";
 
 interface AccessTokenType {
 	expired: boolean;
 	date: string;
 }
 
-type LoginPageProps = {
-	presenter?: InstanceType<typeof AuthPresenter>;
-};
+export const LoginPage = observer(() => {
+	const presenter = useInjection(AuthPresenter);
 
-const LoginPageComponent = observer((props: LoginPageProps) => {
-	const { presenter: authPresenter } = props;
 	const {
 		handleSubmit,
 		register,
@@ -26,7 +24,7 @@ const LoginPageComponent = observer((props: LoginPageProps) => {
 	} = useForm();
 
 	const onSubmit = async (fieldValues: { [key: string]: string }) => {
-		const response = await authPresenter?.login(fieldValues.email, fieldValues.password);
+		const response = await presenter.login(fieldValues.email, fieldValues.password);
 
 		if (response?.ok) {
 			router.navigate({
@@ -41,14 +39,14 @@ const LoginPageComponent = observer((props: LoginPageProps) => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authPresenter?.setAuth(false);
+				presenter.setAuth(false);
 				return null;
 			}
 
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authPresenter?.setAuth(false);
+				presenter.setAuth(false);
 				return null;
 			}
 
@@ -61,17 +59,17 @@ const LoginPageComponent = observer((props: LoginPageProps) => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authPresenter?.setAuth(false);
+				presenter.setAuth(false);
 
 				return null;
 			}
 
-			authPresenter?.setAuth(true);
+			presenter.setAuth(true);
 		};
 
 		checkLocalStorage();
 
-		if (authPresenter?.isAuthenticated) {
+		if (presenter.isAuthenticated) {
 			router.navigate({
 				to: "/app",
 			});
@@ -134,9 +132,9 @@ const LoginPageComponent = observer((props: LoginPageProps) => {
 					>
 						Login
 					</button>
-					{authPresenter?.message && authPresenter?.message?.length && (
+					{presenter.message && presenter.message.length && (
 						<p role="alert" className="text-red-700 text-sm mt-2">
-							{authPresenter?.authMessage}
+							{presenter.authMessage}
 						</p>
 					)}
 				</form>
@@ -144,7 +142,3 @@ const LoginPageComponent = observer((props: LoginPageProps) => {
 		</div>
 	);
 });
-
-export const LoginPage = withInjection({
-	presenter: AuthPresenter,
-})(LoginPageComponent);

@@ -1,5 +1,6 @@
 import { interfaces } from "inversify";
 import { useContext } from "react";
+
 import { InversifyContext } from "./InjectionProvider";
 
 export const useInjection = <T>(identifier: interfaces.ServiceIdentifier<T>) => {

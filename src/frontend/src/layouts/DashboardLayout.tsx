@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
-import { observer } from "mobx-react";
 import { Link } from "@tanstack/router";
+import { observer } from "mobx-react";
+import { useEffect, useState } from "react";
+
 import { AuthPresenter } from "../auth/auth.presenter";
-import { withInjection } from "../ioc/withInjection";
+
 import type { MetaDataViewModel } from "../shared/types/viewmodels";
+import { useInjection } from "../ioc/useInjection";
 
 interface DashboardLayoutProps extends React.PropsWithChildren {
-	authPresenter?: InstanceType<typeof AuthPresenter>;
 	viewModel?: MetaDataViewModel;
 }
 
-const DashboardLayoutComponent = observer((props: DashboardLayoutProps) => {
-	const { children, authPresenter, viewModel } = props;
+export const DashboardLayout = observer((props: DashboardLayoutProps) => {
+	const { children, viewModel } = props;
+	const presenter = useInjection(AuthPresenter);
 
 	const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
@@ -81,7 +83,7 @@ const DashboardLayoutComponent = observer((props: DashboardLayoutProps) => {
 						<button
 							className="block w-full text-lg px-12 bg-gray-200 py-2 rounded-lg text-gray-600 font-medium border border-1 border-white hover:border-black hover:bg-black hover:text-white"
 							onClick={() => {
-								authPresenter?.logout();
+								presenter.logout();
 							}}
 						>
 							Log out
@@ -94,7 +96,3 @@ const DashboardLayoutComponent = observer((props: DashboardLayoutProps) => {
 		</div>
 	);
 });
-
-export const DashboardLayout = withInjection({
-	authPresenter: AuthPresenter,
-})(DashboardLayoutComponent);
