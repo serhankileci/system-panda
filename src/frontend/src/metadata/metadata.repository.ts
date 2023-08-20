@@ -2,7 +2,7 @@ import { action, makeAutoObservable } from "mobx";
 
 import { HttpGateway } from "../shared/gateways/http.gateway";
 
-import type { DatabasePlugin } from "./metadata.types";
+import type { DatabasePlugin, MetaDataResponse } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
 import { injectable, inject } from "inversify";
@@ -52,7 +52,7 @@ export class MetaDataRepository {
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get("/metadata");
+		const metaDataDTO = await this.gateway.get<MetaDataResponse>("/metadata");
 
 		const collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
 			return collectionDto;
