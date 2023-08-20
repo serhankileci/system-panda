@@ -15,6 +15,7 @@
 		"indent": ["warn", "tab"],
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
+		"no-prototype-builtins": "off",
 		"no-mixed-spaces-and-tabs": "warn",
 		"no-unused-vars": "off",
 		"@typescript-eslint/no-unused-vars": [
