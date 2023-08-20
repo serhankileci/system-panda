@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import { CollectionTable } from "../../../modules/collection/CollectionTable";
 
 export const CollectionScreen = observer(
 	(props: { useParams: () => { collection_name: string } }) => {
@@ -9,7 +10,7 @@ export const CollectionScreen = observer(
 				<h1 className="mb-6 text-6xl font-bold">
 					{collection_name.replace("/", "")} collection
 				</h1>
-				<p>Insert table here</p>
+				<CollectionTable collectionName={collection_name} />
 			</article>
 		);
 	}

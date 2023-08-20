@@ -1,9 +1,11 @@
-export const getMetaDataStub = {
-	data: {
-		plugins: {
-			active: [],
-			inactive: [],
+export const getMetaDataStub = () => {
+	return {
+		data: {
+			plugins: {
+				active: [],
+				inactive: [],
+			},
+			collections: ["/student", "/classroom", "/song", "/record", "/users"],
 		},
-		collections: ["/student", "/classroom", "/song", "/record", "/users"],
-	},
+	};
 };

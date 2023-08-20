@@ -18,13 +18,13 @@ export class HttpGateway {
 		this.config = config;
 	}
 
-	get = async (path: string) => {
+	get = async <T = unknown>(path: string) => {
 		const response = await fetch(this.config.apiUrl + path, {
 			method: "GET",
 			headers: this.headers,
 		});
 
-		const dto = (await response.json()) as MetaDataResponse;
+		const dto = (await response.json()) as T;
 
 		return dto;
 	};
