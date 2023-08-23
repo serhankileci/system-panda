@@ -1,10 +1,16 @@
+import { cmsTablePrefix, crudMapping } from "./index.js";
+import { PrismaClient } from "@prisma/client/index.js";
+import {
+	PrismaClientInitializationError,
+	PrismaClientKnownRequestError,
+	PrismaClientOptions,
+	PrismaClientRustPanicError,
+	PrismaClientUnknownRequestError,
+	PrismaClientValidationError,
+} from "@prisma/client/runtime/index.js";
 import * as bodyParser from "body-parser";
-import { Options as RateLimitOptions } from "express-rate-limit";
-import { HelmetOptions } from "helmet";
-import { ServeStaticOptions } from "serve-static";
-import { CorsOptions } from "cors";
 import { CompressionOptions } from "compression";
-import morgan from "morgan";
+import { CorsOptions } from "cors";
 import {
 	Express,
 	NextFunction as ExpressNext,
@@ -12,19 +18,13 @@ import {
 	Response as ExpressResponse,
 	Request,
 } from "express";
-import { PrismaClient } from "@prisma/client/index.js";
-import { IncomingHttpHeaders } from "http";
-import {
-	PrismaClientInitializationError,
-	PrismaClientKnownRequestError,
-	PrismaClientRustPanicError,
-	PrismaClientUnknownRequestError,
-	PrismaClientValidationError,
-	PrismaClientOptions,
-} from "@prisma/client/runtime/index.js";
-import { crudMapping } from "./index.js";
-import { DeepReadonly } from "utility-types";
+import { Options as RateLimitOptions } from "express-rate-limit";
 import { SessionData } from "express-session";
+import { HelmetOptions } from "helmet";
+import { IncomingHttpHeaders } from "http";
+import morgan from "morgan";
+import { ServeStaticOptions } from "serve-static";
+import { DeepReadonly } from "utility-types";
 
 /* ********** PLUGINS ********** */
 type PluginExportFn = (ctx: Context) => Context | Promise<Context>;
@@ -175,6 +175,11 @@ type BoolField = {
 type DateTimeField = {
 	type: "DateTime";
 	defaultValue?: { kind: "now" | "updatedAt" } | string;
+};
+
+type FieldInfo = {
+	name: string;
+	type: string | StringFields | NumField | BoolField | DateTimeField;
 };
 
 /* ******************** */
@@ -381,6 +386,6 @@ export {
 	InputData,
 	MutableDataStore,
 	CollectionMethod,
-	CurrentHook,
-	HookOperationArgs,
+	InternalTablesKeys,
+	FieldInfo,
 };
