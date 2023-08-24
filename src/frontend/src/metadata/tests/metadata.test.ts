@@ -42,7 +42,7 @@ defineFeature(feature, test => {
 		};
 		metaDataRepository.collectionsPM = [];
 
-		metaDataLoadStub = getMetaDataStub;
+		metaDataLoadStub = getMetaDataStub();
 
 		metaDataRepository.gateway.get = jest.fn().mockImplementation(_path => {
 			return Promise.resolve(metaDataLoadStub);
@@ -67,7 +67,7 @@ defineFeature(feature, test => {
 		});
 
 		then("I should have a list of plugins and collections.", () => {
-			expect(viewModel.collections.length).toEqual(5);
+			expect(viewModel.collections.length).toEqual(6);
 			expect(viewModel.collections[0]).toBe("/student");
 			expect(viewModel.collections[2]).toBe("/song");
 			expect(viewModel.collections[4]).toBe("/users");
