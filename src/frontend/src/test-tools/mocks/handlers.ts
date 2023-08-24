@@ -1,16 +1,52 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { rest } from "msw";
-import { getMetaDataStub } from "../metadata.stub.ts";
+
 import config from "../../shared/config.ts";
-import { getCollectionStudentStub } from "../stubs/collection.stub.ts";
+import { getMetaDataStub } from "../metadata.stub.ts";
+import {
+	getCollectionAlbumFieldsStub,
+	getCollectionAlbumStub,
+	getCollectionStudentFieldsStub,
+	getCollectionStudentStub,
+	getSuccessfulItemUpdateStub,
+} from "../stubs/collection.stub.ts";
 
 export const handlers = [
 	rest.get(config.apiUrl + "/metadata", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getMetaDataStub()));
 	}),
 
-	rest.get(config.apiUrl + "/collections/student", (_req, res, ctx) => {
-		console.log("test:", getCollectionStudentStub());
+	rest.get(config.apiUrl + "/fields/collection/album", (_req, res, ctx) => {
+		return res(ctx.status(200), ctx.json(getCollectionAlbumFieldsStub()));
+	}),
 
+	rest.get(config.apiUrl + "/collections/album", (_req, res, ctx) => {
+		return res(ctx.status(200), ctx.json(getCollectionAlbumStub()));
+	}),
+
+	rest.put(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+		const where = req.url.searchParams.get("where") as string;
+
+		const id = (JSON.parse(where).id as number).toString();
+
+		const body: {
+			data: {
+				[key: string]: unknown;
+			};
+		} = await req.json();
+
+		return res(ctx.status(200), ctx.json(getSuccessfulItemUpdateStub(id, body)));
+	}),
+
+	rest.put(config.apiUrl + "/collections/album", (_req, res, ctx) => {
+		return res(ctx.status(200), ctx.json(getCollectionAlbumStub()));
+	}),
+
+	rest.get(config.apiUrl + "/fields/collection/student", (_req, res, ctx) => {
+		return res(ctx.status(200), ctx.json(getCollectionStudentFieldsStub()));
+	}),
+
+	rest.get(config.apiUrl + "/collections/student", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getCollectionStudentStub()));
 	}),
 

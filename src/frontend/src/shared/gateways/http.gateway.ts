@@ -5,6 +5,10 @@ import { MetaDataResponse } from "../../metadata/metadata.types";
 import config, { ConfigType } from "../config";
 
 import "reflect-metadata";
+import type {
+	FailedUpdateResponse,
+	SuccessfulUpdateResponse,
+} from "../../modules/collection/collection.repository";
 
 @injectable()
 export class HttpGateway {
@@ -39,6 +43,25 @@ export class HttpGateway {
 
 		if (sendDto) {
 			return (await response.json()) as AuthResponse;
+		}
+
+		return response;
+	};
+
+	put = async <T = unknown | Response>(
+		path: string,
+		body: unknown,
+		sendDto = true
+	): Promise<T | Response> => {
+		const response = await fetch(this.config.apiUrl + path, {
+			method: "PUT",
+			headers: this.headers,
+			body: JSON.stringify(body),
+			credentials: "same-origin",
+		});
+
+		if (sendDto) {
+			return (await response.json()) as T;
 		}
 
 		return response;

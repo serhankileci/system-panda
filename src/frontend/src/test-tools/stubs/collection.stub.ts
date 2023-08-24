@@ -1,19 +1,80 @@
+export const getCollectionAlbumFieldsStub = () => {
+	return {
+		success: true,
+		data: {
+			fields: [
+				{
+					name: "year",
+					type: "number",
+				},
+				{
+					name: "title",
+					type: "String",
+				},
+			],
+		},
+	};
+};
+
+export type AlbumFieldsStubResponse = ReturnType<typeof getCollectionAlbumFieldsStub>;
+
+export const getCollectionAlbumStub = () => {
+	return {
+		success: true,
+		data: [
+			{ id: "1", title: "Album 1", year: 1994 },
+			{ id: "2", title: "Album 2", year: 2010 },
+			{ id: "3", title: "Album 3", year: 2023 },
+		],
+	};
+};
+
+export type AlbumStubResponse = ReturnType<typeof getCollectionAlbumStub>;
+
+export const getCollectionStudentFieldsStub = () => {
+	return {
+		success: true,
+		data: {
+			fields: [
+				{
+					name: "name",
+					type: "String",
+				},
+			],
+		},
+	};
+};
+
 export const getCollectionStudentStub = () => {
 	return {
 		success: true,
 		data: [
-			{
-				id: "1",
-				name: null,
-			},
-			{
-				id: "2",
-				name: "Jane Doe",
-			},
-			{
-				id: "3",
-				name: "John Doe",
-			},
+			{ id: "1", name: "Kevin" },
+			{ id: "2", name: "Alex" },
+			{ id: "3", name: "Jane" },
 		],
+	};
+};
+
+export const getSuccessfulItemUpdateStub = (
+	itemId: string,
+	changes: {
+		data: {
+			[key: string]: unknown;
+		};
+	}
+) => {
+	return {
+		success: true,
+		data: {
+			before: [
+				{
+					id: itemId,
+					title: "Placeholder",
+					year: 2000,
+				},
+			],
+			after: changes.data,
+		},
 	};
 };

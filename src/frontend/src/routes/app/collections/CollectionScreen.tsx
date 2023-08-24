@@ -5,10 +5,15 @@ export const CollectionScreen = observer(
 	(props: { useParams: () => { collection_name: string } }) => {
 		const { collection_name = "" } = props.useParams();
 
+		console.log("collectionParam: ", collection_name);
+
 		return (
-			<article>
+			<article className="h=full p-4">
 				<h1 className="mb-6 text-6xl font-bold">
-					{collection_name.replace("/", "")} collection
+					<span className="text-[#20852d] capitalize">
+						{collection_name.replace("/", "")}
+					</span>{" "}
+					collection
 				</h1>
 				<CollectionTable collectionName={collection_name} />
 			</article>

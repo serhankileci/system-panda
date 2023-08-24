@@ -36,6 +36,11 @@
 	-webkit-backdrop-filter: blur(4px);
 }
 
+::selection {
+	background: rgb(246, 131, 206);
+	color: white;
+}
+
 input:autofill {
 	box-shadow: 0 0 0 30px #f0f1f8 inset;
 	-webkit-text-fill-color: #242424;

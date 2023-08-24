@@ -5,7 +5,7 @@ export const getMetaDataStub = () => {
 				active: [],
 				inactive: [],
 			},
-			collections: ["/student", "/classroom", "/song", "/record", "/users"],
+			collections: ["/student", "/classroom", "/song", "/record", "/users", "/album"],
 		},
 	};
 };
