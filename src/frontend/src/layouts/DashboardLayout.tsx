@@ -19,7 +19,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.metaKey && event.key === "b") {
+			if ((event.metaKey || event.ctrlKey) && event.key === "b") {
 				setIsNavbarOpen(!isNavbarOpen);
 			}
 		};
@@ -37,6 +37,12 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 	]
 		.filter(Boolean)
 		.join(" ");
+
+	let modifierKey = "Ctrl";
+
+	if (navigator.userAgent.toLowerCase().includes("mac")) {
+		modifierKey = "⌘";
+	}
 
 	return (
 		<div className={dashboardClassName}>
@@ -88,7 +94,9 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 						>
 							Log out
 						</button>
-						<span className="block text-center text-xs mt-2 text-slate-600">⌘ + B</span>
+						<span className="block text-center text-xs mt-2 text-slate-600">
+							{modifierKey} + B
+						</span>
 					</nav>
 				</aside>
 			)}

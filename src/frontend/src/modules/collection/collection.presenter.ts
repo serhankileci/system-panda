@@ -25,6 +25,10 @@ class CollectionPresenter {
 		await this.collectionRepository.updateItem(collectionName, collectionItemId, newData);
 	};
 
+	removeItem = async (collectionName: string, collectinItemId: string) => {
+		await this.collectionRepository.deleteItem(collectionName, collectinItemId);
+	};
+
 	get viewModel() {
 		const fieldsVm = toJS(this.collectionRepository.collectionFieldsPm);
 		const collectionDataListVm = toJS(this.collectionRepository.collectionDataPm);

@@ -27,8 +27,9 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 
 	const columnHelper = createColumnHelper<any>();
 
-	const deleteItem = (id: string) => {
-		console.log("delete id: ", id);
+	const deleteItem = async (id: string) => {
+		await presenter.removeItem(props.collectionName, id);
+		setData(presenter.viewModel.dataList);
 	};
 
 	const defaultColumns = [
@@ -44,7 +45,9 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 							className="px-3 py-1 border border-1 border-red-500 bg-red-50 text-red-500 font-medium rounded hover:shadow hover:shadow-red-50 active:shadow-red-100 active:shadow-md"
 							onClick={() => deleteItem(id)}
 						>
-							Delete
+							<span className="sm:hidden">🗑️</span>
+
+							<span className="hidden sm:block">Delete</span>
 						</button>
 					</div>
 				);
@@ -75,8 +78,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 						columnHelper.accessor(field.name, {
 							id: field.name,
 							cell: info => {
-								console.log("column: ", field);
-
 								const originalValue = info.getValue();
 
 								const [editing, setEditing] = useState<boolean>(false);
@@ -136,6 +137,11 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 									alignmentClass = "text-center";
 								}
 
+								const onEdit = () => {
+									setInputValue(info.getValue());
+									setEditing(true);
+								};
+
 								return (
 									<div>
 										{editing ? (
@@ -144,7 +150,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 													value={inputValue}
 													type={defaultInputType}
 													onChange={e => setInputValue(e.target.value)}
-													className="border border-1 bg-white mr-2 rounded py-1 px-2 focus:shadow-lg focus:shadow-blue-50 focus:border-blue-200 outline-0"
+													className="border border-1 bg-white mr-2 rounded py-1 px-2 focus:shadow-lg focus:shadow-blue-50 focus:border-blue-200 outline-0 w-full"
 												/>
 												<button
 													className="bg-red-50 text-red-600 rounded py-1 px-3 hover:shadow hover:shadow-red-50 font-bold mr-2 border border-1 border-red-500 active:shadow-md active:shadow-red-100"
@@ -162,7 +168,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 										) : (
 											<div className={`${alignmentClass}`}>
 												<p
-													onClick={() => setEditing(true)}
+													onClick={onEdit}
 													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2"
 												>
 													{info.getValue()}
@@ -249,41 +255,49 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 			>
 				Create a new {singlarizedCollectionName}
 			</button>
-			{!presenter.viewModel.hasFields && (
+			{!presenter.viewModel.hasData && (
 				<p className="mt-3">This collection currently has no items.</p>
 			)}
-			<table className="bg-white mt-3 shadow-lg shadow-[#c2ead5]">
-				<thead>
-					{table.getHeaderGroups().map(headerGroup => (
-						<tr key={headerGroup.id} className="bg-blue-50">
-							{headerGroup.headers.map(header => (
-								<th
-									key={header.id}
-									className="py-2 px-8 border-left-1 border border-top-white capitalize"
-								>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext()
-										  )}
-								</th>
-							))}
-						</tr>
-					))}
-				</thead>
-				<tbody>
-					{table.getRowModel().rows.map(row => (
-						<tr key={row.id}>
-							{row.getVisibleCells().map(cell => (
-								<td key={cell.id} className="py-3 px-8 border-left-1 border">
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
-						</tr>
-					))}
-				</tbody>
-			</table>
+			<div className="mt-3" style={{ overflowX: "auto" }}>
+				<table className="bg-white  shadow-lg shadow-[#c2ead5]">
+					<thead>
+						{table.getHeaderGroups().map(headerGroup => (
+							<tr
+								key={headerGroup.id}
+								className="bg-blue-50 [&>*:first-child]:sticky [&>*:first-child]:bg-blue-50 [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+							>
+								{headerGroup.headers.map(header => (
+									<th
+										key={header.id}
+										className="py-2 px-8 border-left-1 border border-top-white capitalize"
+									>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext()
+											  )}
+									</th>
+								))}
+							</tr>
+						))}
+					</thead>
+					<tbody>
+						{table.getRowModel().rows.map(row => (
+							<tr
+								key={row.id}
+								className="[&>*:first-child]:sticky [&>*:first-child]:bg-white [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+							>
+								{row.getVisibleCells().map(cell => (
+									<td key={cell.id} className="py-3 px-2 sm:px-8 border">
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	);
 });
