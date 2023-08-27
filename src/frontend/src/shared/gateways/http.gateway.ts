@@ -66,4 +66,23 @@ export class HttpGateway {
 
 		return response;
 	};
+
+	delete = async <T = unknown | Response>(
+		path: string,
+		body: unknown,
+		sendDto = true
+	): Promise<T | Response> => {
+		const response = await fetch(this.config.apiUrl + path, {
+			method: "DELETE",
+			headers: this.headers,
+			body: JSON.stringify(body),
+			credentials: "same-origin",
+		});
+
+		if (sendDto) {
+			return (await response.json()) as T;
+		}
+
+		return response;
+	};
 }

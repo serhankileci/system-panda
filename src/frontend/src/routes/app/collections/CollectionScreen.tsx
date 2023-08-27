@@ -8,7 +8,7 @@ export const CollectionScreen = observer(
 		console.log("collectionParam: ", collection_name);
 
 		return (
-			<article className="h=full p-4">
+			<article className="h=full pt-4 px-4 pb-12">
 				<h1 className="mb-6 text-6xl font-bold">
 					<span className="text-[#20852d] capitalize">
 						{collection_name.replace("/", "")}

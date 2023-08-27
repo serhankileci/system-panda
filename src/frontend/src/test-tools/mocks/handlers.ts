@@ -8,6 +8,7 @@ import {
 	getCollectionAlbumStub,
 	getCollectionStudentFieldsStub,
 	getCollectionStudentStub,
+	getSuccessfulItemDeletionStub,
 	getSuccessfulItemUpdateStub,
 } from "../stubs/collection.stub.ts";
 
@@ -40,6 +41,13 @@ export const handlers = [
 
 	rest.put(config.apiUrl + "/collections/album", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getCollectionAlbumStub()));
+	}),
+
+	rest.delete(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+		const body = await req.json();
+		const id = body.where.id as string;
+
+		return res(ctx.status(200), ctx.json(getSuccessfulItemDeletionStub(id)));
 	}),
 
 	rest.get(config.apiUrl + "/fields/collection/student", (_req, res, ctx) => {

@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { action, makeAutoObservable, set, toJS } from "mobx";
+import { action, makeAutoObservable, set, toJS, remove } from "mobx";
 import { makeLoggable } from "mobx-log";
 
 import config from "../../shared/config";
@@ -108,17 +108,56 @@ class CollectionRepository {
 			data,
 		});
 
-		console.log("updatedDto: ", updatedDto);
-
 		if ("data" in updatedDto && "after" in updatedDto.data) {
 			const itemIndex = this.collectionDataPm.findIndex(item => item.id === id);
 
 			set(this.collectionDataPm[itemIndex], updatedDto.data.after);
-
-			console.log(toJS(this.collectionDataPm));
 		} else if ("message" in updatedDto) {
 			console.error(updatedDto.message);
 		}
+	};
+
+	@action deleteItem = async (collectionName: string, id: string) => {
+		if (!id) {
+			throw new Error("Id is required.");
+		}
+
+		if (!collectionName) {
+			throw new Error("Collection name is required.");
+		}
+
+		const deletionDto = await this.httpGateway.delete<
+			SuccessfulUpdateResponse | FailedUpdateResponse
+		>(`/collections/${collectionName}`, {
+			where: {
+				id,
+			},
+		});
+
+		if ("success" in deletionDto && "message" in deletionDto && !deletionDto.success) {
+			return {
+				success: deletionDto.success,
+				message: deletionDto.message,
+			};
+		}
+
+		if ("success" in deletionDto && deletionDto.success) {
+			const targetIndex = this.collectionDataPm.findIndex(item => {
+				return item.id === id;
+			});
+
+			remove(this.collectionDataPm, targetIndex.toString());
+
+			console.log("colelctionPM: ", toJS(this.collectionDataPm));
+
+			return {
+				success: deletionDto.success,
+			};
+		}
+
+		return {
+			success: false,
+		};
 	};
 
 	@action reset = () => {

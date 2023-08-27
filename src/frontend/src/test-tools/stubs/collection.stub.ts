@@ -78,3 +78,21 @@ export const getSuccessfulItemUpdateStub = (
 		},
 	};
 };
+
+export const getSuccessfulItemDeletionStub = (itemId: string) => {
+	const data = getCollectionAlbumStub().data;
+
+	const targetIndex = data.findIndex(album => {
+		return album.id === itemId;
+	});
+
+	const targetItem = data.splice(targetIndex, 1);
+
+	return {
+		success: true,
+		data: {
+			before: [targetItem],
+			after: {},
+		},
+	};
+};
