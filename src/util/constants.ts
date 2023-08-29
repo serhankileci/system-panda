@@ -2,13 +2,17 @@ import * as url from "url";
 
 const __dirname = url.fileURLToPath(new URL("..", import.meta.url));
 const PLUGINS_API =
-	process.env.PLUGINS_API ||
 	"https://mmhsc5ce5v3hv4qt64p4dpodom0msylf.lambda-url.eu-central-1.on.aws/plugins";
 const packageProjectDir = __dirname;
 const staticDir = `${packageProjectDir}server/static`;
 const userProjectDir = process.cwd();
 const cmsTablePrefix = "system_panda";
 const cmsNamePrefix = "system-panda";
+const internalTablesKeys = {
+	users: `${cmsTablePrefix}_users`,
+	sessions: `${cmsTablePrefix}_sessions`,
+	plugins: `${cmsTablePrefix}_plugins`,
+} as const;
 const logfile = `${userProjectDir}/${cmsNamePrefix}.log` as const;
 const crudMapping = {
 	create: "POST",
@@ -43,5 +47,5 @@ export {
 	packageProjectDir,
 	SESSION,
 	staticDir,
+	internalTablesKeys,
 };
-export const { NODE_ENV } = process.env;
