@@ -4,7 +4,7 @@ import { metaDataVmSignal } from "../../../shared/signals/metaDataVmSignal";
 
 export const OverviewScreenComponent = () => {
 	return (
-		<article className="h-full p-4 rounded-lg">
+		<article className="h-full pt-4 px-4 rounded-lg pb-12">
 			<h1 className="mb-6 text-6xl font-bold">General Overview</h1>
 
 			<div className="flex gap-4 mb-6">

@@ -7,6 +7,7 @@ import { makeLoggable } from "mobx-log";
 import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "../shared/types/ioc-types";
+import { AuthResponse } from "./auth.types";
 
 @injectable()
 export class AuthenticationRepository {
@@ -46,7 +47,7 @@ export class AuthenticationRepository {
 			password,
 		};
 
-		const response = await this.gateway.post("/auth/login", dto, false);
+		const response = await this.gateway.post<AuthResponse>("/auth/login", dto, false);
 
 		if (response.ok) {
 			this.email = email;
@@ -67,7 +68,7 @@ export class AuthenticationRepository {
 	};
 
 	logout = async () => {
-		const response = await this.gateway.post("/auth/logout", {}, false);
+		const response = await this.gateway.post<AuthResponse>("/auth/logout", {}, false);
 
 		if (response.ok) {
 			localStorage.removeItem(this.ACCESS_TOKEN);

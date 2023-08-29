@@ -33,7 +33,7 @@ export const App = observer(() => {
 	}, []);
 
 	return (
-		<div className="pt-12">
+		<div className="pt-12 pb-16">
 			<DashboardLayout viewModel={viewModel}>
 				<Outlet />
 			</DashboardLayout>

@@ -4,6 +4,7 @@ import { rest } from "msw";
 import config from "../../shared/config.ts";
 import { getMetaDataStub } from "../metadata.stub.ts";
 import {
+	createCollectionAlbumStub,
 	getCollectionAlbumFieldsStub,
 	getCollectionAlbumStub,
 	getCollectionStudentFieldsStub,
@@ -56,6 +57,16 @@ export const handlers = [
 
 	rest.get(config.apiUrl + "/collections/student", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getCollectionStudentStub()));
+	}),
+
+	rest.post(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+		const body: {
+			data: {
+				[key: string]: unknown;
+			};
+		} = await req.json();
+
+		return res(ctx.status(200), ctx.json(createCollectionAlbumStub(body)));
 	}),
 
 	rest.post(config.apiUrl + "/auth/login", (req, res, ctx) => {

@@ -1,8 +1,5 @@
 import {
-	ColumnDef,
 	CoreRow,
-	RowData,
-	RowModel,
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
@@ -16,6 +13,8 @@ import { useInjection } from "../../ioc/useInjection";
 import { CollectionPresenter } from "./collection.presenter";
 
 import { Modal } from "@mui/base/Modal";
+import { useForm } from "react-hook-form";
+import { emailRegex } from "../../utilities/regex";
 
 export const CollectionTable = observer((props: { collectionName: string }) => {
 	const presenter = useInjection(CollectionPresenter);
@@ -23,7 +22,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 	const singlarizedCollectionName = singularize(props.collectionName);
 
 	const [openModal, setOpenModel] = useState(false);
-	const [modalState, setModalState] = useState<{ [key: string]: any }>({});
+	const [modalState, setModalState] = useState<{ [key: string]: any }[]>([]);
 
 	const columnHelper = createColumnHelper<any>();
 
@@ -170,6 +169,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 												<p
 													onClick={onEdit}
 													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2"
+													style={{ minHeight: "2.15rem" }}
 												>
 													{info.getValue()}
 												</p>
@@ -186,6 +186,9 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 
 				setColumns(fieldColumns);
 				setData(presenter.viewModel.dataList);
+				setModalState(presenter.viewModel.fields);
+
+				console.log("modalState: ", modalState);
 			}
 		}
 		load();
@@ -196,6 +199,27 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 	});
+
+	const {
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm();
+
+	console.log("errors: ", errors);
+
+	const onSubmit = async (data: { [key: string]: unknown }) => {
+		console.log("data: ", data);
+		const response = await presenter.addItem(props.collectionName, data);
+
+		if (response.success) {
+			setData(presenter.viewModel.dataList);
+			setOpenModel(false);
+			reset();
+		}
+		console.log("res: ", response);
+	};
 
 	return (
 		<div>
@@ -216,33 +240,93 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 				onClose={() => setOpenModel(false)}
 			>
 				<div className="bg-white rounded">
-					<div className="text-right flex items-center gap-2 p-2">
-						<p className="pl-2 pr-6 font-bold">New {singlarizedCollectionName}</p>
+					<div className="text-right flex items-center justify-between gap-2 p-2">
+						<p className="pl-2 pr-6 font-bold">
+							Adding a new record: {singlarizedCollectionName}
+						</p>
 						<button
 							className="bg-red-100 text-red-500 py-0.5 px-2.5 rounded-full font-bold hover:bg-red-200 hover:shadow active:shadow-md active:bg-red-500 active:text-white"
-							onClick={() => setOpenModel(false)}
+							onClick={() => {
+								reset();
+								setOpenModel(false);
+							}}
 						>
 							<span className="relative bottom-[0.5px]">x</span>
 						</button>
 					</div>
-					<article className="px-3 py-2">
-						{Object.keys(modalState).map((key, index) => {
-							if (key === "id") {
-								return null;
-							}
+					<article className="px-4 py-2">
+						<form onSubmit={handleSubmit(onSubmit)}>
+							{modalState.map(field => {
+								let inputType = "text";
+								let pattern = undefined;
+								let defaultValue: string | number = "";
 
-							return (
-								<section key={key}>
-									<label htmlFor="key">{key}</label>
-									<input
-										id={key}
-										type="text"
-										value={modalState[key]}
-										className="bg-[#f2f2f2] border border-1"
-									/>
-								</section>
-							);
-						})}
+								if (field.name === "id") {
+									return null;
+								}
+
+								if (field.type === "number") {
+									inputType = "number";
+									defaultValue = 0;
+								}
+
+								if (field.type === "datetime") {
+									inputType = "date";
+									defaultValue = new Date().toISOString();
+								}
+
+								if (
+									RegExp(/(\bemail\b)/i).test(field.name as string) &&
+									field.type === "String"
+								) {
+									inputType = "email";
+									pattern = emailRegex;
+								}
+
+								return (
+									<fieldset className="flex flex-col">
+										<label htmlFor={field.name} className="capitalize">
+											{field.name}
+										</label>
+										<input
+											id={field.name}
+											defaultValue={defaultValue}
+											type={inputType}
+											{...register(field.name, {
+												pattern,
+											})}
+											className="bg-[#f2f2f2] border border-1 mb-3 px-3 py-1"
+										/>
+										{errors[field.name as string]?.type === "pattern" && (
+											<p
+												role="alert"
+												className="text-red-700 text-sm inline text-left w-full mt-[-0.5rem] mb-3"
+											>
+												You've entered an invalid {field.name}.
+											</p>
+										)}
+									</fieldset>
+								);
+							})}
+
+							<div className="flex gap-4 items-center justify-end mt-2">
+								<button
+									className="px-3 py-2 border border-1 rounded text-gray-400"
+									onClick={() => {
+										reset();
+										setOpenModel(false);
+									}}
+								>
+									Cancel
+								</button>
+								<button
+									type="submit"
+									className="bg-blue-500 px-3 py-2 text-white rounded hover:bg-blue-600 active:bg-blue-700 hover:shadow active:shadow-md"
+								>
+									Create {singularize(props.collectionName)}
+								</button>
+							</div>
+						</form>
 					</article>
 				</div>
 			</Modal>
@@ -253,7 +337,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 					setOpenModel(true);
 				}}
 			>
-				Create a new {singlarizedCollectionName}
+				+ {singlarizedCollectionName}
 			</button>
 			{!presenter.viewModel.hasData && (
 				<p className="mt-3">This collection currently has no items.</p>
