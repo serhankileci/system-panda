@@ -9,13 +9,13 @@ authRouter
 	.post("/logout", ifAuthenticated, (req, res, next) => {
 		try {
 			req.sessionStore.destroy(req.cookies[SESSION.COOKIE_NAME], err => {
-				if (err) next(err);
+				if (err) return next(err);
 
 				res.clearCookie(SESSION.COOKIE_NAME);
 				res.sendStatus(200);
 			});
-		} catch (err) {
-			next(err);
+		} catch (err: unknown) {
+			return next(err);
 		}
 	});
 
