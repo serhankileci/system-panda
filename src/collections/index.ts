@@ -1,2 +1,3 @@
-export * from "./defaultCollections.js";
-export * from "./mapQuery.js";
+export * from "./makePrismaModel.js";
+export * from "./overrideDefaultCollections.js";
+export * from "./collectionFromModel.js";
