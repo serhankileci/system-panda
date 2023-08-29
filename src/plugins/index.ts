@@ -4,12 +4,15 @@ import {
 	ActiveInactivePlugins,
 	Plugins,
 	getDataStore,
+	internalTablesKeys,
 } from "../util/index.js";
 
 const plugins: Plugins = {
 	prisma: () => getDataStore().prisma,
 	load: async function () {
-		const dbPlugins: DatabasePlugin[] = await this.prisma().system_panda_plugins.findMany();
+		const dbPlugins: DatabasePlugin[] = await this.prisma()[
+			internalTablesKeys.plugins
+		].findMany();
 		const obj: ActiveInactivePlugins = { active: [], inactive: [] };
 
 		for (const plugin of dbPlugins) {
@@ -27,13 +30,13 @@ const plugins: Plugins = {
 		return obj;
 	},
 	enable: async function (title) {
-		await this.prisma().system_panda_plugins.update({
+		await this.prisma()[internalTablesKeys.plugins].update({
 			where: { title },
 			data: { active: true },
 		});
 	},
 	disable: async function (title) {
-		await this.prisma().system_panda_plugins.update({
+		await this.prisma()[internalTablesKeys.plugins].update({
 			where: { title },
 			data: { active: false },
 		});
@@ -41,12 +44,12 @@ const plugins: Plugins = {
 	install: async function (title) {
 		const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
 
-		await this.prisma().system_panda_plugins.create({
+		await this.prisma()[internalTablesKeys.plugins].create({
 			data: { ...res, active: false },
 		});
 	},
 	uninstall: async function (title) {
-		await this.prisma().system_panda_plugins.delete({ where: { title } });
+		await this.prisma()[internalTablesKeys.plugins].delete({ where: { title } });
 	},
 };
 
