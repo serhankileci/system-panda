@@ -29,6 +29,10 @@ class CollectionPresenter {
 		await this.collectionRepository.deleteItem(collectionName, collectinItemId);
 	};
 
+	addItem = async (collectionName: string, data: { [key: string]: unknown }) => {
+		return this.collectionRepository.createItem(collectionName, data);
+	};
+
 	get viewModel() {
 		const fieldsVm = toJS(this.collectionRepository.collectionFieldsPm);
 		const collectionDataListVm = toJS(this.collectionRepository.collectionDataPm);
@@ -36,6 +40,7 @@ class CollectionPresenter {
 			fields: fieldsVm,
 			dataList: collectionDataListVm,
 			hasFields: !!fieldsVm && !!fieldsVm.length,
+			fieldsCount: (fieldsVm && fieldsVm.length) || 0,
 			hasData: !!collectionDataListVm && !!collectionDataListVm.length,
 		};
 	}

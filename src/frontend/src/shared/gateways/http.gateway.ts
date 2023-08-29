@@ -33,7 +33,11 @@ export class HttpGateway {
 		return dto;
 	};
 
-	post = async (path: string, body: unknown, sendDto = true) => {
+	post = async <T = unknown | Response>(
+		path: string,
+		body: unknown,
+		sendDto = true
+	): Promise<T | Response> => {
 		const response = await fetch(this.config.apiUrl + path, {
 			method: "POST",
 			headers: this.headers,
@@ -42,7 +46,7 @@ export class HttpGateway {
 		});
 
 		if (sendDto) {
-			return (await response.json()) as AuthResponse;
+			return (await response.json()) as T;
 		}
 
 		return response;

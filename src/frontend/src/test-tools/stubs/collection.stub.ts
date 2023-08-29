@@ -29,6 +29,25 @@ export const getCollectionAlbumStub = () => {
 	};
 };
 
+let isFirstCall = true;
+
+export const createCollectionAlbumStub = (data: { [key: string]: unknown }) => {
+	if (isFirstCall) {
+		isFirstCall = false;
+		data["id"] = "4";
+	} else {
+		data["id"] = Math.floor(Math.random() * 999).toString();
+	}
+
+	return {
+		success: true,
+		data: {
+			before: null,
+			after: data,
+		},
+	};
+};
+
 export type AlbumStubResponse = ReturnType<typeof getCollectionAlbumStub>;
 
 export const getCollectionStudentFieldsStub = () => {

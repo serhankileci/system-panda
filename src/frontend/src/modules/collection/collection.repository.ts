@@ -8,7 +8,7 @@ import { Types } from "../../shared/types/ioc-types";
 
 interface CollectionResponse {
 	success: true;
-	data: { id: string; [key: string]: unknown }[];
+	data: { id?: string; [key: string]: unknown }[];
 }
 
 type FieldInfo = {
@@ -45,7 +45,7 @@ class CollectionRepository {
 	@inject(Types.IHttpGateway) httpGateway!: InstanceType<typeof HttpGateway>;
 
 	collectionDataPm: {
-		id: string;
+		id?: string;
 		[key: string]: unknown;
 	}[] = [];
 
@@ -84,6 +84,28 @@ class CollectionRepository {
 		this.collectionDataPm = collectionDataDto.data;
 
 		return toJS(this.collectionDataPm);
+	};
+
+	@action createItem = async (collectionName: string, data: unknown) => {
+		const itemDto = await this.httpGateway.post<
+			SuccessfulUpdateResponse | FailedUpdateResponse
+		>(`/collections/${collectionName}`, data);
+
+		console.log("dto: ", itemDto);
+
+		if ("success" in itemDto && itemDto.success) {
+			if ("data" in itemDto && "after" in itemDto.data) {
+				this.collectionDataPm.push(itemDto.data.after);
+			}
+
+			return {
+				success: itemDto.success,
+			};
+		}
+
+		return {
+			success: false,
+		};
 	};
 
 	@action updateItem = async (
