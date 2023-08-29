@@ -6,14 +6,14 @@ import {
 	EventTriggerPayload,
 	ExistingData,
 	InputData,
-	Models,
+	CollectionSkeletons,
 	Webhook,
 	methodMapping,
 	nullIfEmptyArrOrObj,
 	SystemPandaError,
 	handleHooksPlugins,
 } from "../../util/index.js";
-import { mapQuery } from "../../collections/index.js";
+import { mapQuery } from "../../database/index.js";
 import { PrismaClient } from "@prisma/client";
 import { webhook } from "../../webhooks/index.js";
 
@@ -21,7 +21,7 @@ function collection(
 	query: PrismaClient,
 	ctx: Context,
 	hooks: Collection["hooks"],
-	models: Models,
+	models: CollectionSkeletons,
 	mergedWebhooks: Webhook[],
 	cKey: string,
 	slugOrKey: string
@@ -153,7 +153,7 @@ function collection(
 				}
 			});
 		} catch (err: unknown) {
-			next(err);
+			return next(err);
 		}
 	};
 }
