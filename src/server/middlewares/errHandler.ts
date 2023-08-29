@@ -1,13 +1,17 @@
 import { SystemPandaError, logfile, logger, isPrismaErr } from "../../util/index.js";
 import { ErrorRequestHandler } from "express";
 
-const errHandler: ErrorRequestHandler = async (err, req, res, next) => {
+const errHandler: ErrorRequestHandler = async (err, _, res, __) => {
+	const success = false;
+
 	if (!res.headersSent) {
+		res.status(500);
+
 		if (isPrismaErr(err)) {
-			res.status(500).json({ success: false, message: err.message });
+			res.json({ success, message: err.message });
 		} else {
-			res.status(500).json({
-				success: false,
+			res.json({
+				success,
 				message:
 					err instanceof Error || err instanceof SystemPandaError ? err.message : err,
 			});
