@@ -1,16 +1,10 @@
-import { cmsTablePrefix, crudMapping } from "./index.js";
-import { PrismaClient } from "@prisma/client/index.js";
-import {
-	PrismaClientInitializationError,
-	PrismaClientKnownRequestError,
-	PrismaClientOptions,
-	PrismaClientRustPanicError,
-	PrismaClientUnknownRequestError,
-	PrismaClientValidationError,
-} from "@prisma/client/runtime/index.js";
 import * as bodyParser from "body-parser";
-import { CompressionOptions } from "compression";
+import { Options as RateLimitOptions } from "express-rate-limit";
+import { HelmetOptions } from "helmet";
+import { ServeStaticOptions } from "serve-static";
 import { CorsOptions } from "cors";
+import { CompressionOptions } from "compression";
+import morgan from "morgan";
 import {
 	Express,
 	NextFunction as ExpressNext,
@@ -18,13 +12,19 @@ import {
 	Response as ExpressResponse,
 	Request,
 } from "express";
-import { Options as RateLimitOptions } from "express-rate-limit";
-import { SessionData } from "express-session";
-import { HelmetOptions } from "helmet";
+import { PrismaClient } from "@prisma/client/index.js";
 import { IncomingHttpHeaders } from "http";
-import morgan from "morgan";
-import { ServeStaticOptions } from "serve-static";
+import {
+	PrismaClientInitializationError,
+	PrismaClientKnownRequestError,
+	PrismaClientRustPanicError,
+	PrismaClientUnknownRequestError,
+	PrismaClientValidationError,
+	PrismaClientOptions,
+} from "@prisma/client/runtime/index.js";
+import { crudMapping } from "./index.js";
 import { DeepReadonly } from "utility-types";
+import { SessionData } from "express-session";
 
 /* ********** PLUGINS ********** */
 type PluginExportFn = (ctx: Context) => Context | Promise<Context>;
@@ -71,6 +71,8 @@ type WebhookFunc = (webhook: Webhook) => {
 /* ******************** */
 
 /* ********** CONTEXT ********** */
+type CurrentHook = keyof CRUDHooks;
+
 type Context = {
 	prisma: PrismaClient;
 	collections: Collections;
@@ -81,7 +83,7 @@ type Context = {
 	sessionData: Record<string, unknown> | undefined;
 	bools: Record<string, boolean>;
 	util: {
-		currentHook: keyof CRUDHooks;
+		currentHook: CurrentHook;
 	};
 	customVars: Record<string, unknown>;
 };
@@ -98,6 +100,17 @@ type CRUDHooks = {
 	afterOperation?: AfterOperation[];
 };
 
+type HookOperationArgs = {
+	ctx: {
+		express: {
+			req: ExpressRequest;
+			res: ExpressResponse;
+		};
+		customVars: Record<string, unknown>;
+	};
+	existingData?: ExistingData;
+	inputData?: InputData;
+} & CRUD_Operation;
 type ReadonlyHookOperationArgs = {
 	ctx: DeepReadonly<Omit<Context, "express" | "customVars">> & {
 		express: {
@@ -162,11 +175,6 @@ type BoolField = {
 type DateTimeField = {
 	type: "DateTime";
 	defaultValue?: { kind: "now" | "updatedAt" } | string;
-};
-
-type FieldInfo = {
-	name: string;
-	type: string | StringFields | NumField | BoolField | DateTimeField;
 };
 
 /* ******************** */
@@ -244,12 +252,7 @@ type AuthFields = {
 	roleField?: string;
 };
 
-type Models = { [key: string]: { [key: string]: undefined } };
-
-type InternalTablesKeys =
-	| `${typeof cmsTablePrefix}_users`
-	| `${typeof cmsTablePrefix}_sessions`
-	| `${typeof cmsTablePrefix}_plugins`;
+type CollectionSkeletons = Record<string, Record<string, undefined>>;
 
 type Settings = {
 	db: Database;
@@ -259,6 +262,13 @@ type Settings = {
 	extendServer?: ExtendServer;
 	disableAdminUI?: boolean;
 	isAccessAllowed?: (options: Context) => boolean;
+	/**
+	 * default: {
+	 *     status: "healthy",
+	 *     timestamp: new Date().toISOString(),
+	 *     uptime: process.uptime()
+	 * }
+	 */
 	healthCheck?:
 		| {
 				path?: string;
@@ -280,9 +290,16 @@ type SP = (args: Options) => Promise<void>;
 /* ********** MISC. ********** */
 type MutableDataStore = Partial<{
 	prisma: PrismaClient;
-	models: Models;
+	models: CollectionSkeletons;
 	initFirstAuth: AuthSession["initFirstAuth"];
-}> & { authFields: Required<AuthFields>; pluginStore: ActiveInactivePlugins };
+}> & {
+	authFields: Required<AuthFields>;
+	pluginStore: ActiveInactivePlugins;
+	normalizedCollections: {
+		visible: Collections;
+		internal: Collections;
+	};
+};
 
 type CRUD_Operation = {
 	readonly operation: "create" | "read" | "update" | "delete";
@@ -359,11 +376,11 @@ export {
 	AuthFields,
 	RelationField,
 	CustomSessionData,
-	Models,
+	CollectionSkeletons,
 	ExistingData,
 	InputData,
 	MutableDataStore,
 	CollectionMethod,
-	InternalTablesKeys,
-	FieldInfo,
+	CurrentHook,
+	HookOperationArgs,
 };
