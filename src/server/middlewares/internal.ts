@@ -5,6 +5,7 @@ import {
 	filterObjByKeys,
 	getConfigStore,
 	getDataStore,
+	internalTablesKeys,
 } from "../../util/index.js";
 
 function internalMiddlewares(ctx: Context) {
@@ -18,7 +19,7 @@ function internalMiddlewares(ctx: Context) {
 			ctx.express = { req, res };
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
-				const data = await ctx.prisma.system_panda_sessions.findUnique({
+				const data = await ctx.prisma[internalTablesKeys.sessions].findUnique({
 					where: { id: req.cookies[SESSION.COOKIE_NAME] },
 					include: { [relationKey]: true },
 				});
