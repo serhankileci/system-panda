@@ -40,11 +40,16 @@ const isPrismaErr = (err: unknown) =>
 		PrismaClientValidationError,
 	].some(x => err?.constructor.name === x.name);
 
-function filterObjByKeys(obj: Record<string, unknown>, keys: string[]) {
-	return Object.keys(obj).reduce((prev: typeof obj, cur: keyof typeof obj) => {
-		if (keys.includes(cur)) prev[cur] = obj[cur];
-		return prev;
-	}, {});
+function filterObjByKeys<T extends object>(obj: T, keys: (keyof T)[]) {
+	const filteredObj: Partial<T> = {};
+
+	keys.forEach(key => {
+		if (obj.hasOwnProperty(key)) {
+			filteredObj[key] = obj[key];
+		}
+	});
+
+	return filteredObj;
 }
 
 export {
