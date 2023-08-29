@@ -1,24 +1,16 @@
-import path from "node:path";
-import { mkdir, writeFile } from "node:fs/promises";
-import { Collections, Database, pathExists, setDataStore, userProjectDir } from "../util/index.js";
+import { getConfigStore, setDataStore } from "../util/index.js";
 import { seed } from "./seed.js";
 import { execPrismaScripts } from "./execPrismaScripts.js";
-import { getModels } from "./getModels.js";
-import { makePrismaModel } from "./makePrismaModel.js";
+import { collectionFromModel } from "../collections/collectionFromModel.js";
+import { makePrismaModel } from "../collections/makePrismaModel.js";
 
-async function database(db: Database, collections: Collections) {
-	const generatedSchemaString = makePrismaModel(db, collections);
-
-	console.log("🐼 Checking for Prisma files...");
-	if (!(await pathExists(`${userProjectDir}/prisma`))) await mkdir(`${userProjectDir}/prisma`);
-	await writeFile(path.resolve(`${userProjectDir}/prisma/schema.prisma`), generatedSchemaString);
-
-	await execPrismaScripts();
-
-	const models = getModels(generatedSchemaString);
+async function database() {
+	const db = getConfigStore().settings.db;
+	const generatedSchemaString = makePrismaModel(db);
+	await execPrismaScripts(generatedSchemaString);
+	const models = collectionFromModel(generatedSchemaString);
 
 	console.log("🐼 Connecting to database...");
-
 	const { PrismaClient } = await import("@prisma/client");
 	const prisma = new PrismaClient({
 		errorFormat: db.errorFormat,
@@ -26,11 +18,8 @@ async function database(db: Database, collections: Collections) {
 		datasources: { db: { url: db.URI } },
 	});
 
-	setDataStore({ prisma });
-
+	setDataStore({ prisma, models });
 	await seed();
-
-	return models;
 }
 
 export { database };
