@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { SessionData, Store } from "express-session";
-import { CustomSessionData, getDataStore } from "../util/index.js";
+import { CustomSessionData, getDataStore, internalTablesKeys } from "../util/index.js";
 
 class PrismaSessionStore extends Store {
 	constructor(private prisma: PrismaClient) {
@@ -9,7 +9,7 @@ class PrismaSessionStore extends Store {
 
 	private async findSessionById(sid: string) {
 		try {
-			const session = await this.prisma.system_panda_sessions.findUnique({
+			const session = await this.prisma[internalTablesKeys.sessions].findUnique({
 				where: { id: sid },
 			});
 
@@ -34,7 +34,7 @@ class PrismaSessionStore extends Store {
 			const { userID, ...rest } = session;
 			const relationKey = getDataStore().authFields.relationKey;
 
-			await this.prisma.system_panda_sessions.upsert({
+			await this.prisma[internalTablesKeys.sessions].upsert({
 				where: { id: sid },
 				create: {
 					id: sid,
@@ -54,7 +54,7 @@ class PrismaSessionStore extends Store {
 
 	async destroy(sid: string, callback: (err?: any) => void) {
 		try {
-			await this.prisma.system_panda_sessions.delete({ where: { id: sid } });
+			await this.prisma[internalTablesKeys.sessions].delete({ where: { id: sid } });
 
 			callback();
 		} catch (err) {
