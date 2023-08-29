@@ -31,7 +31,12 @@ function apiHandler(ctx: Context, globalWebhooks: Webhook[]) {
 		});
 
 	apiRouter.get("/collections", ifAuthenticated, (_, res) =>
-		res.json(Object.entries(collections).map(([k, v]) => "/" + (v.slug || k)))
+		res.json(
+			Object.entries(collections).map(([k, v]) => ({
+				slug: v.slug || k,
+				fields: v.fields,
+			}))
+		)
 	);
 
 	for (const [cKey, cValue] of Object.entries(collections)) {
