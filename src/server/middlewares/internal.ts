@@ -39,7 +39,7 @@ function internalMiddlewares(ctx: Context) {
 			}
 
 			next();
-		} catch (err) {
+		} catch (err: unknown) {
 			next(err);
 		}
 	};
