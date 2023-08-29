@@ -8,6 +8,9 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
 		const { collectionKey, secretField, uniqueIdentifierField } = authFields;
 		const { httpOnly, secure, originalMaxAge } = req.session.cookie;
 
+		const missingCreds = [uniqueIdentifierField, secretField].filter(field => !req.body[field]);
+		if (missingCreds.length > 0) throw `Missing credentials: '${missingCreds.join("', '")}'.`;
+
 		const data = await prisma[collectionKey].findUnique({
 			where: {
 				[uniqueIdentifierField]: req.body[uniqueIdentifierField],
@@ -30,7 +33,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
 			req.session.id,
 			{ cookie: req.session.cookie, userID: data.id },
 			err => {
-				if (err) next(err);
+				if (err) return next(err);
 
 				res.cookie(SESSION.COOKIE_NAME, req.session.id, {
 					maxAge: Number(originalMaxAge),
@@ -41,8 +44,8 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
 				return res.sendStatus(200);
 			}
 		);
-	} catch (err) {
-		next(err);
+	} catch (err: unknown) {
+		return next(err);
 	}
 };
 
