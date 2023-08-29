@@ -5,16 +5,16 @@ function overrideDefaultCollections(authFields: Required<AuthFields>) {
 		(typeof internalTablesKeys)[keyof typeof internalTablesKeys],
 		Collection
 	> = {
-		system_panda_users: {
+		[internalTablesKeys.users]: {
 			fields: {
 				relation_session: {
 					type: "relation",
 					many: true,
-					ref: "system_panda_sessions.id",
+					ref: `${internalTablesKeys.sessions}.id`,
 				},
 			},
 		},
-		system_panda_sessions: {
+		[internalTablesKeys.sessions]: {
 			id: {
 				type: "cuid",
 			},
@@ -36,7 +36,7 @@ function overrideDefaultCollections(authFields: Required<AuthFields>) {
 				},
 			},
 		},
-		system_panda_plugins: {
+		[internalTablesKeys.plugins]: {
 			fields: {
 				title: { required: true, type: "String", unique: true },
 				description: { required: true, type: "String" },
