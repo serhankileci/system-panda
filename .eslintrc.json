@@ -27,5 +27,5 @@
 			}
 		]
 	},
-	"ignorePatterns": ["**/build/*", "**/node_modules/*"]
+	"ignorePatterns": ["**/build/*", "**/node_modules/*", "src/frontend"]
 }
