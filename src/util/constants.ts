@@ -31,7 +31,7 @@ const SESSION = {
 	MAX_AGE: 60 * 60 * 24 * 30 * 1000,
 };
 const routes = {
-	static: `/${cmsNamePrefix}-static`,
+	static: "/",
 	api: "/api",
 } as const;
 
