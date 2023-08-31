@@ -5,7 +5,7 @@ export class Config {
 
 	constructor() {
 		this.isEnvironmentProd = import.meta.env?.PROD;
-		this.apiUrl = "/api";
+		this.apiUrl = "/system-panda-api";
 		this.baseUrl = import.meta.env?.BASE_URL;
 	}
 }
