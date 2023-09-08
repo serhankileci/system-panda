@@ -2,7 +2,7 @@
 import { rest } from "msw";
 
 import config from "../../shared/config.ts";
-import { getMetaDataStub } from "../metadata.stub.ts";
+import { getMetaDataStub } from "../stubs/metadata.stub.ts";
 import {
 	createCollectionAlbumStub,
 	getCollectionAlbumFieldsStub,
@@ -14,7 +14,7 @@ import {
 } from "../stubs/collection.stub.ts";
 
 export const handlers = [
-	rest.get(config.apiUrl + "/metadata", (_req, res, ctx) => {
+	rest.get(config.apiUrl + "/collections", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getMetaDataStub()));
 	}),
 

@@ -25,7 +25,8 @@
 		"react-dom": "^18.2.0",
 		"react-hook-form": "^7.45.2",
 		"reflect-metadata": "^0.1.13",
-		"remeda": "^1.25.2"
+		"remeda": "^1.25.2",
+		"ts-node": "^10.9.1"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.3",

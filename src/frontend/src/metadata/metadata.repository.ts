@@ -13,7 +13,26 @@ export interface PluginsProgrammersModel {
 	inactivePlugins: DatabasePlugin[];
 }
 
-export type CollectionsProgrammersModel = string[];
+export type CollectionsProgrammersModel = Array<{
+	name: string;
+	fieldNames: string[];
+	fields: {
+		[key: string]: {
+			type?: string;
+			required?: string;
+			ref?: string;
+			many?: boolean;
+			subtype?: string;
+			unique?: boolean;
+			index?: boolean;
+			defaultValue?:
+				| {
+						kind?: string;
+				  }
+				| string;
+		};
+	};
+}>;
 
 @injectable()
 export class MetaDataRepository {
@@ -52,25 +71,34 @@ export class MetaDataRepository {
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get<MetaDataResponse>("/metadata");
+		const metaDataDTO = await this.gateway.get<MetaDataResponse>("/collections");
 
-		const collectionsPM = metaDataDTO.data.collections.map(collectionDto => {
-			return collectionDto;
+		console.log("metaDataDto: ", metaDataDTO.data);
+
+		const collectionsPM = metaDataDTO.data.map(collectionDto => {
+			console.log("dto: ", collectionDto);
+			return {
+				name: collectionDto.slug,
+				fieldNames: Object.keys(collectionDto.fields),
+				fields: collectionDto.fields,
+			};
 		});
+
+		// console.log("pm: ", collectionsPM);
 
 		this.setCollectionsProgrammersModel(collectionsPM);
 
-		const activePlugins = metaDataDTO.data.plugins.active.map(pluginDto => {
-			return pluginDto;
-		});
+		// const activePlugins = metaDataDTO.data.plugins.active.map(pluginDto => {
+		// 	return pluginDto;
+		// });
 
-		const inactivePlugins = metaDataDTO.data.plugins.inactive.map(pluginDto => {
-			return pluginDto;
-		});
+		// const inactivePlugins = metaDataDTO.data.plugins.inactive.map(pluginDto => {
+		// 	return pluginDto;
+		// });
 
-		this.setPluginsProgrammersModel({
-			activePlugins,
-			inactivePlugins,
-		});
+		// this.setPluginsProgrammersModel({
+		// 	activePlugins,
+		// 	inactivePlugins,
+		// });
 	};
 }

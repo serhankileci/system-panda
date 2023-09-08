@@ -44,6 +44,8 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 		modifierKey = "⌘";
 	}
 
+	console.log("browser vm: ", viewModel);
+
 	return (
 		<div className={dashboardClassName}>
 			{isNavbarOpen && (

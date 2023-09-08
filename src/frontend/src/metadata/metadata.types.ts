@@ -13,8 +13,23 @@ export interface Plugins {
 export type Collections = string[];
 
 export interface MetaDataResponse {
-	data: {
-		plugins: Plugins;
-		collections: Collections;
-	};
+	data: Array<{
+		slug: string;
+		fields: {
+			[key: string]: {
+				type?: string;
+				required?: string;
+				ref?: string;
+				many?: boolean;
+				subtype?: string;
+				unique?: boolean;
+				index?: boolean;
+				defaultValue?:
+					| {
+							kind?: string;
+					  }
+					| string;
+			};
+		};
+	}>;
 }

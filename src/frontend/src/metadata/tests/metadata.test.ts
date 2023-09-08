@@ -1,7 +1,7 @@
 import { defineFeature, loadFeature } from "jest-cucumber";
 
 import { InversifyConfig } from "../../ioc/InversifyConfig";
-import { getMetaDataStub } from "../../test-tools/metadata.stub";
+import { getMetaDataStub } from "../../test-tools/stubs/metadata.stub";
 import { MetaDataPresenter } from "../metadata.presenter";
 import { MetaDataRepository } from "../metadata.repository";
 
@@ -9,11 +9,12 @@ const feature = loadFeature("src/metadata/tests/features/metadata.feature");
 
 let metaDataPresenter: InstanceType<typeof MetaDataPresenter>;
 
-let viewModel = {
+let viewModel: typeof metaDataPresenter.viewModel = {
 	collections: [],
+	hasCollections: false,
 	plugins: {
-		activePlugins: [],
-		inactivePlugins: [],
+		enabledPlugins: [],
+		disabledPlugins: [],
 	},
 };
 
@@ -29,9 +30,10 @@ defineFeature(feature, test => {
 	beforeEach(() => {
 		viewModel = {
 			collections: [],
+			hasCollections: false,
 			plugins: {
-				activePlugins: [],
-				inactivePlugins: [],
+				enabledPlugins: [],
+				disabledPlugins: [],
 			},
 		};
 		metaDataLoadStub = null;
@@ -67,10 +69,12 @@ defineFeature(feature, test => {
 		});
 
 		then("I should have a list of plugins and collections.", () => {
-			expect(viewModel.collections.length).toEqual(6);
-			expect(viewModel.collections[0]).toBe("/student");
-			expect(viewModel.collections[2]).toBe("/song");
-			expect(viewModel.collections[4]).toBe("/users");
+			console.log("viewModel: ", viewModel);
+
+			expect(viewModel.collections.length).toEqual(4);
+			expect(viewModel.collections[0].name).toBe("student");
+			expect(viewModel.collections[1].name).toBe("classroom");
+			expect(viewModel.collections[3].name).toBe("record");
 		});
 	});
 });
