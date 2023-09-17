@@ -4,14 +4,13 @@ import { defineFeature, loadFeature } from "jest-cucumber";
 
 import { InversifyConfig } from "../../../../ioc/InversifyConfig";
 import {
-	AlbumFieldsStubResponse,
 	AlbumStubResponse,
-	getCollectionAlbumFieldsStub,
 	getCollectionAlbumStub,
 	getSuccessfulItemUpdateStub,
 } from "../../../../test-tools/stubs/collection.stub";
 import { CollectionPresenter } from "../../collection.presenter";
 import { CollectionRepository } from "../../collection.repository";
+import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
 
 const feature = loadFeature(
 	"src/modules/collection/testing/features/update-collection-item.feature"
@@ -29,7 +28,7 @@ type ErrorResponse = {
 	success: false;
 };
 
-type GetResponseType = AlbumStubResponse | AlbumFieldsStubResponse | ErrorResponse;
+type GetResponseType = AlbumStubResponse | ErrorResponse | ReturnType<typeof getMetaDataStub>;
 
 type GetStubMapType = { [key: string]: () => Promise<GetResponseType> };
 
@@ -42,9 +41,8 @@ defineFeature(feature, test => {
 
 			collectionRepository.httpGateway.get = jest.fn().mockImplementation((path: string) => {
 				const getStubMap: GetStubMapType = {
-					"/collections/album": () => Promise.resolve(getCollectionAlbumStub()),
-					"/fields/collection/album": () =>
-						Promise.resolve(getCollectionAlbumFieldsStub()),
+					"/collections/record": () => Promise.resolve(getCollectionAlbumStub()),
+					"/collections": () => Promise.resolve(getMetaDataStub()),
 				};
 
 				for (const requestUrl in getStubMap) {
@@ -61,7 +59,7 @@ defineFeature(feature, test => {
 			collectionRepository.httpGateway.put = jest
 				.fn()
 				.mockImplementation((path: string, body: any) => {
-					if (path.indexOf(`/collections/album?where={"id"`) !== -1) {
+					if (path.indexOf(`/collections/record`) !== -1) {
 						return Promise.resolve(getSuccessfulItemUpdateStub(body.where.id, body));
 					}
 
@@ -72,12 +70,10 @@ defineFeature(feature, test => {
 		});
 
 		given("I see my target collection item", async () => {
-			await collectionPresenter!.load("album");
+			await collectionPresenter!.load("record");
+			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith("/collections");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/fields/collection/album"
-			);
-			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/collections/album"
+				"/collections/record"
 			);
 
 			expect(collectionPresenter!.viewModel.hasData).toBe(true);
@@ -90,13 +86,13 @@ defineFeature(feature, test => {
 				expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 2");
 				expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2010);
 
-				await collectionPresenter!.updateItem("album", "2", {
+				await collectionPresenter!.updateItem("record", "2", {
 					title: "The Dark Side of the Moon",
 					year: 1973,
 				});
 
 				expect(collectionRepository!.httpGateway.put).toHaveBeenCalledWith(
-					`/collections/album?where={"id": 2}`,
+					`/collections/record`,
 					{
 						where: {
 							id: "2",

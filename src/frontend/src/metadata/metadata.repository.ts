@@ -2,7 +2,7 @@ import { action, makeAutoObservable } from "mobx";
 
 import { HttpGateway } from "../shared/gateways/http.gateway";
 
-import type { DatabasePlugin, MetaDataResponse } from "./metadata.types";
+import type { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
 import { injectable, inject } from "inversify";
@@ -71,12 +71,31 @@ export class MetaDataRepository {
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get<MetaDataResponse>("/collections");
+		const metaDataDTO = await this.gateway.get<
+			Array<{
+				slug: string;
+				fields: {
+					[key: string]: {
+						type?: string;
+						required?: string;
+						ref?: string;
+						many?: boolean;
+						subtype?: string;
+						unique?: boolean;
+						index?: boolean;
+						defaultValue?:
+							| {
+									kind?: string;
+							  }
+							| string;
+					};
+				};
+			}>
+		>("/collections");
 
-		console.log("metaDataDto: ", metaDataDTO.data);
+		console.log("meta dto: ", metaDataDTO);
 
-		const collectionsPM = metaDataDTO.data.map(collectionDto => {
-			console.log("dto: ", collectionDto);
+		const collectionsPM = metaDataDTO.map(collectionDto => {
 			return {
 				name: collectionDto.slug,
 				fieldNames: Object.keys(collectionDto.fields),
@@ -84,7 +103,7 @@ export class MetaDataRepository {
 			};
 		});
 
-		// console.log("pm: ", collectionsPM);
+		console.log("collectionsPM: ", collectionsPM);
 
 		this.setCollectionsProgrammersModel(collectionsPM);
 

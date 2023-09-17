@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import { Modal } from "@mui/base/Modal";
 import {
 	CoreRow,
 	createColumnHelper,
@@ -5,16 +7,14 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import { singularize } from "inflection";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
-import { singularize } from "inflection";
+import { useForm } from "react-hook-form";
 
 import { useInjection } from "../../ioc/useInjection";
-import { CollectionPresenter } from "./collection.presenter";
-
-import { Modal } from "@mui/base/Modal";
-import { useForm } from "react-hook-form";
 import { emailRegex } from "../../utilities/regex";
+import { CollectionPresenter } from "./collection.presenter";
 
 export const CollectionTable = observer((props: { collectionName: string }) => {
 	const presenter = useInjection(CollectionPresenter);
@@ -91,7 +91,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 								};
 
 								const onSubmit = async () => {
-									console.log(id);
 									const newData = Object.assign({}, info.row.original, {
 										[field.name]: inputValue,
 									}) as {
@@ -103,14 +102,11 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 										delete newData.id;
 									}
 
-									console.log("newData", newData);
-
 									const dto = await presenter.updateItem(
 										props.collectionName,
 										id,
 										newData
 									);
-									console.log("dto: ", dto);
 
 									setData(presenter.viewModel.dataList);
 
@@ -187,8 +183,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 				setColumns(fieldColumns);
 				setData(presenter.viewModel.dataList);
 				setModalState(presenter.viewModel.fields);
-
-				console.log("modalState: ", modalState);
 			}
 		}
 		load();
@@ -207,10 +201,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 		formState: { errors },
 	} = useForm();
 
-	console.log("errors: ", errors);
-
 	const onSubmit = async (data: { [key: string]: unknown }) => {
-		console.log("data: ", data);
 		const response = await presenter.addItem(props.collectionName, data);
 
 		if (response.success) {
@@ -218,7 +209,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 			setOpenModel(false);
 			reset();
 		}
-		console.log("res: ", response);
 	};
 
 	return (

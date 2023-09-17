@@ -1,23 +1,3 @@
-export const getCollectionAlbumFieldsStub = () => {
-	return {
-		success: true,
-		data: {
-			fields: [
-				{
-					name: "year",
-					type: "number",
-				},
-				{
-					name: "title",
-					type: "String",
-				},
-			],
-		},
-	};
-};
-
-export type AlbumFieldsStubResponse = ReturnType<typeof getCollectionAlbumFieldsStub>;
-
 export const getCollectionAlbumStub = () => {
 	return {
 		success: true,
@@ -72,6 +52,25 @@ export const getCollectionStudentStub = () => {
 			{ id: "2", name: "Alex" },
 			{ id: "3", name: "Jane" },
 		],
+	};
+};
+
+let isStudentFirstCall = true;
+
+export const createCollectionStudentStub = (data: { [key: string]: unknown }) => {
+	if (isStudentFirstCall) {
+		isStudentFirstCall = false;
+		data["id"] = "4";
+	} else {
+		data["id"] = Math.floor(Math.random() * 999).toString();
+	}
+
+	return {
+		success: true,
+		data: {
+			before: null,
+			after: data,
+		},
 	};
 };
 

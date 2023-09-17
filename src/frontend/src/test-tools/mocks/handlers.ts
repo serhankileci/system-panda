@@ -2,31 +2,26 @@
 import { rest } from "msw";
 
 import config from "../../shared/config.ts";
-import { getMetaDataStub } from "../stubs/metadata.stub.ts";
 import {
 	createCollectionAlbumStub,
-	getCollectionAlbumFieldsStub,
 	getCollectionAlbumStub,
-	getCollectionStudentFieldsStub,
 	getCollectionStudentStub,
 	getSuccessfulItemDeletionStub,
 	getSuccessfulItemUpdateStub,
+	createCollectionStudentStub,
 } from "../stubs/collection.stub.ts";
+import { getMetaDataStub } from "../stubs/metadata.stub.ts";
 
 export const handlers = [
 	rest.get(config.apiUrl + "/collections", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getMetaDataStub()));
 	}),
 
-	rest.get(config.apiUrl + "/fields/collection/album", (_req, res, ctx) => {
-		return res(ctx.status(200), ctx.json(getCollectionAlbumFieldsStub()));
-	}),
-
-	rest.get(config.apiUrl + "/collections/album", (_req, res, ctx) => {
+	rest.get(config.apiUrl + "/collections/record", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getCollectionAlbumStub()));
 	}),
 
-	rest.put(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+	rest.put(config.apiUrl + "/collections/record", async (req, res, ctx) => {
 		const where = req.url.searchParams.get("where") as string;
 
 		const id = (JSON.parse(where).id as number).toString();
@@ -40,26 +35,18 @@ export const handlers = [
 		return res(ctx.status(200), ctx.json(getSuccessfulItemUpdateStub(id, body)));
 	}),
 
-	rest.put(config.apiUrl + "/collections/album", (_req, res, ctx) => {
+	rest.put(config.apiUrl + "/collections/record", (_req, res, ctx) => {
 		return res(ctx.status(200), ctx.json(getCollectionAlbumStub()));
 	}),
 
-	rest.delete(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+	rest.delete(config.apiUrl + "/collections/record", async (req, res, ctx) => {
 		const body = await req.json();
 		const id = body.where.id as string;
 
 		return res(ctx.status(200), ctx.json(getSuccessfulItemDeletionStub(id)));
 	}),
 
-	rest.get(config.apiUrl + "/fields/collection/student", (_req, res, ctx) => {
-		return res(ctx.status(200), ctx.json(getCollectionStudentFieldsStub()));
-	}),
-
-	rest.get(config.apiUrl + "/collections/student", (_req, res, ctx) => {
-		return res(ctx.status(200), ctx.json(getCollectionStudentStub()));
-	}),
-
-	rest.post(config.apiUrl + "/collections/album", async (req, res, ctx) => {
+	rest.post(config.apiUrl + "/collections/record", async (req, res, ctx) => {
 		const body: {
 			data: {
 				[key: string]: unknown;
@@ -67,6 +54,35 @@ export const handlers = [
 		} = await req.json();
 
 		return res(ctx.status(200), ctx.json(createCollectionAlbumStub(body)));
+	}),
+
+	rest.get(config.apiUrl + "/collections/student", (_req, res, ctx) => {
+		return res(ctx.status(200), ctx.json(getCollectionStudentStub()));
+	}),
+
+	rest.post(config.apiUrl + "/collections/student", async (req, res, ctx) => {
+		const body: {
+			data: {
+				[key: string]: unknown;
+			};
+		} = await req.json();
+
+		return res(ctx.status(200), ctx.json(createCollectionStudentStub(body.data)));
+	}),
+
+	rest.put(config.apiUrl + "/collections/student", async (req, res, ctx) => {
+		const body: {
+			data: {
+				[key: string]: unknown;
+			};
+			where?: {
+				id?: string;
+			};
+		} = await req.json();
+
+		const id = body.where?.id;
+
+		return res(ctx.status(200), ctx.json(getSuccessfulItemUpdateStub(id!, body)));
 	}),
 
 	rest.post(config.apiUrl + "/auth/login", (req, res, ctx) => {

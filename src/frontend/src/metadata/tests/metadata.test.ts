@@ -69,8 +69,6 @@ defineFeature(feature, test => {
 		});
 
 		then("I should have a list of plugins and collections.", () => {
-			console.log("viewModel: ", viewModel);
-
 			expect(viewModel.collections.length).toEqual(4);
 			expect(viewModel.collections[0].name).toBe("student");
 			expect(viewModel.collections[1].name).toBe("classroom");

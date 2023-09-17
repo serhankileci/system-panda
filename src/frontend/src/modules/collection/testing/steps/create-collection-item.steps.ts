@@ -4,15 +4,13 @@ import { defineFeature, loadFeature } from "jest-cucumber";
 
 import { InversifyConfig } from "../../../../ioc/InversifyConfig";
 import {
-	AlbumFieldsStubResponse,
 	AlbumStubResponse,
 	createCollectionAlbumStub,
-	getCollectionAlbumFieldsStub,
 	getCollectionAlbumStub,
-	getSuccessfulItemUpdateStub,
 } from "../../../../test-tools/stubs/collection.stub";
 import { CollectionPresenter } from "../../collection.presenter";
 import { CollectionRepository } from "../../collection.repository";
+import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
 
 const feature = loadFeature(
 	"src/modules/collection/testing/features/create-collection-item.feature"
@@ -30,7 +28,7 @@ type ErrorResponse = {
 	success: false;
 };
 
-type GetResponseType = AlbumStubResponse | AlbumFieldsStubResponse | ErrorResponse;
+type GetResponseType = AlbumStubResponse | ErrorResponse | ReturnType<typeof getMetaDataStub>;
 
 type GetStubMapType = { [key: string]: () => Promise<GetResponseType> };
 
@@ -43,9 +41,8 @@ defineFeature(feature, test => {
 
 			collectionRepository.httpGateway.get = jest.fn().mockImplementation((path: string) => {
 				const getStubMap: GetStubMapType = {
-					"/collections/album": () => Promise.resolve(getCollectionAlbumStub()),
-					"/fields/collection/album": () =>
-						Promise.resolve(getCollectionAlbumFieldsStub()),
+					"/collections/record": () => Promise.resolve(getCollectionAlbumStub()),
+					"/collections": () => Promise.resolve(getMetaDataStub()),
 				};
 
 				for (const requestUrl in getStubMap) {
@@ -62,8 +59,8 @@ defineFeature(feature, test => {
 			collectionRepository.httpGateway.post = jest
 				.fn()
 				.mockImplementation((path: string, body: any) => {
-					if (path === `/collections/album`) {
-						return Promise.resolve(createCollectionAlbumStub(body));
+					if (path === `/collections/record`) {
+						return Promise.resolve(createCollectionAlbumStub(body.data));
 					}
 
 					return Promise.resolve({
@@ -73,14 +70,11 @@ defineFeature(feature, test => {
 		});
 
 		given("when the collection table screen is loaded", async () => {
-			await collectionPresenter!.load("album");
+			await collectionPresenter!.load("record");
+			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith("/collections");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/fields/collection/album"
+				"/collections/record"
 			);
-			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/collections/album"
-			);
-
 			expect(collectionPresenter!.viewModel.hasData).toBe(true);
 			expect(collectionPresenter!.viewModel.hasFields).toBe(true);
 			expect(collectionPresenter!.viewModel.dataList.length).toEqual(3);
@@ -91,17 +85,19 @@ defineFeature(feature, test => {
 			async () => {
 				expect(collectionPresenter!.viewModel.dataList[3]).toBe(undefined);
 
-				await collectionPresenter!.addItem("album", {
+				await collectionPresenter!.addItem("record", {
 					title: "The Dark Side of the Moon",
 					year: 1973,
 				});
 
 				expect(collectionRepository!.httpGateway.post).toHaveBeenCalledWith(
-					`/collections/album`,
+					`/collections/record`,
 					{
-						id: "4",
-						title: "The Dark Side of the Moon",
-						year: 1973,
+						data: {
+							id: "4",
+							title: "The Dark Side of the Moon",
+							year: 1973,
+						},
 					}
 				);
 			}

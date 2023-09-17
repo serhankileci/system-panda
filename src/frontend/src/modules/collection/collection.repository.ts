@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { action, makeAutoObservable, set, toJS, remove } from "mobx";
+import { action, makeAutoObservable, remove, set, toJS } from "mobx";
 import { makeLoggable } from "mobx-log";
 
 import config from "../../shared/config";
@@ -13,12 +13,22 @@ interface CollectionResponse {
 
 type FieldInfo = {
 	name: string;
-	type: string;
+	[key: string]: unknown;
 };
+
+// type FieldInfo = {
+// 	name: string;
+// 	type: string;
+// };
 
 interface FieldsResponse {
 	success: boolean;
-	data: { fields: FieldInfo[] };
+	data: Array<{
+		slug: string;
+		fields: {
+			[key: string]: unknown;
+		};
+	}>;
 	error?: unknown;
 }
 
@@ -69,17 +79,39 @@ class CollectionRepository {
 	}
 
 	@action getFields = async (collectionName: string) => {
-		const fieldsDto = await this.httpGateway.get<FieldsResponse>(
-			`/fields/collection/${collectionName}`
-		);
+		const fieldsDto = await this.httpGateway.get<FieldsResponse>(`/collections`);
+		console.log("fieldsDto: ", fieldsDto.data);
 
-		this.collectionFieldsPm = fieldsDto.data.fields;
+		if (fieldsDto.data) {
+			const collectionEntry = fieldsDto.data.find(field => field.slug === collectionName);
+			if (collectionEntry && collectionEntry.fields) {
+				const fieldsPm = [];
+
+				for (const field in collectionEntry.fields) {
+					const fieldValue = collectionEntry.fields[field] as { type?: string };
+
+					if (fieldValue.type === "relation") {
+						continue;
+					}
+
+					fieldsPm.push({
+						name: field,
+						type: fieldValue.type,
+					});
+				}
+				this.collectionFieldsPm = fieldsPm;
+			}
+		}
 	};
 
 	@action getData = async (collectionName: string) => {
+		console.log("collectionName: ", collectionName);
+
 		const collectionDataDto = await this.httpGateway.get<CollectionResponse>(
 			`/collections/${collectionName}`
 		);
+
+		console.log("data: ", collectionDataDto);
 
 		this.collectionDataPm = collectionDataDto.data;
 
@@ -90,8 +122,6 @@ class CollectionRepository {
 		const itemDto = await this.httpGateway.post<
 			SuccessfulUpdateResponse | FailedUpdateResponse
 		>(`/collections/${collectionName}`, data);
-
-		console.log("dto: ", itemDto);
 
 		if ("success" in itemDto && itemDto.success) {
 			if ("data" in itemDto && "after" in itemDto.data) {
@@ -169,8 +199,6 @@ class CollectionRepository {
 			});
 
 			remove(this.collectionDataPm, targetIndex.toString());
-
-			console.log("colelctionPM: ", toJS(this.collectionDataPm));
 
 			return {
 				success: deletionDto.success,
