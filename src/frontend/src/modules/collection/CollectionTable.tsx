@@ -247,6 +247,13 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 					<article className="px-4 py-2">
 						<form onSubmit={handleSubmit(onSubmit)}>
 							{modalState.map(field => {
+								if (
+									typeof field.type === "string" &&
+									new RegExp(/json/i).test(field.type)
+								) {
+									return null;
+								}
+
 								let inputType = "text";
 								let pattern = undefined;
 								let defaultValue: string | number = "";
@@ -260,14 +267,18 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 									defaultValue = 0;
 								}
 
-								if (field.type === "datetime") {
+								if (
+									typeof field.type === "string" &&
+									new RegExp(/datetime/i).test(field.type)
+								) {
 									inputType = "date";
-									defaultValue = new Date().toISOString();
+									defaultValue = new Date().toISOString().split("T")[0];
 								}
 
 								if (
 									RegExp(/(\bemail\b)/i).test(field.name as string) &&
-									field.type === "String"
+									typeof field.type === "string" &&
+									new RegExp(/string/i).test(field.type)
 								) {
 									inputType = "email";
 									pattern = emailRegex;
@@ -332,46 +343,51 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 			{!presenter.viewModel.hasData && (
 				<p className="mt-3">This collection currently has no items.</p>
 			)}
-			<div className="mt-3" style={{ overflowX: "auto" }}>
-				<table className="bg-white  shadow-lg shadow-[#c2ead5]">
-					<thead>
-						{table.getHeaderGroups().map(headerGroup => (
-							<tr
-								key={headerGroup.id}
-								className="bg-blue-50 [&>*:first-child]:sticky [&>*:first-child]:bg-blue-50 [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
-							>
-								{headerGroup.headers.map(header => (
-									<th
-										key={header.id}
-										className="py-2 px-8 border-left-1 border border-top-white capitalize"
-									>
-										{header.isPlaceholder
-											? null
-											: flexRender(
+			{presenter.viewModel.hasData && (
+				<div className="mt-3" style={{ overflowX: "auto" }}>
+					<table className="bg-white  shadow-lg shadow-[#c2ead5]">
+						<thead>
+							{table.getHeaderGroups().map(headerGroup => (
+								<tr
+									key={headerGroup.id}
+									className="bg-blue-50 [&>*:first-child]:sticky [&>*:first-child]:bg-blue-50 [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+								>
+									{headerGroup.headers.map(header => (
+										<th
+											key={header.id}
+											className="py-2 px-8 border-left-1 border border-top-white capitalize"
+										>
+											{header.isPlaceholder
+												? null
+												: flexRender(
 													header.column.columnDef.header,
 													header.getContext()
-											  )}
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map(row => (
-							<tr
-								key={row.id}
-								className="[&>*:first-child]:sticky [&>*:first-child]:bg-white [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
-							>
-								{row.getVisibleCells().map(cell => (
-									<td key={cell.id} className="py-3 px-2 sm:px-8 border">
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
-								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+												)}
+										</th>
+									))}
+								</tr>
+							))}
+						</thead>
+						<tbody>
+							{table.getRowModel().rows.map(row => (
+								<tr
+									key={row.id}
+									className="[&>*:first-child]:sticky [&>*:first-child]:bg-white [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+								>
+									{row.getVisibleCells().map(cell => (
+										<td key={cell.id} className="py-3 px-2 sm:px-8 border">
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext()
+											)}
+										</td>
+									))}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)}
 		</div>
 	);
 });

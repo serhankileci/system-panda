@@ -10,10 +10,10 @@ import config from "./shared/config.ts";
 
 import "./index.css";
 
-// if (!config.isEnvironmentProd) {
-// 	const { worker } = await import("./test-tools/mocks/browser.ts");
-// 	await worker.start();
-// }
+if (!config.isEnvironmentProd) {
+	const { worker } = await import("./test-tools/mocks/browser.ts");
+	await worker.start();
+}
 
 configure({
 	enforceActions: "never",

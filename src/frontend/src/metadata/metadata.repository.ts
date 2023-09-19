@@ -7,6 +7,7 @@ import { makeLoggable } from "mobx-log";
 import config from "../shared/config";
 import { injectable, inject } from "inversify";
 import { Types } from "../shared/types/ioc-types";
+import type { MetaDataResponse, Field } from "./metadata.types";
 
 export interface PluginsProgrammersModel {
 	activePlugins: DatabasePlugin[];
@@ -16,22 +17,7 @@ export interface PluginsProgrammersModel {
 export type CollectionsProgrammersModel = Array<{
 	name: string;
 	fieldNames: string[];
-	fields: {
-		[key: string]: {
-			type?: string;
-			required?: string;
-			ref?: string;
-			many?: boolean;
-			subtype?: string;
-			unique?: boolean;
-			index?: boolean;
-			defaultValue?:
-				| {
-						kind?: string;
-				  }
-				| string;
-		};
-	};
+	fields: Field;
 }>;
 
 @injectable()
@@ -71,29 +57,7 @@ export class MetaDataRepository {
 	}
 
 	loadMetaData = async () => {
-		const metaDataDTO = await this.gateway.get<
-			Array<{
-				slug: string;
-				fields: {
-					[key: string]: {
-						type?: string;
-						required?: string;
-						ref?: string;
-						many?: boolean;
-						subtype?: string;
-						unique?: boolean;
-						index?: boolean;
-						defaultValue?:
-							| {
-									kind?: string;
-							  }
-							| string;
-					};
-				};
-			}>
-		>("/collections");
-
-		console.log("meta dto: ", metaDataDTO);
+		const metaDataDTO = await this.gateway.get<MetaDataResponse>("/collections");
 
 		const collectionsPM = metaDataDTO.map(collectionDto => {
 			return {
@@ -102,8 +66,6 @@ export class MetaDataRepository {
 				fields: collectionDto.fields,
 			};
 		});
-
-		console.log("collectionsPM: ", collectionsPM);
 
 		this.setCollectionsProgrammersModel(collectionsPM);
 

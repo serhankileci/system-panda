@@ -5,7 +5,7 @@ import { makeLoggable } from "mobx-log";
 import config from "../../shared/config";
 import { HttpGateway } from "../../shared/gateways/http.gateway";
 import { Types } from "../../shared/types/ioc-types";
-
+import type { MetaDataResponse } from "../../metadata/metadata.types";
 interface CollectionResponse {
 	success: true;
 	data: { id?: string; [key: string]: unknown }[];
@@ -15,22 +15,6 @@ type FieldInfo = {
 	name: string;
 	[key: string]: unknown;
 };
-
-// type FieldInfo = {
-// 	name: string;
-// 	type: string;
-// };
-
-interface FieldsResponse {
-	success: boolean;
-	data: Array<{
-		slug: string;
-		fields: {
-			[key: string]: unknown;
-		};
-	}>;
-	error?: unknown;
-}
 
 export interface SuccessfulUpdateResponse {
 	success: boolean;
@@ -79,11 +63,11 @@ class CollectionRepository {
 	}
 
 	@action getFields = async (collectionName: string) => {
-		const fieldsDto = await this.httpGateway.get<FieldsResponse>(`/collections`);
-		console.log("fieldsDto: ", fieldsDto.data);
+		const fieldsDto = await this.httpGateway.get<MetaDataResponse>(`/collections`);
 
-		if (fieldsDto.data) {
-			const collectionEntry = fieldsDto.data.find(field => field.slug === collectionName);
+		if (fieldsDto && fieldsDto.length) {
+			const collectionEntry = fieldsDto.find(field => field.slug === collectionName);
+
 			if (collectionEntry && collectionEntry.fields) {
 				const fieldsPm = [];
 
@@ -99,19 +83,16 @@ class CollectionRepository {
 						type: fieldValue.type,
 					});
 				}
+
 				this.collectionFieldsPm = fieldsPm;
 			}
 		}
 	};
 
 	@action getData = async (collectionName: string) => {
-		console.log("collectionName: ", collectionName);
-
 		const collectionDataDto = await this.httpGateway.get<CollectionResponse>(
 			`/collections/${collectionName}`
 		);
-
-		console.log("data: ", collectionDataDto);
 
 		this.collectionDataPm = collectionDataDto.data;
 
@@ -121,7 +102,7 @@ class CollectionRepository {
 	@action createItem = async (collectionName: string, data: unknown) => {
 		const itemDto = await this.httpGateway.post<
 			SuccessfulUpdateResponse | FailedUpdateResponse
-		>(`/collections/${collectionName}`, data);
+		>(`/collections/${collectionName}`, { data });
 
 		if ("success" in itemDto && itemDto.success) {
 			if ("data" in itemDto && "after" in itemDto.data) {
@@ -153,7 +134,7 @@ class CollectionRepository {
 
 		const updatedDto = await this.httpGateway.put<
 			SuccessfulUpdateResponse | FailedUpdateResponse
-		>(`/collections/${collectionName}?where={"id": ${id}}`, {
+		>(`/collections/${collectionName}`, {
 			where: {
 				id,
 			},

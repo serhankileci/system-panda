@@ -15,8 +15,6 @@ export class MetaDataPresenter {
 			disabledPlugins: this.plugins.inactivePlugins || [],
 		};
 
-		console.log("programmer model: ", this.metaDataRepository.collectionsPM);
-
 		return {
 			plugins: pluginsViewModel,
 			collections: this.metaDataRepository.collectionsPM.map(collection => {

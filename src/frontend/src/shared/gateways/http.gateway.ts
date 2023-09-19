@@ -23,8 +23,6 @@ export class HttpGateway {
 			headers: this.headers,
 		});
 
-		console.log("response: ", response);
-
 		const dto = (await response.json()) as T;
 
 		return dto;
