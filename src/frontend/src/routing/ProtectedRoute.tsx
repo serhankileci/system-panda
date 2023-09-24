@@ -1,4 +1,4 @@
-import { MakeLinkOptions, Navigate } from "@tanstack/router";
+import { MakeLinkOptions, Navigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { observer } from "mobx-react";
 import { ReactNode, useEffect } from "react";

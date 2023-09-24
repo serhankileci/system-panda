@@ -11,9 +11,9 @@
 	"dependencies": {
 		"@mui/base": "^5.0.0-beta.12",
 		"@preact/signals": "^1.1.5",
+		"@tanstack/react-router": "0.0.1-beta.191",
 		"@tanstack/react-table": "^8.9.3",
-		"@tanstack/router": "^0.0.1-beta.119",
-		"@tanstack/router-devtools": "^0.0.1-beta.119",
+		"@tanstack/router-devtools": "0.0.1-beta.191",
 		"dayjs": "^1.11.9",
 		"inflection": "^2.0.1",
 		"inversify": "^6.0.1",

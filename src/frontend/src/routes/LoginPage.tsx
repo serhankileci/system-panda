@@ -1,4 +1,4 @@
-import { Outlet } from "@tanstack/router";
+import { Outlet } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { observer } from "mobx-react";
 import { useEffect } from "react";

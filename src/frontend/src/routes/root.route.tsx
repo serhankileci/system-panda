@@ -1,4 +1,4 @@
-import { RootRoute } from "@tanstack/router";
+import { RootRoute } from "@tanstack/react-router";
 
 import { ErrorScreen } from "../components/ErrorScreen";
 import { Root } from "./Root";
