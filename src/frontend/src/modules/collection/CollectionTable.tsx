@@ -229,7 +229,13 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 	} = useForm();
 
 	const onSubmit = async (data: { [key: string]: unknown }) => {
-		const response = await presenter.addItem(props.collectionName, data);
+		const preparedData = Object.assign({}, data);
+
+		if ("dateCreated" in preparedData && typeof preparedData["dateCreated"] === "string") {
+			preparedData["dateCreated"] = dayjs(preparedData["dateCreated"]).toISOString();
+		}
+
+		const response = await presenter.addItem(props.collectionName, preparedData);
 
 		if (response.success) {
 			setData(presenter.viewModel.dataList);
