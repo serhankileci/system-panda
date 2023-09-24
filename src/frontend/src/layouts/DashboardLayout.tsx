@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/router";
+import { Link } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
 
-import { AuthPresenter } from "../auth/auth.presenter";
+import { AuthPresenter } from "../modules/auth/auth.presenter";
 
 import type { MetaDataViewModel } from "../shared/types/viewmodels";
 import { useInjection } from "../ioc/useInjection";
@@ -100,7 +100,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 					</nav>
 				</aside>
 			)}
-			<main>{children}</main>
+			<main className="overflow-auto">{children}</main>
 		</div>
 	);
 });

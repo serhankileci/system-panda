@@ -2,11 +2,11 @@ import dayjs from "dayjs";
 import { defineFeature, loadFeature } from "jest-cucumber";
 
 import { InversifyConfig } from "../../ioc/InversifyConfig";
-import { LoginTestHarness } from "../../test-tools/harnesses/login.harness";
-import { AuthPresenter } from "../auth.presenter";
-import { AuthenticationRepository } from "../authentication.repository";
+import { AuthPresenter } from "../../modules/auth/auth.presenter";
+import { AuthenticationRepository } from "../../modules/auth/authentication.repository";
+import { LoginTestHarness } from "../support/harnesses/login.harness";
 
-const featureLoggingIn = loadFeature("src/auth/tests/features/login.feature");
+const featureLoggingIn = loadFeature("src/__tests__/features/auth/login.feature");
 
 defineFeature(featureLoggingIn, test => {
 	test("Entering the correct password", ({ given, when, then }) => {
@@ -52,7 +52,7 @@ defineFeature(featureLoggingIn, test => {
 	});
 });
 
-const featureLoggingOut = loadFeature("src/auth/tests/features/logout.feature");
+const featureLoggingOut = loadFeature("src/__tests__/features/auth/logout.feature");
 
 defineFeature(featureLoggingOut, test => {
 	const inversifyConfig = new InversifyConfig("test");

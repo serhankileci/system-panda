@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import { Modal } from "@mui/base/Modal";
 import {
 	CoreRow,
 	createColumnHelper,
@@ -5,16 +7,15 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import { singularize } from "inflection";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
-import { singularize } from "inflection";
+import { useForm } from "react-hook-form";
 
 import { useInjection } from "../../ioc/useInjection";
-import { CollectionPresenter } from "./collection.presenter";
-
-import { Modal } from "@mui/base/Modal";
-import { useForm } from "react-hook-form";
 import { emailRegex } from "../../utilities/regex";
+import { CollectionPresenter } from "./collection.presenter";
+import dayjs from "dayjs";
 
 export const CollectionTable = observer((props: { collectionName: string }) => {
 	const presenter = useInjection(CollectionPresenter);
@@ -73,11 +74,22 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 				const columnHelper = createColumnHelper<any>();
 
 				presenter.viewModel.fields.forEach(field => {
+					if (field.type === "Json") {
+						return null;
+					}
+
 					fieldColumns.push(
 						columnHelper.accessor(field.name, {
 							id: field.name,
 							cell: info => {
-								const originalValue = info.getValue();
+								let originalValue = info.getValue();
+
+								if (
+									typeof originalValue === "string" &&
+									field.type === "DateTime"
+								) {
+									originalValue = dayjs(originalValue).format("YYYY-MM-DD");
+								}
 
 								const [editing, setEditing] = useState<boolean>(false);
 								const [inputValue, setInputValue] = useState(originalValue);
@@ -91,7 +103,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 								};
 
 								const onSubmit = async () => {
-									console.log(id);
 									const newData = Object.assign({}, info.row.original, {
 										[field.name]: inputValue,
 									}) as {
@@ -103,14 +114,16 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 										delete newData.id;
 									}
 
-									console.log("newData", newData);
+									if (
+										"dateCreated" in newData &&
+										typeof newData["dateCreated"] === "string"
+									) {
+										newData["dateCreated"] = dayjs(
+											newData["dateCreated"]
+										).toISOString();
+									}
 
-									const dto = await presenter.updateItem(
-										props.collectionName,
-										id,
-										newData
-									);
-									console.log("dto: ", dto);
+									await presenter.updateItem(props.collectionName, id, newData);
 
 									setData(presenter.viewModel.dataList);
 
@@ -141,10 +154,20 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 									setEditing(true);
 								};
 
+								const displayValue = (): any => {
+									let value = info.getValue();
+
+									if (field.type === "DateTime" && typeof value === "string") {
+										value = dayjs(value).format("MM/DD/YYYY");
+									}
+
+									return value;
+								};
+
 								return (
-									<div>
+									<div key={field.name}>
 										{editing ? (
-											<div>
+											<div className="inline-flex">
 												<input
 													value={inputValue}
 													type={defaultInputType}
@@ -165,13 +188,13 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 												</button>
 											</div>
 										) : (
-											<div className={`${alignmentClass}`}>
+											<div className={`${alignmentClass} `} key={field.name}>
 												<p
 													onClick={onEdit}
-													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2"
+													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2 break-words whitespace-normal max-w-[20rem]"
 													style={{ minHeight: "2.15rem" }}
 												>
-													{info.getValue()}
+													{displayValue()}
 												</p>
 											</div>
 										)}
@@ -187,8 +210,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 				setColumns(fieldColumns);
 				setData(presenter.viewModel.dataList);
 				setModalState(presenter.viewModel.fields);
-
-				console.log("modalState: ", modalState);
 			}
 		}
 		load();
@@ -207,10 +228,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 		formState: { errors },
 	} = useForm();
 
-	console.log("errors: ", errors);
-
 	const onSubmit = async (data: { [key: string]: unknown }) => {
-		console.log("data: ", data);
 		const response = await presenter.addItem(props.collectionName, data);
 
 		if (response.success) {
@@ -218,7 +236,6 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 			setOpenModel(false);
 			reset();
 		}
-		console.log("res: ", response);
 	};
 
 	return (
@@ -257,6 +274,13 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 					<article className="px-4 py-2">
 						<form onSubmit={handleSubmit(onSubmit)}>
 							{modalState.map(field => {
+								if (
+									typeof field.type === "string" &&
+									new RegExp(/json/i).test(field.type)
+								) {
+									return null;
+								}
+
 								let inputType = "text";
 								let pattern = undefined;
 								let defaultValue: string | number = "";
@@ -270,21 +294,25 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 									defaultValue = 0;
 								}
 
-								if (field.type === "datetime") {
+								if (
+									typeof field.type === "string" &&
+									new RegExp(/datetime/i).test(field.type)
+								) {
 									inputType = "date";
-									defaultValue = new Date().toISOString();
+									defaultValue = new Date().toISOString().split("T")[0];
 								}
 
 								if (
 									RegExp(/(\bemail\b)/i).test(field.name as string) &&
-									field.type === "String"
+									typeof field.type === "string" &&
+									new RegExp(/string/i).test(field.type)
 								) {
 									inputType = "email";
 									pattern = emailRegex;
 								}
 
 								return (
-									<fieldset className="flex flex-col">
+									<fieldset className="flex flex-col" key={field.name}>
 										<label htmlFor={field.name} className="capitalize">
 											{field.name}
 										</label>
@@ -342,46 +370,51 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 			{!presenter.viewModel.hasData && (
 				<p className="mt-3">This collection currently has no items.</p>
 			)}
-			<div className="mt-3" style={{ overflowX: "auto" }}>
-				<table className="bg-white  shadow-lg shadow-[#c2ead5]">
-					<thead>
-						{table.getHeaderGroups().map(headerGroup => (
-							<tr
-								key={headerGroup.id}
-								className="bg-blue-50 [&>*:first-child]:sticky [&>*:first-child]:bg-blue-50 [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
-							>
-								{headerGroup.headers.map(header => (
-									<th
-										key={header.id}
-										className="py-2 px-8 border-left-1 border border-top-white capitalize"
-									>
-										{header.isPlaceholder
-											? null
-											: flexRender(
-													header.column.columnDef.header,
-													header.getContext()
-											  )}
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map(row => (
-							<tr
-								key={row.id}
-								className="[&>*:first-child]:sticky [&>*:first-child]:bg-white [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
-							>
-								{row.getVisibleCells().map(cell => (
-									<td key={cell.id} className="py-3 px-2 sm:px-8 border">
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
-								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+			{presenter.viewModel.hasData && (
+				<div className="mt-3" style={{ overflowX: "auto" }}>
+					<table className="bg-white  shadow-lg shadow-[#c2ead5]">
+						<thead>
+							{table.getHeaderGroups().map(headerGroup => (
+								<tr
+									key={headerGroup.id}
+									className="bg-blue-50 [&>*:first-child]:sticky [&>*:first-child]:bg-blue-50 [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+								>
+									{headerGroup.headers.map(header => (
+										<th
+											key={header.id}
+											className="py-2 px-8 border-left-1 border border-top-white capitalize"
+										>
+											{header.isPlaceholder
+												? null
+												: flexRender(
+														header.column.columnDef.header,
+														header.getContext()
+												  )}
+										</th>
+									))}
+								</tr>
+							))}
+						</thead>
+						<tbody>
+							{table.getRowModel().rows.map(row => (
+								<tr
+									key={row.id}
+									className="[&>*:first-child]:sticky [&>*:first-child]:bg-white [&>*:first-child]:z-10 [&>*:first-child]:left-0 [&>*:first-child]:shadow-lg [&>*:first-child]:outline [&>*:first-child]:outline-1 [&>*:first-child]:outline-[#e5e7eb] [&>*:first-child]:drop-shadow-lg sm:[&>*:first-child]:outline-0 sm:[&>*:first-child]:drop-shadow-none"
+								>
+									{row.getVisibleCells().map(cell => (
+										<td key={cell.id} className="py-3 px-2 sm:px-8 border">
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext()
+											)}
+										</td>
+									))}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)}
 		</div>
 	);
 });

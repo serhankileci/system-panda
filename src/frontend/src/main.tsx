@@ -1,17 +1,17 @@
-import { RouterProvider } from "@tanstack/router";
+import { RouterProvider } from "@tanstack/react-router";
 import { configure } from "mobx";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 
-import { InversifyConfig } from "./ioc/InversifyConfig.ts";
 import { InjectionProvider } from "./ioc/InjectionProvider.tsx";
+import { InversifyConfig } from "./ioc/InversifyConfig.ts";
 import { router } from "./routing/router.tsx";
 import config from "./shared/config.ts";
 
 import "./index.css";
 
 if (!config.isEnvironmentProd) {
-	const { worker } = await import("./test-tools/mocks/browser.ts");
+	const { worker } = await import("./__tests__/support/mocks/browser.ts");
 	await worker.start();
 }
 

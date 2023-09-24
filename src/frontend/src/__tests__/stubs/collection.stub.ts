@@ -1,28 +1,13 @@
-export const getCollectionAlbumFieldsStub = () => {
-	return {
-		success: true,
-		data: {
-			fields: [
-				{
-					name: "year",
-					type: "number",
-				},
-				{
-					name: "title",
-					type: "String",
-				},
-			],
-		},
-	};
-};
-
-export type AlbumFieldsStubResponse = ReturnType<typeof getCollectionAlbumFieldsStub>;
-
 export const getCollectionAlbumStub = () => {
 	return {
 		success: true,
 		data: [
-			{ id: "1", title: "Album 1", year: 1994 },
+			{
+				id: "1",
+				title: "Album 1",
+				year: 1994,
+				dateCreated: new Date().toISOString(),
+			},
 			{ id: "2", title: "Album 2", year: 2010 },
 			{ id: "3", title: "Album 3", year: 2023 },
 		],
@@ -68,10 +53,33 @@ export const getCollectionStudentStub = () => {
 	return {
 		success: true,
 		data: [
-			{ id: "1", name: "Kevin" },
-			{ id: "2", name: "Alex" },
-			{ id: "3", name: "Jane" },
+			{
+				id: "1",
+				name: "Kevin",
+				dateCreated: new Date().toDateString(),
+			},
+			{ id: "2", name: "Alex", dateCreated: new Date().toDateString() },
+			{ id: "3", name: "Jane", dateCreated: new Date().toDateString() },
 		],
+	};
+};
+
+let isStudentFirstCall = true;
+
+export const createCollectionStudentStub = (data: { [key: string]: unknown }) => {
+	if (isStudentFirstCall) {
+		isStudentFirstCall = false;
+		data["id"] = "4";
+	} else {
+		data["id"] = Math.floor(Math.random() * 999).toString();
+	}
+
+	return {
+		success: true,
+		data: {
+			before: null,
+			after: data,
+		},
 	};
 };
 

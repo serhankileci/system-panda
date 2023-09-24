@@ -1,16 +1,12 @@
 import { defineFeature, loadFeature } from "jest-cucumber";
 
-import { InversifyConfig } from "../../../../ioc/InversifyConfig";
-import {
-	AlbumFieldsStubResponse,
-	AlbumStubResponse,
-	getCollectionAlbumFieldsStub,
-	getCollectionAlbumStub,
-} from "../../../../test-tools/stubs/collection.stub";
-import { CollectionPresenter } from "../../collection.presenter";
-import { CollectionRepository } from "../../collection.repository";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
+import { CollectionRepository } from "../../../modules/collection/collection.repository";
+import { getCollectionAlbumStub } from "../../stubs/collection.stub";
+import { getMetaDataStub } from "../../stubs/metadata.stub";
 
-const feature = loadFeature("src/modules/collection/testing/features/get-collection-data.feature");
+const feature = loadFeature("src/__tests__/features/collection/get-collection-data.feature");
 
 const inversifyConfig = new InversifyConfig("test");
 inversifyConfig.setupBindings();
@@ -19,14 +15,6 @@ const container = inversifyConfig.container;
 
 let collectionRepository: InstanceType<typeof CollectionRepository> | null = null;
 let collectionPresenter: InstanceType<typeof CollectionPresenter> | null = null;
-
-type ErrorResponse = {
-	success: false;
-};
-
-type GetResponseType = AlbumStubResponse | AlbumFieldsStubResponse | ErrorResponse;
-
-type GetStubMapType = { [key: string]: () => Promise<GetResponseType> };
 
 defineFeature(feature, test => {
 	test("After clicking on the collection link from dashboard's sidebar, populate table with that collection's data", ({
@@ -40,19 +28,12 @@ defineFeature(feature, test => {
 			collectionPresenter = container.get(CollectionPresenter);
 
 			collectionRepository.httpGateway.get = jest.fn().mockImplementation((path: string) => {
-				let getRequest = null;
+				if (path === "/collections") {
+					return Promise.resolve(getMetaDataStub());
+				}
 
-				const getStubMap: GetStubMapType = {
-					"/collections/album": () => Promise.resolve(getCollectionAlbumStub()),
-					"/fields/collection/album": () =>
-						Promise.resolve(getCollectionAlbumFieldsStub()),
-				};
-
-				for (const requestUrl in getStubMap) {
-					if (path.indexOf(requestUrl) !== -1) {
-						getRequest = getStubMap[requestUrl];
-						return getRequest();
-					}
+				if (path === "/collections/record") {
+					return Promise.resolve(getCollectionAlbumStub());
 				}
 
 				return Promise.resolve({
@@ -66,20 +47,18 @@ defineFeature(feature, test => {
 		});
 
 		when("I click on the collection", async () => {
-			await collectionPresenter!.load("album");
+			await collectionPresenter!.load("record");
 
+			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith("/collections");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/fields/collection/album"
-			);
-			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
-				"/collections/album"
+				"/collections/record"
 			);
 		});
 
 		then(
 			"I should see the collection table populated with its relevant fields and data",
 			() => {
-				expect(collectionPresenter?.viewModel.fields.length).toEqual(2);
+				expect(collectionPresenter?.viewModel.fields.length).toEqual(4);
 				expect(collectionPresenter?.viewModel.fields[0]).toStrictEqual({
 					name: "year",
 					type: "number",

@@ -1,11 +1,12 @@
 import { inject, injectable } from "inversify";
-import { action, makeAutoObservable, set, toJS, remove } from "mobx";
+import { action, makeAutoObservable, remove, set, toJS } from "mobx";
 import { makeLoggable } from "mobx-log";
 
 import config from "../../shared/config";
 import { HttpGateway } from "../../shared/gateways/http.gateway";
 import { Types } from "../../shared/types/ioc-types";
 
+import type { MetaDataResponse } from "../../modules/metadata/metadata.types";
 interface CollectionResponse {
 	success: true;
 	data: { id?: string; [key: string]: unknown }[];
@@ -13,14 +14,8 @@ interface CollectionResponse {
 
 type FieldInfo = {
 	name: string;
-	type: string;
+	[key: string]: unknown;
 };
-
-interface FieldsResponse {
-	success: boolean;
-	data: { fields: FieldInfo[] };
-	error?: unknown;
-}
 
 export interface SuccessfulUpdateResponse {
 	success: boolean;
@@ -69,11 +64,30 @@ class CollectionRepository {
 	}
 
 	@action getFields = async (collectionName: string) => {
-		const fieldsDto = await this.httpGateway.get<FieldsResponse>(
-			`/fields/collection/${collectionName}`
-		);
+		const fieldsDto = await this.httpGateway.get<MetaDataResponse>(`/collections`);
 
-		this.collectionFieldsPm = fieldsDto.data.fields;
+		if (fieldsDto && fieldsDto.length) {
+			const collectionEntry = fieldsDto.find(field => field.slug === collectionName);
+
+			if (collectionEntry && collectionEntry.fields) {
+				const fieldsPm = [];
+
+				for (const field in collectionEntry.fields) {
+					const fieldValue = collectionEntry.fields[field] as { type?: string };
+
+					if (fieldValue.type === "relation") {
+						continue;
+					}
+
+					fieldsPm.push({
+						name: field,
+						type: fieldValue.type,
+					});
+				}
+
+				this.collectionFieldsPm = fieldsPm;
+			}
+		}
 	};
 
 	@action getData = async (collectionName: string) => {
@@ -89,9 +103,7 @@ class CollectionRepository {
 	@action createItem = async (collectionName: string, data: unknown) => {
 		const itemDto = await this.httpGateway.post<
 			SuccessfulUpdateResponse | FailedUpdateResponse
-		>(`/collections/${collectionName}`, data);
-
-		console.log("dto: ", itemDto);
+		>(`/collections/${collectionName}`, { data });
 
 		if ("success" in itemDto && itemDto.success) {
 			if ("data" in itemDto && "after" in itemDto.data) {
@@ -123,7 +135,7 @@ class CollectionRepository {
 
 		const updatedDto = await this.httpGateway.put<
 			SuccessfulUpdateResponse | FailedUpdateResponse
-		>(`/collections/${collectionName}?where={"id": ${id}}`, {
+		>(`/collections/${collectionName}`, {
 			where: {
 				id,
 			},
@@ -169,8 +181,6 @@ class CollectionRepository {
 			});
 
 			remove(this.collectionDataPm, targetIndex.toString());
-
-			console.log("colelctionPM: ", toJS(this.collectionDataPm));
 
 			return {
 				success: deletionDto.success,

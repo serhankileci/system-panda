@@ -19,8 +19,8 @@ export class MetaDataPresenter {
 			plugins: pluginsViewModel,
 			collections: this.metaDataRepository.collectionsPM.map(collection => {
 				return {
-					name: collection.replace("/", ""),
-					endpoint: collection,
+					name: collection.name,
+					endpoint: `/${collection.name}`,
 				};
 			}),
 			hasCollections: this.metaDataRepository.collectionsPM.length ? true : false,

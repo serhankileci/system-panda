@@ -1,12 +1,16 @@
-import { Outlet } from "@tanstack/router";
-import TanStackRouterDevtools from "../routing/TanStackRouterDevtools";
+import { Outlet } from "@tanstack/react-router";
+import { Suspense } from "react";
+
 import { router } from "../routing/router";
+import TanStackRouterDevtools from "../routing/TanStackRouterDevtools";
 
 export const Root = () => {
 	return (
 		<div className="relative">
 			<Outlet />
-			<TanStackRouterDevtools router={router} />
+			<Suspense fallback={null}>
+				<TanStackRouterDevtools router={router} />
+			</Suspense>
 		</div>
 	);
 };

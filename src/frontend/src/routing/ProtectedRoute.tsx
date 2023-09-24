@@ -1,10 +1,10 @@
-import { MakeLinkOptions, Navigate } from "@tanstack/router";
+import { MakeLinkOptions, Navigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { observer } from "mobx-react";
 import { ReactNode, useEffect } from "react";
 
-import { AuthPresenter } from "../auth/auth.presenter";
 import { useInjection } from "../ioc/useInjection";
+import { AuthPresenter } from "../modules/auth/auth.presenter";
 import { router } from "./router";
 
 type ProtectedRouteProps = {

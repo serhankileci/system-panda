@@ -1,6 +1,7 @@
-import { CollectionScreen } from "./CollectionScreen";
+import { Route } from "@tanstack/react-router";
+
 import { appRoute } from "..";
-import { Route } from "@tanstack/router";
+import { CollectionScreen } from "./CollectionScreen";
 
 export const collectionRoute = new Route({
 	getParentRoute: () => appRoute,

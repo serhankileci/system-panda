@@ -1,4 +1,4 @@
-import { AuthPresenter } from "../../auth/auth.presenter";
+import { AuthPresenter } from "../../modules/auth/auth.presenter";
 import { router } from "../../routing/router";
 import { CollectionListItems } from "../CollectionListItems";
 import { useMobileSideBar } from "./use-mobile-sidebar";
