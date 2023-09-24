@@ -1,4 +1,5 @@
-import { Route } from "@tanstack/router";
+import { Route } from "@tanstack/react-router";
+
 import { appRoute } from "..";
 import { PluginsScreen } from "./PluginsScreen";
 

@@ -1,9 +1,11 @@
-import { MakeLinkOptions, Navigate } from "@tanstack/router";
+import { MakeLinkOptions, Navigate } from "@tanstack/react-router";
+import dayjs from "dayjs";
 import { observer } from "mobx-react";
 import { ReactNode, useEffect } from "react";
+
+import { useInjection } from "../ioc/useInjection";
+import { AuthPresenter } from "../modules/auth/auth.presenter";
 import { router } from "./router";
-import dayjs from "dayjs";
-import { AuthPresenter } from "../auth/auth.presenter";
 
 type ProtectedRouteProps = {
 	to?: MakeLinkOptions["to"];
@@ -18,14 +20,14 @@ interface AccessTokenType {
 
 export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 	const { redirectTo = "/", children } = props;
-	const authPresenter = new AuthPresenter();
+	const presenter = useInjection(AuthPresenter);
 
 	useEffect(() => {
 		const checkLocalStorage = () => {
 			const accessToken = localStorage.getItem("accessToken");
 
 			if (!accessToken) {
-				authPresenter.setAuth(false);
+				presenter.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -33,7 +35,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 			const accessTokenData = JSON.parse(accessToken) as AccessTokenType;
 
 			if (accessTokenData.expired) {
-				authPresenter.setAuth(false);
+				presenter.setAuth(false);
 				router.navigate({ to: "/" });
 				return null;
 			}
@@ -47,7 +49,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 
 				localStorage.setItem("accessToken", JSON.stringify(updatedExpiredObj));
 
-				authPresenter.setAuth(false);
+				presenter.setAuth(false);
 				router.navigate({ to: "/" });
 			}
 		};
@@ -55,7 +57,7 @@ export const ProtectedRoute = observer((props: ProtectedRouteProps) => {
 		checkLocalStorage();
 	}, []);
 
-	if (!authPresenter.isAuthenticated) {
+	if (!presenter.isAuthenticated) {
 		return <Navigate to={redirectTo} />;
 	}
 

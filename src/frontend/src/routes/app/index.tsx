@@ -1,6 +1,7 @@
-import { Route } from "@tanstack/router";
-import { rootRoute } from "../root.route";
+import { Route } from "@tanstack/react-router";
+
 import { ProtectedRoute } from "../../routing/ProtectedRoute";
+import { rootRoute } from "../root.route";
 import App from "./App";
 
 export const appRoute = new Route({

@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 export const useMobileSideBar = (initialState = true) => {
-	const [showMenu, setShowMenu] = useState<boolean>(initialState);
+	const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(initialState);
 
-	const setMenuState = (value: boolean) => {
-		setShowMenu(value);
+	const setSideBarState = (value: boolean) => {
+		setIsSideBarOpen(value);
 	};
 
-	return [showMenu, setMenuState] as const;
+	return [isSideBarOpen, setSideBarState] as const;
 };

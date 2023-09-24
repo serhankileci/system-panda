@@ -1,25 +1,25 @@
-import { ReactNode, useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { observer } from "mobx-react";
-import { MetaDataPresenter } from "../metadata/metadata.presenter";
-import { Link } from "@tanstack/router";
-import { AuthPresenter } from "../auth/auth.presenter";
+import { useEffect, useState } from "react";
 
-type DashboardLayoutProps = {
-	children: ReactNode | ReactNode[];
-};
+import { AuthPresenter } from "../modules/auth/auth.presenter";
+
+import type { MetaDataViewModel } from "../shared/types/viewmodels";
+import { useInjection } from "../ioc/useInjection";
+
+interface DashboardLayoutProps extends React.PropsWithChildren {
+	viewModel?: MetaDataViewModel;
+}
 
 export const DashboardLayout = observer((props: DashboardLayoutProps) => {
-	const { children } = props;
+	const { children, viewModel } = props;
+	const presenter = useInjection(AuthPresenter);
+
 	const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-
-	const metaDataPresenter = new MetaDataPresenter();
-	const authPresenter = new AuthPresenter();
-
-	const { viewModel } = metaDataPresenter;
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.metaKey && event.key === "b") {
+			if ((event.metaKey || event.ctrlKey) && event.key === "b") {
 				setIsNavbarOpen(!isNavbarOpen);
 			}
 		};
@@ -38,6 +38,12 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 		.filter(Boolean)
 		.join(" ");
 
+	let modifierKey = "Ctrl";
+
+	if (navigator.userAgent.toLowerCase().includes("mac")) {
+		modifierKey = "⌘";
+	}
+
 	return (
 		<div className={dashboardClassName}>
 			{isNavbarOpen && (
@@ -52,8 +58,8 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 							</Link>
 							<h2 className="text-lg font-medium">Collections</h2>
 							<ul className="mb-2">
-								{viewModel.hasCollections &&
-									viewModel.collections.map(({ name }, index: number) => {
+								{viewModel?.hasCollections &&
+									viewModel?.collections.map(({ name }, index: number) => {
 										return (
 											<li
 												key={index}
@@ -70,7 +76,9 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 											</li>
 										);
 									})}
-								<li className={`${!viewModel.hasCollections ? "block" : "hidden"}`}>
+								<li
+									className={`${!viewModel?.hasCollections ? "block" : "hidden"}`}
+								>
 									No collections have been detected
 								</li>
 							</ul>
@@ -81,16 +89,18 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 						<button
 							className="block w-full text-lg px-12 bg-gray-200 py-2 rounded-lg text-gray-600 font-medium border border-1 border-white hover:border-black hover:bg-black hover:text-white"
 							onClick={() => {
-								authPresenter.logout();
+								presenter.logout();
 							}}
 						>
 							Log out
 						</button>
-						<span className="block text-center text-xs mt-2 text-slate-600">⌘ + B</span>
+						<span className="block text-center text-xs mt-2 text-slate-600">
+							{modifierKey} + B
+						</span>
 					</nav>
 				</aside>
 			)}
-			<main>{children}</main>
+			<main className="overflow-auto">{children}</main>
 		</div>
 	);
 });
