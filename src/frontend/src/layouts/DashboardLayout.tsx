@@ -100,7 +100,7 @@ export const DashboardLayout = observer((props: DashboardLayoutProps) => {
 					</nav>
 				</aside>
 			)}
-			<main>{children}</main>
+			<main className="overflow-auto">{children}</main>
 		</div>
 	);
 });

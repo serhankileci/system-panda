@@ -22,10 +22,10 @@ export type Field = {
 		unique?: boolean;
 		index?: boolean;
 		defaultValue?:
-		| {
-			kind?: string;
-		}
-		| string;
+			| {
+					kind?: string;
+			  }
+			| string;
 	};
 };
 

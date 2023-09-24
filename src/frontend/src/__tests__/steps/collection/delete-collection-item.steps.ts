@@ -5,7 +5,11 @@ import { defineFeature, loadFeature } from "jest-cucumber";
 import { InversifyConfig } from "../../../ioc/InversifyConfig";
 import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
 import { CollectionRepository } from "../../../modules/collection/collection.repository";
-import { AlbumStubResponse, getCollectionAlbumStub, getSuccessfulItemDeletionStub } from "../../stubs/collection.stub";
+import {
+	AlbumStubResponse,
+	getCollectionAlbumStub,
+	getSuccessfulItemDeletionStub,
+} from "../../stubs/collection.stub";
 import { getMetaDataStub } from "../../stubs/metadata.stub";
 
 const feature = loadFeature("src/__tests__/features/collection/delete-collection-item.feature");

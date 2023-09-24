@@ -2,7 +2,14 @@
 import { rest } from "msw";
 
 import config from "../../../shared/config.ts";
-import { createCollectionAlbumStub, createCollectionStudentStub, getCollectionAlbumStub, getCollectionStudentStub, getSuccessfulItemDeletionStub, getSuccessfulItemUpdateStub } from "../../stubs/collection.stub.ts";
+import {
+	createCollectionAlbumStub,
+	createCollectionStudentStub,
+	getCollectionAlbumStub,
+	getCollectionStudentStub,
+	getSuccessfulItemDeletionStub,
+	getSuccessfulItemUpdateStub,
+} from "../../stubs/collection.stub.ts";
 import { getMetaDataStub } from "../../stubs/metadata.stub.ts";
 
 export const handlers = [

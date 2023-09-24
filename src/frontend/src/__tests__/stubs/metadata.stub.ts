@@ -6,6 +6,12 @@ export const getMetaDataStub = () => {
 				name: {
 					type: "String",
 				},
+				dateCreated: {
+					type: "DateTime",
+					defaultValue: {
+						kind: "now",
+					},
+				},
 				relation_classroom: {
 					type: "relation",
 					many: true,

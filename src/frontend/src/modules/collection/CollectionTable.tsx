@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { useInjection } from "../../ioc/useInjection";
 import { emailRegex } from "../../utilities/regex";
 import { CollectionPresenter } from "./collection.presenter";
+import dayjs from "dayjs";
 
 export const CollectionTable = observer((props: { collectionName: string }) => {
 	const presenter = useInjection(CollectionPresenter);
@@ -73,11 +74,22 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 				const columnHelper = createColumnHelper<any>();
 
 				presenter.viewModel.fields.forEach(field => {
+					if (field.type === "Json") {
+						return null;
+					}
+
 					fieldColumns.push(
 						columnHelper.accessor(field.name, {
 							id: field.name,
 							cell: info => {
-								const originalValue = info.getValue();
+								let originalValue = info.getValue();
+
+								if (
+									typeof originalValue === "string" &&
+									field.type === "DateTime"
+								) {
+									originalValue = dayjs(originalValue).format("YYYY-MM-DD");
+								}
 
 								const [editing, setEditing] = useState<boolean>(false);
 								const [inputValue, setInputValue] = useState(originalValue);
@@ -102,11 +114,16 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 										delete newData.id;
 									}
 
-									const dto = await presenter.updateItem(
-										props.collectionName,
-										id,
-										newData
-									);
+									if (
+										"dateCreated" in newData &&
+										typeof newData["dateCreated"] === "string"
+									) {
+										newData["dateCreated"] = dayjs(
+											newData["dateCreated"]
+										).toISOString();
+									}
+
+									await presenter.updateItem(props.collectionName, id, newData);
 
 									setData(presenter.viewModel.dataList);
 
@@ -137,10 +154,20 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 									setEditing(true);
 								};
 
+								const displayValue = (): any => {
+									let value = info.getValue();
+
+									if (field.type === "DateTime" && typeof value === "string") {
+										value = dayjs(value).format("MM/DD/YYYY");
+									}
+
+									return value;
+								};
+
 								return (
-									<div>
+									<div key={field.name}>
 										{editing ? (
-											<div>
+											<div className="inline-flex">
 												<input
 													value={inputValue}
 													type={defaultInputType}
@@ -161,13 +188,13 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 												</button>
 											</div>
 										) : (
-											<div className={`${alignmentClass}`}>
+											<div className={`${alignmentClass} `} key={field.name}>
 												<p
 													onClick={onEdit}
-													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2"
+													className="hover:bg-[#f2f2f2] hover:cursor-pointer rounded py-1 px-2 break-words whitespace-normal max-w-[20rem]"
 													style={{ minHeight: "2.15rem" }}
 												>
-													{info.getValue()}
+													{displayValue()}
 												</p>
 											</div>
 										)}
@@ -285,7 +312,7 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 								}
 
 								return (
-									<fieldset className="flex flex-col">
+									<fieldset className="flex flex-col" key={field.name}>
 										<label htmlFor={field.name} className="capitalize">
 											{field.name}
 										</label>
@@ -360,9 +387,9 @@ export const CollectionTable = observer((props: { collectionName: string }) => {
 											{header.isPlaceholder
 												? null
 												: flexRender(
-													header.column.columnDef.header,
-													header.getContext()
-												)}
+														header.column.columnDef.header,
+														header.getContext()
+												  )}
 										</th>
 									))}
 								</tr>

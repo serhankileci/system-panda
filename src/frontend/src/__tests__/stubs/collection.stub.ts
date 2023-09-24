@@ -2,7 +2,12 @@ export const getCollectionAlbumStub = () => {
 	return {
 		success: true,
 		data: [
-			{ id: "1", title: "Album 1", year: 1994 },
+			{
+				id: "1",
+				title: "Album 1",
+				year: 1994,
+				dateCreated: new Date().toISOString(),
+			},
 			{ id: "2", title: "Album 2", year: 2010 },
 			{ id: "3", title: "Album 3", year: 2023 },
 		],
@@ -48,9 +53,13 @@ export const getCollectionStudentStub = () => {
 	return {
 		success: true,
 		data: [
-			{ id: "1", name: "Kevin" },
-			{ id: "2", name: "Alex" },
-			{ id: "3", name: "Jane" },
+			{
+				id: "1",
+				name: "Kevin",
+				dateCreated: new Date().toDateString(),
+			},
+			{ id: "2", name: "Alex", dateCreated: new Date().toDateString() },
+			{ id: "3", name: "Jane", dateCreated: new Date().toDateString() },
 		],
 	};
 };
