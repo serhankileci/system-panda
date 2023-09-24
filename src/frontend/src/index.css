@@ -17,6 +17,7 @@
 		rgba(209, 247, 214, 1) 24%,
 		rgba(240, 248, 241, 1) 100%
 	);
+	background-size: cover;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
@@ -41,6 +42,18 @@
 	color: white;
 }
 
+body {
+	min-height: 100vh;
+	background-color: #f0f8f1;
+	background: linear-gradient(
+		341deg,
+		rgba(176, 244, 184, 1) 7%,
+		rgba(209, 247, 214, 1) 24%,
+		rgba(240, 248, 241, 1) 100%
+	);
+	background-size: cover;
+}
+
 input:autofill {
 	box-shadow: 0 0 0 30px #f0f1f8 inset;
 	-webkit-text-fill-color: #242424;
@@ -50,4 +63,23 @@ input:autofill {
 	-o-text-fill-color: #242424;
 	-moz-box-shadow: 0 0 0 30px #f0f1f8 inset;
 	-moz-text-fill-color: #242424;
+}
+
+input[type="date"] {
+	position: relative;
+	padding: 10px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+	color: transparent;
+	background: none;
+	z-index: 1;
+}
+
+input[type="date"]:before {
+	@apply block bg-none bg-no-repeat hover:hue-rotate-[327deg] absolute right-2 top-[0.8rem] p-2;
+	content: "";
+	background-image: url("/src/assets/calendar-days-solid.svg");
+	width: 15px;
+	height: 20px;
 }

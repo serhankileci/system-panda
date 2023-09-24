@@ -35,7 +35,9 @@ class CollectionPresenter {
 
 	get viewModel() {
 		const fieldsVm = toJS(this.collectionRepository.collectionFieldsPm);
+
 		const collectionDataListVm = toJS(this.collectionRepository.collectionDataPm);
+
 		return {
 			fields: fieldsVm,
 			dataList: collectionDataListVm,

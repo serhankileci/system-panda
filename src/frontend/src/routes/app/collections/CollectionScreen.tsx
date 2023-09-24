@@ -1,11 +1,10 @@
 import { observer } from "mobx-react";
+
 import { CollectionTable } from "../../../modules/collection/CollectionTable";
 
 export const CollectionScreen = observer(
 	(props: { useParams: () => { collection_name: string } }) => {
 		const { collection_name = "" } = props.useParams();
-
-		console.log("collectionParam: ", collection_name);
 
 		return (
 			<article className="h=full pt-4 px-4 pb-12">

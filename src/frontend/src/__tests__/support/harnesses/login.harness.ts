@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Container } from "inversify";
 
-import { AuthenticationRepository } from "../../auth/authentication.repository";
-import { InversifyConfig } from "../../ioc/InversifyConfig";
-import { getAuthorizedStub, getUnauthorizedStub } from "../stubs/login.stub";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { AuthenticationRepository } from "../../../modules/auth/authentication.repository";
+import { getAuthorizedStub, getUnauthorizedStub } from "../../stubs/login.stub";
 
 export class LoginTestHarness {
 	container: Container;

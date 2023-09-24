@@ -1,19 +1,14 @@
 import { injectable } from "inversify";
 
-import { AuthResponse } from "../../auth/auth.types";
-import { MetaDataResponse } from "../../metadata/metadata.types";
 import config, { ConfigType } from "../config";
 
 import "reflect-metadata";
-import type {
-	FailedUpdateResponse,
-	SuccessfulUpdateResponse,
-} from "../../modules/collection/collection.repository";
 
 @injectable()
 export class HttpGateway {
 	headers = {
 		"Content-Type": "application/json",
+		"Access-Control-Allow-Origin": "*",
 	};
 
 	config: ConfigType;
@@ -23,7 +18,7 @@ export class HttpGateway {
 	}
 
 	get = async <T = unknown>(path: string) => {
-		const response = await fetch(this.config.apiUrl + path, {
+		const response = await fetch(config.apiUrl + path, {
 			method: "GET",
 			headers: this.headers,
 		});
@@ -38,7 +33,7 @@ export class HttpGateway {
 		body: unknown,
 		sendDto = true
 	): Promise<T | Response> => {
-		const response = await fetch(this.config.apiUrl + path, {
+		const response = await fetch(config.apiUrl + path, {
 			method: "POST",
 			headers: this.headers,
 			body: JSON.stringify(body),
@@ -57,7 +52,7 @@ export class HttpGateway {
 		body: unknown,
 		sendDto = true
 	): Promise<T | Response> => {
-		const response = await fetch(this.config.apiUrl + path, {
+		const response = await fetch(config.apiUrl + path, {
 			method: "PUT",
 			headers: this.headers,
 			body: JSON.stringify(body),
@@ -76,7 +71,7 @@ export class HttpGateway {
 		body: unknown,
 		sendDto = true
 	): Promise<T | Response> => {
-		const response = await fetch(this.config.apiUrl + path, {
+		const response = await fetch(config.apiUrl + path, {
 			method: "DELETE",
 			headers: this.headers,
 			body: JSON.stringify(body),

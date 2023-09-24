@@ -1,13 +1,14 @@
-import "reflect-metadata";
-
-import { HttpGateway } from "../shared/gateways/http.gateway";
-import config, { ConfigType } from "../shared/config";
-import { action, makeAutoObservable } from "mobx";
-import { makeLoggable } from "mobx-log";
 import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
-import { Types } from "../shared/types/ioc-types";
+import { action, makeAutoObservable } from "mobx";
+import { makeLoggable } from "mobx-log";
+
+import config, { ConfigType } from "../../shared/config";
+import { HttpGateway } from "../../shared/gateways/http.gateway";
+import { Types } from "../../shared/types/ioc-types";
 import { AuthResponse } from "./auth.types";
+
+import "reflect-metadata";
 
 @injectable()
 export class AuthenticationRepository {

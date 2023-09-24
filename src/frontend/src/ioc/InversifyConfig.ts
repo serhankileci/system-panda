@@ -1,13 +1,13 @@
 import { Container } from "inversify";
 
-import { AuthPresenter } from "../auth/auth.presenter";
-import { AuthenticationRepository } from "../auth/authentication.repository";
-import { MetaDataPresenter } from "../metadata/metadata.presenter";
-import { MetaDataRepository } from "../metadata/metadata.repository";
+import { AuthPresenter } from "../modules/auth/auth.presenter";
+import { AuthenticationRepository } from "../modules/auth/authentication.repository";
+import { CollectionRepository } from "../modules/collection/collection.repository";
+import { MetaDataPresenter } from "../modules/metadata/metadata.presenter";
+import { MetaDataRepository } from "../modules/metadata/metadata.repository";
 import { FakeHttpGateway } from "../shared/gateways/fakehttp.gateway";
 import { HttpGateway } from "../shared/gateways/http.gateway";
 import { Types } from "../shared/types/ioc-types";
-import { CollectionRepository } from "../modules/collection/collection.repository";
 
 export class InversifyConfig {
 	container: InstanceType<typeof Container>;
