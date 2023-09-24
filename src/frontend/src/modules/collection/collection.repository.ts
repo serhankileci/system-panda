@@ -5,7 +5,8 @@ import { makeLoggable } from "mobx-log";
 import config from "../../shared/config";
 import { HttpGateway } from "../../shared/gateways/http.gateway";
 import { Types } from "../../shared/types/ioc-types";
-import type { MetaDataResponse } from "../../metadata/metadata.types";
+
+import type { MetaDataResponse } from "../../modules/metadata/metadata.types";
 interface CollectionResponse {
 	success: true;
 	data: { id?: string; [key: string]: unknown }[];

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import MobileSideBar from "../../components/MobileSideBar/MobileSideBar";
 import { DashboardLayout } from "../../layouts/DashboardLayout";
-import { MetaDataPresenter } from "../../metadata/metadata.presenter";
+import { MetaDataPresenter } from "../../modules/metadata/metadata.presenter";
 
 import type { MetaDataViewModel } from "../../shared/types/viewmodels";
 import { metaDataVmSignal } from "../../shared/signals/metaDataVmSignal";

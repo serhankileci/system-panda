@@ -2,19 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { defineFeature, loadFeature } from "jest-cucumber";
 
-import { InversifyConfig } from "../../../../ioc/InversifyConfig";
-import {
-	AlbumStubResponse,
-	getCollectionAlbumStub,
-	getSuccessfulItemUpdateStub,
-} from "../../../../test-tools/stubs/collection.stub";
-import { CollectionPresenter } from "../../collection.presenter";
-import { CollectionRepository } from "../../collection.repository";
-import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
+import { CollectionRepository } from "../../../modules/collection/collection.repository";
+import { AlbumStubResponse, getCollectionAlbumStub, getSuccessfulItemDeletionStub } from "../../stubs/collection.stub";
+import { getMetaDataStub } from "../../stubs/metadata.stub";
 
-const feature = loadFeature(
-	"src/modules/collection/testing/features/update-collection-item.feature"
-);
+const feature = loadFeature("src/__tests__/features/collection/delete-collection-item.feature");
 
 const inversifyConfig = new InversifyConfig("test");
 inversifyConfig.setupBindings();
@@ -56,11 +50,11 @@ defineFeature(feature, test => {
 				});
 			});
 
-			collectionRepository.httpGateway.put = jest
+			collectionRepository.httpGateway.delete = jest
 				.fn()
 				.mockImplementation((path: string, body: any) => {
 					if (path.indexOf(`/collections/record`) !== -1) {
-						return Promise.resolve(getSuccessfulItemUpdateStub(body.where.id, body));
+						return Promise.resolve(getSuccessfulItemDeletionStub(body.where.id));
 					}
 
 					return Promise.resolve({
@@ -78,39 +72,28 @@ defineFeature(feature, test => {
 
 			expect(collectionPresenter!.viewModel.hasData).toBe(true);
 			expect(collectionPresenter!.viewModel.hasFields).toBe(true);
+
+			expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 2");
+			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2010);
 		});
 
-		when(
-			"I click on an item's value in the table cell, change at the value, and submit the change",
-			async () => {
-				expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 2");
-				expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2010);
+		when("I click on delete button on same row as the target collection item", async () => {
+			await collectionPresenter!.removeItem("record", "2");
 
-				await collectionPresenter!.updateItem("record", "2", {
-					title: "The Dark Side of the Moon",
-					year: 1973,
-				});
-
-				expect(collectionRepository!.httpGateway.put).toHaveBeenCalledWith(
-					`/collections/record`,
-					{
-						where: {
-							id: "2",
-						},
-						data: {
-							title: "The Dark Side of the Moon",
-							year: 1973,
-						},
-					}
-				);
-			}
-		);
-
-		then("I should that the collection item's value has my change", () => {
-			expect(collectionPresenter!.viewModel.dataList[1].title).toBe(
-				"The Dark Side of the Moon"
+			expect(collectionRepository!.httpGateway.delete).toHaveBeenCalledWith(
+				`/collections/record`,
+				{
+					where: {
+						id: "2",
+					},
+				}
 			);
-			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(1973);
+		});
+
+		then("I should see that collection item removed from the table", () => {
+			expect(collectionPresenter!.viewModel.dataList.length).toEqual(2);
+			expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 3");
+			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2023);
 		});
 	});
 });

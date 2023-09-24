@@ -2,19 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { defineFeature, loadFeature } from "jest-cucumber";
 
-import { InversifyConfig } from "../../../../ioc/InversifyConfig";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
+import { CollectionRepository } from "../../../modules/collection/collection.repository";
 import {
 	AlbumStubResponse,
-	createCollectionAlbumStub,
 	getCollectionAlbumStub,
-} from "../../../../test-tools/stubs/collection.stub";
-import { CollectionPresenter } from "../../collection.presenter";
-import { CollectionRepository } from "../../collection.repository";
-import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
+	getSuccessfulItemUpdateStub,
+} from "../../stubs/collection.stub";
+import { getMetaDataStub } from "../../stubs/metadata.stub";
 
-const feature = loadFeature(
-	"src/modules/collection/testing/features/create-collection-item.feature"
-);
+const feature = loadFeature("src/__tests__/features/collection/update-collection-item.feature");
 
 const inversifyConfig = new InversifyConfig("test");
 inversifyConfig.setupBindings();
@@ -33,7 +31,7 @@ type GetResponseType = AlbumStubResponse | ErrorResponse | ReturnType<typeof get
 type GetStubMapType = { [key: string]: () => Promise<GetResponseType> };
 
 defineFeature(feature, test => {
-	test("On collection table screen,", ({ given, when, then }) => {
+	test("After collection table is populated", ({ given, when, then }) => {
 		beforeEach(() => {
 			collectionRepository = container.get(CollectionRepository);
 
@@ -56,11 +54,11 @@ defineFeature(feature, test => {
 				});
 			});
 
-			collectionRepository.httpGateway.post = jest
+			collectionRepository.httpGateway.put = jest
 				.fn()
 				.mockImplementation((path: string, body: any) => {
-					if (path === `/collections/record`) {
-						return Promise.resolve(createCollectionAlbumStub(body.data));
+					if (path.indexOf(`/collections/record`) !== -1) {
+						return Promise.resolve(getSuccessfulItemUpdateStub(body.where.id, body));
 					}
 
 					return Promise.resolve({
@@ -69,32 +67,35 @@ defineFeature(feature, test => {
 				});
 		});
 
-		given("when the collection table screen is loaded", async () => {
+		given("I see my target collection item", async () => {
 			await collectionPresenter!.load("record");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith("/collections");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
 				"/collections/record"
 			);
+
 			expect(collectionPresenter!.viewModel.hasData).toBe(true);
 			expect(collectionPresenter!.viewModel.hasFields).toBe(true);
-			expect(collectionPresenter!.viewModel.dataList.length).toEqual(3);
 		});
 
 		when(
-			"I click on add/create button, enter values of the collection, and submit the creation",
+			"I click on an item's value in the table cell, change at the value, and submit the change",
 			async () => {
-				expect(collectionPresenter!.viewModel.dataList[3]).toBe(undefined);
+				expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 2");
+				expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2010);
 
-				await collectionPresenter!.addItem("record", {
+				await collectionPresenter!.updateItem("record", "2", {
 					title: "The Dark Side of the Moon",
 					year: 1973,
 				});
 
-				expect(collectionRepository!.httpGateway.post).toHaveBeenCalledWith(
+				expect(collectionRepository!.httpGateway.put).toHaveBeenCalledWith(
 					`/collections/record`,
 					{
+						where: {
+							id: "2",
+						},
 						data: {
-							id: "4",
 							title: "The Dark Side of the Moon",
 							year: 1973,
 						},
@@ -103,11 +104,11 @@ defineFeature(feature, test => {
 			}
 		);
 
-		then("I should see that collection item added into the table", () => {
-			expect(collectionPresenter!.viewModel.dataList[3].title).toBe(
+		then("I should that the collection item's value has my change", () => {
+			expect(collectionPresenter!.viewModel.dataList[1].title).toBe(
 				"The Dark Side of the Moon"
 			);
-			expect(collectionPresenter!.viewModel.dataList[3].year).toBe(1973);
+			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(1973);
 		});
 	});
 });

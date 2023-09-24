@@ -1,12 +1,12 @@
 import { action, makeAutoObservable } from "mobx";
 
-import { HttpGateway } from "../shared/gateways/http.gateway";
+import { HttpGateway } from "../../shared/gateways/http.gateway";
 
 import type { DatabasePlugin } from "./metadata.types";
 import { makeLoggable } from "mobx-log";
-import config from "../shared/config";
+import config from "../../shared/config";
 import { injectable, inject } from "inversify";
-import { Types } from "../shared/types/ioc-types";
+import { Types } from "../../shared/types/ioc-types";
 import type { MetaDataResponse, Field } from "./metadata.types";
 
 export interface PluginsProgrammersModel {

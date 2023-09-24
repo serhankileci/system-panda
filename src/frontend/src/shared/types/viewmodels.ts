@@ -1,4 +1,4 @@
-import type { DatabasePlugin } from "../../metadata/metadata.types";
+import type { DatabasePlugin } from "../../modules/metadata/metadata.types";
 
 export interface MetaDataViewModel {
 	plugins: {

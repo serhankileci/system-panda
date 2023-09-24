@@ -2,19 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { defineFeature, loadFeature } from "jest-cucumber";
 
-import { InversifyConfig } from "../../../../ioc/InversifyConfig";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
+import { CollectionRepository } from "../../../modules/collection/collection.repository";
 import {
 	AlbumStubResponse,
+	createCollectionAlbumStub,
 	getCollectionAlbumStub,
-	getSuccessfulItemDeletionStub,
-} from "../../../../test-tools/stubs/collection.stub";
-import { CollectionPresenter } from "../../collection.presenter";
-import { CollectionRepository } from "../../collection.repository";
-import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
+} from "../../stubs/collection.stub";
+import { getMetaDataStub } from "../../stubs/metadata.stub";
 
-const feature = loadFeature(
-	"src/modules/collection/testing/features/delete-collection-item.feature"
-);
+const feature = loadFeature("src/__tests__/features/collection/create-collection-item.feature");
 
 const inversifyConfig = new InversifyConfig("test");
 inversifyConfig.setupBindings();
@@ -33,7 +31,7 @@ type GetResponseType = AlbumStubResponse | ErrorResponse | ReturnType<typeof get
 type GetStubMapType = { [key: string]: () => Promise<GetResponseType> };
 
 defineFeature(feature, test => {
-	test("After collection table is populated", ({ given, when, then }) => {
+	test("On collection table screen,", ({ given, when, then }) => {
 		beforeEach(() => {
 			collectionRepository = container.get(CollectionRepository);
 
@@ -56,11 +54,11 @@ defineFeature(feature, test => {
 				});
 			});
 
-			collectionRepository.httpGateway.delete = jest
+			collectionRepository.httpGateway.post = jest
 				.fn()
 				.mockImplementation((path: string, body: any) => {
-					if (path.indexOf(`/collections/record`) !== -1) {
-						return Promise.resolve(getSuccessfulItemDeletionStub(body.where.id));
+					if (path === `/collections/record`) {
+						return Promise.resolve(createCollectionAlbumStub(body.data));
 					}
 
 					return Promise.resolve({
@@ -69,37 +67,45 @@ defineFeature(feature, test => {
 				});
 		});
 
-		given("I see my target collection item", async () => {
+		given("when the collection table screen is loaded", async () => {
 			await collectionPresenter!.load("record");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith("/collections");
 			expect(collectionRepository!.httpGateway.get).toHaveBeenCalledWith(
 				"/collections/record"
 			);
-
 			expect(collectionPresenter!.viewModel.hasData).toBe(true);
 			expect(collectionPresenter!.viewModel.hasFields).toBe(true);
-
-			expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 2");
-			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2010);
+			expect(collectionPresenter!.viewModel.dataList.length).toEqual(3);
 		});
 
-		when("I click on delete button on same row as the target collection item", async () => {
-			await collectionPresenter!.removeItem("record", "2");
+		when(
+			"I click on add/create button, enter values of the collection, and submit the creation",
+			async () => {
+				expect(collectionPresenter!.viewModel.dataList[3]).toBe(undefined);
 
-			expect(collectionRepository!.httpGateway.delete).toHaveBeenCalledWith(
-				`/collections/record`,
-				{
-					where: {
-						id: "2",
-					},
-				}
+				await collectionPresenter!.addItem("record", {
+					title: "The Dark Side of the Moon",
+					year: 1973,
+				});
+
+				expect(collectionRepository!.httpGateway.post).toHaveBeenCalledWith(
+					`/collections/record`,
+					{
+						data: {
+							id: "4",
+							title: "The Dark Side of the Moon",
+							year: 1973,
+						},
+					}
+				);
+			}
+		);
+
+		then("I should see that collection item added into the table", () => {
+			expect(collectionPresenter!.viewModel.dataList[3].title).toBe(
+				"The Dark Side of the Moon"
 			);
-		});
-
-		then("I should see that collection item removed from the table", () => {
-			expect(collectionPresenter!.viewModel.dataList.length).toEqual(2);
-			expect(collectionPresenter!.viewModel.dataList[1].title).toBe("Album 3");
-			expect(collectionPresenter!.viewModel.dataList[1].year).toBe(2023);
+			expect(collectionPresenter!.viewModel.dataList[3].year).toBe(1973);
 		});
 	});
 });

@@ -1,11 +1,11 @@
 import { defineFeature, loadFeature } from "jest-cucumber";
 
 import { InversifyConfig } from "../../ioc/InversifyConfig";
-import { getMetaDataStub } from "../../test-tools/stubs/metadata.stub";
-import { MetaDataPresenter } from "../metadata.presenter";
-import { MetaDataRepository } from "../metadata.repository";
+import { MetaDataPresenter } from "../../modules/metadata/metadata.presenter";
+import { MetaDataRepository } from "../../modules/metadata/metadata.repository";
+import { getMetaDataStub } from "../stubs/metadata.stub";
 
-const feature = loadFeature("src/metadata/tests/features/metadata.feature");
+const feature = loadFeature("src/__tests__/features/metadata.feature");
 
 let metaDataPresenter: InstanceType<typeof MetaDataPresenter>;
 

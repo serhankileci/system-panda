@@ -4,8 +4,8 @@ import { observer } from "mobx-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-import { AuthPresenter } from "../auth/auth.presenter";
 import { useInjection } from "../ioc/useInjection";
+import { AuthPresenter } from "../modules/auth/auth.presenter";
 import { router } from "../routing/router";
 import { emailRegex } from "../utilities/regex";
 

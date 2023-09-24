@@ -1,16 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { rest } from "msw";
 
-import config from "../../shared/config.ts";
-import {
-	createCollectionAlbumStub,
-	getCollectionAlbumStub,
-	getCollectionStudentStub,
-	getSuccessfulItemDeletionStub,
-	getSuccessfulItemUpdateStub,
-	createCollectionStudentStub,
-} from "../stubs/collection.stub.ts";
-import { getMetaDataStub } from "../stubs/metadata.stub.ts";
+import config from "../../../shared/config.ts";
+import { createCollectionAlbumStub, createCollectionStudentStub, getCollectionAlbumStub, getCollectionStudentStub, getSuccessfulItemDeletionStub, getSuccessfulItemUpdateStub } from "../../stubs/collection.stub.ts";
+import { getMetaDataStub } from "../../stubs/metadata.stub.ts";
 
 export const handlers = [
 	rest.get(config.apiUrl + "/collections", (_req, res, ctx) => {

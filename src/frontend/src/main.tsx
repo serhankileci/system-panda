@@ -11,7 +11,7 @@ import config from "./shared/config.ts";
 import "./index.css";
 
 if (!config.isEnvironmentProd) {
-	const { worker } = await import("./test-tools/mocks/browser.ts");
+	const { worker } = await import("./__tests__/support/mocks/browser.ts");
 	await worker.start();
 }
 

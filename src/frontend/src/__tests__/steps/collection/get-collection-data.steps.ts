@@ -1,12 +1,12 @@
 import { defineFeature, loadFeature } from "jest-cucumber";
 
-import { InversifyConfig } from "../../../../ioc/InversifyConfig";
-import { getCollectionAlbumStub } from "../../../../test-tools/stubs/collection.stub";
-import { CollectionPresenter } from "../../collection.presenter";
-import { CollectionRepository } from "../../collection.repository";
-import { getMetaDataStub } from "../../../../test-tools/stubs/metadata.stub";
+import { InversifyConfig } from "../../../ioc/InversifyConfig";
+import { CollectionPresenter } from "../../../modules/collection/collection.presenter";
+import { CollectionRepository } from "../../../modules/collection/collection.repository";
+import { getCollectionAlbumStub } from "../../stubs/collection.stub";
+import { getMetaDataStub } from "../../stubs/metadata.stub";
 
-const feature = loadFeature("src/modules/collection/testing/features/get-collection-data.feature");
+const feature = loadFeature("src/__tests__/features/collection/get-collection-data.feature");
 
 const inversifyConfig = new InversifyConfig("test");
 inversifyConfig.setupBindings();
