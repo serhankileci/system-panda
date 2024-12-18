@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execa } from "execa";
-import { logfile, logger } from "./index.js";
+import { logToFile } from "./index.js";
 
 (async () => {
 	try {
@@ -17,11 +17,12 @@ import { logfile, logger } from "./index.js";
 		if (cmds.ext.includes(bin)) {
 			await execa(bin, rest, options);
 		} else if (cmds.int.includes(bin)) {
-			// internal scripts for later
+			// internal scripts
+			// ...
 		} else {
 			throw "Command not found.";
 		}
 	} catch (err: unknown) {
-		await logger(logfile, err as Error);
+		await logToFile(err as Error);
 	}
 })();

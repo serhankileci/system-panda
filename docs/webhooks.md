@@ -1,7 +1,7 @@
 # **Webhooks**
-Webhooks are HTTP requests that trigger after a specified operation. For example, you have an "Album" data collection, and whenever a new album is inserted or an existing one is updated, you want to relay it to an internal or external API for additional processing.
+Webhooks are HTTP requests that trigger after a specified operation. For example, you have an "Album" data table, and whenever a new album is inserted or an existing one is updated, you want to relay it to an internal or external API for additional processing.
 
-Webhooks can be global (running for every collection operation), or collection-specific. A POST request is made when the webhook is triggered, with data in the request body.
+Webhooks can be global (running for every table operation), or table-specific. A POST request is made when the webhook is triggered, with data in the request body.
 
 ## **Example Webhook**
 ```ts
@@ -35,8 +35,8 @@ The data relayed to the specified API endpoint will have the following interface
     // which CRUD operation occurred
     event: "update",
 
-    // for which collection the CRUD operation happened
-    collection: 'Album',
+    // for which table the CRUD operation happened
+    table: 'Album',
 
     /* what the data looked like before and after the CRUD operation,
     READ operations simply return the data that was read instead */

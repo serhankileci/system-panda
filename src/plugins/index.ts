@@ -3,14 +3,15 @@ import {
 	DatabasePlugin,
 	ActiveInactivePlugins,
 	Plugins,
-	getDataStore,
+	store,
 	internalTablesKeys,
 } from "../util/index.js";
 
+// need to pass the db client here somehow
 const plugins: Plugins = {
-	prisma: () => getDataStore().prisma,
+	database: () => store.plugins,
 	load: async function () {
-		const dbPlugins: DatabasePlugin[] = await this.prisma()[
+		const dbPlugins: DatabasePlugin[] = await this.database()[
 			internalTablesKeys.plugins
 		].findMany();
 		const obj: ActiveInactivePlugins = { active: [], inactive: [] };
@@ -30,13 +31,13 @@ const plugins: Plugins = {
 		return obj;
 	},
 	enable: async function (title) {
-		await this.prisma()[internalTablesKeys.plugins].update({
+		await this.database()[internalTablesKeys.plugins].update({
 			where: { title },
 			data: { active: true },
 		});
 	},
 	disable: async function (title) {
-		await this.prisma()[internalTablesKeys.plugins].update({
+		await this.database()[internalTablesKeys.plugins].update({
 			where: { title },
 			data: { active: false },
 		});
@@ -44,12 +45,12 @@ const plugins: Plugins = {
 	install: async function (title) {
 		const res = await (await fetch(`${PLUGINS_API}/${title}`)).json();
 
-		await this.prisma()[internalTablesKeys.plugins].create({
+		await this.database()[internalTablesKeys.plugins].create({
 			data: { ...res, active: false },
 		});
 	},
 	uninstall: async function (title) {
-		await this.prisma()[internalTablesKeys.plugins].delete({ where: { title } });
+		await this.database()[internalTablesKeys.plugins].delete({ where: { title } });
 	},
 };
 

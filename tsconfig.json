@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "ES2022",
-		"module": "ES2022",
+		"target": "ESNext",
+		"module": "ESNext",
 		"rootDir": "./src",
 		"moduleResolution": "node",
 		"typeRoots": ["./node_modules/@types"],
@@ -17,6 +17,6 @@
 		"noImplicitAny": true,
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*.ts", "src/frontend/src/shared/types"],
-	"exclude": ["./node_modules", "src/frontend"]
+	"include": ["src/**/*.ts"],
+	"exclude": ["./node_modules"]
 }

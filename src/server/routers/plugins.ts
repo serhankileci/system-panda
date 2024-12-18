@@ -1,5 +1,5 @@
 import express from "express";
-import { PLUGINS_API, getDataStore, setDataStore } from "../../util/index.js";
+import { PLUGINS_API, store } from "../../util/index.js";
 import { plugins } from "../../plugins/index.js";
 const pluginsRouter = express.Router();
 const localPluginsRouter = express.Router();
@@ -11,16 +11,14 @@ pluginsRouter
 	.use("/remote", remotePluginsRouter);
 
 localPluginsRouter
-	.get("/", (req, res) => res.json({ plugins: getDataStore().pluginStore }))
+	.get("/", (req, res) => res.json({ plugins: store.plugins.get() }))
 	.get("/:title/uninstall", async (req, res, next) => {
 		try {
 			const { title } = req.params;
 
 			await plugins.uninstall(title);
 
-			setDataStore({
-				pluginStore: await plugins.load(),
-			});
+			store.plugins.set(await plugins.load());
 
 			return res.json({
 				message: `Uninstalled plugin: ${title}.`,
@@ -35,9 +33,7 @@ localPluginsRouter
 
 			await plugins.enable(title);
 
-			setDataStore({
-				pluginStore: await plugins.load(),
-			});
+			store.plugins.set(await plugins.load());
 
 			return res.json({
 				message: `Enabled plugin: ${title} and reloaded the plugins.`,
@@ -52,9 +48,7 @@ localPluginsRouter
 
 			await plugins.disable(title);
 
-			setDataStore({
-				pluginStore: await plugins.load(),
-			});
+			store.plugins.set(await plugins.load());
 
 			res.json({
 				message: `Disabled plugin: ${title} and reloaded the plugins.`,
@@ -85,9 +79,7 @@ remotePluginsRouter
 
 			await plugins.install(title);
 
-			setDataStore({
-				pluginStore: await plugins.load(),
-			});
+			store.plugins.set(await plugins.load());
 
 			return res.json({
 				message: `Installed plugin: ${title}.`,

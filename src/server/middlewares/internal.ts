@@ -1,40 +1,26 @@
 import { Request, Response, NextFunction } from "express";
-import {
-	Context,
-	SESSION,
-	filterObjByKeys,
-	getConfigStore,
-	getDataStore,
-	internalTablesKeys,
-} from "../../util/index.js";
+import { Context, SESSION, filterObjByKeys, internalTablesKeys, store } from "../../util/index.js";
 
 function internalMiddlewares(ctx: Context) {
-	const {
-		settings: { authSession },
-	} = getConfigStore();
 	const loadCtxWithData = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const { relationKey, secretField } = getDataStore().authFields;
-
+			const { options, table } = store.tables.get().authentication;
 			ctx.express = { req, res };
 
 			if (req.cookies[SESSION.COOKIE_NAME]) {
-				const data = await ctx.prisma[internalTablesKeys.sessions].findUnique({
+				const data = await ctx.db[internalTablesKeys.sessions].findUnique({
 					where: { id: req.cookies[SESSION.COOKIE_NAME] },
-					include: { [relationKey]: true },
+					include: { ["relation_" + table.name]: true },
 				});
 
-				if (data?.[relationKey]) {
-					if (!authSession.sessionData || authSession.sessionData === "*") {
-						ctx.sessionData = { ...data[relationKey], [secretField]: null };
-					} else if (
-						Array.isArray(authSession.sessionData) &&
-						authSession.sessionData.length > 0
-					) {
-						ctx.sessionData = filterObjByKeys(
-							data[relationKey],
-							authSession.sessionData
-						);
+				if (data?.["relation_" + table.name]) {
+					if (!options.data || options.data === "*") {
+						ctx.session = {
+							...data["relation_" + table.name],
+							[table.secretField!]: null,
+						};
+					} else if (Array.isArray(options.data) && options.data.length > 0) {
+						ctx.session = filterObjByKeys(data["relation_" + table.name], options.data);
 					}
 				}
 			}

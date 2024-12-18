@@ -1,4 +1,4 @@
-import { SystemPandaError, logfile, logger, isPrismaErr } from "../../util/index.js";
+import { ContentKittyError, logToFile, isPrismaErr } from "../../util/index.js";
 import { ErrorRequestHandler } from "express";
 
 const errHandler: ErrorRequestHandler = async (err, _, res, __) => {
@@ -13,12 +13,12 @@ const errHandler: ErrorRequestHandler = async (err, _, res, __) => {
 			res.json({
 				success,
 				message:
-					err instanceof Error || err instanceof SystemPandaError ? err.message : err,
+					err instanceof Error || err instanceof ContentKittyError ? err.message : err,
 			});
 		}
 	}
 
-	await logger(logfile, err as SystemPandaError | Error);
+	await logToFile(err as ContentKittyError | Error);
 };
 
 export { errHandler };

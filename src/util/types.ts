@@ -5,245 +5,191 @@ import { ServeStaticOptions } from "serve-static";
 import { CorsOptions } from "cors";
 import { CompressionOptions } from "compression";
 import morgan from "morgan";
-import {
-	Express,
-	NextFunction as ExpressNext,
-	Request as ExpressRequest,
-	Response as ExpressResponse,
-	Request,
-} from "express";
+import { Express, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client/index.js";
-import { IncomingHttpHeaders } from "http";
-import {
-	PrismaClientInitializationError,
-	PrismaClientKnownRequestError,
-	PrismaClientRustPanicError,
-	PrismaClientUnknownRequestError,
-	PrismaClientValidationError,
-	PrismaClientOptions,
-} from "@prisma/client/runtime/index.js";
-import { crudMapping } from "./index.js";
-import { DeepReadonly } from "utility-types";
-import { SessionData } from "express-session";
+import { IncomingHttpHeaders } from "node:http";
+import { defaultAuthFields } from "./index.js";
+import { DeepReadonly, Optional } from "utility-types";
 
-/* ********** PLUGINS ********** */
-type PluginExportFn = (ctx: Context) => Context | Promise<Context>;
+/**********************/
+
+declare global {
+	/* eslint-disable no-var */
+	// node globals have to be declared with var
+	/* eslint-enable no-var */
+}
+
+/*********** UTILITY TYPES ***********/
+type InferringSelf<Self, T> = Self extends unknown ? T : Self;
+
+type FieldSuggestiontables<
+	FieldNames extends string[],
+	AuthTableName extends string | undefined
+> = {
+	[K in keyof FieldNames]: Table<FieldNames[K], FieldNames[number], AuthTableName>;
+};
+
+type NonEmptyArray<T> = [T, ...T[]];
+
+/*********** PACKAGE TYPES ***********/
+type ExistingData = any;
+type InputData = any;
+type CRUD = "create" | "read" | "update" | "delete";
+type RequestMethods = {
+	main: "GET" | "POST" | "PUT" | "DELETE";
+	others: "PATCH" | "HEAD" | "OPTIONS" | "TRACE" | "CONNECT";
+};
+type Locale = "en" | "tr" | "de" | "ru" | "cn" | "jp" | "it" | "fr";
+type Labels = Partial<Record<Exclude<Locale, "en">, string>>;
 
 type DatabasePlugin = {
 	active: boolean;
 	title: string;
 	author: string;
 	version: string;
-	sourceCode: PluginExportFn;
+	sourceCode: (ctx: Context) => Context | Promise<Context>;
 };
+
 type ActiveInactivePlugins = { active: DatabasePlugin[]; inactive: DatabasePlugin[] };
+
 type Plugins = {
-	prisma: () => PrismaClient;
+	database: () => PrismaClient;
 	load: () => Promise<ActiveInactivePlugins>;
 	enable: (title: string) => Promise<void>;
 	disable: (title: string) => Promise<void>;
 	install: (title: string) => Promise<void>;
 	uninstall: (title: string) => Promise<void>;
 };
-/* ******************** */
 
-/* ********** WEBHOOKS ********** */
 type Webhook = {
 	name: string;
 	api: string;
-	onOperation: ("create" | "read" | "update" | "delete")[];
-	headers?: RequestHeaders;
+	onOperation: CRUD[];
+	headers?: IncomingHttpHeaders;
 };
-type WebhookPayload = Request["body"];
+
 type EventTriggerPayload = {
 	timestamp: string;
-	data: WebhookPayload;
-	event: keyof typeof crudMapping;
-	collection: {
+	data: Request["body"];
+	event: CRUD;
+	table: {
 		name: string;
 		slug: string;
 	};
 };
+
 type WebhookFunc = (webhook: Webhook) => {
 	init: () => void;
 	trigger: (obj: EventTriggerPayload) => void;
 };
-/* ******************** */
 
-/* ********** CONTEXT ********** */
-type CurrentHook = keyof CRUDHooks;
+type HookFunc = ({ hook, onTrigger }: { hook: keyof Hooks; onTrigger: () => void }) => {
+	init: () => void;
+	trigger: () => void;
+};
 
 type Context = {
-	prisma: PrismaClient;
-	collections: Collections;
+	db: PrismaClient;
+	tables: Table[];
 	express: {
-		req: ExpressRequest;
-		res: ExpressResponse;
+		req: Request;
+		res: Response;
 	};
-	sessionData: Record<string, unknown> | undefined;
-	bools: Record<string, boolean>;
+	session: Record<string, unknown> | undefined;
 	util: {
-		currentHook: CurrentHook;
+		currentHook: keyof Hooks;
 	};
-	customVars: Record<string, unknown>;
+	custom: Record<string, unknown>;
 };
-/* ******************** */
 
-/* ********** HOOKS ********** */
-type ExistingData = any;
-type InputData = any;
-
-type CRUDHooks = {
-	beforeOperation?: BeforeOperation[];
-	validateInput?: ModifyValidateInputOperation[];
-	modifyInput?: ModifyValidateInputOperation[];
-	afterOperation?: AfterOperation[];
+type Hooks = {
+	beforeOperation?: Hook<boolean | Promise<boolean>>[];
+	validateInput?: Hook<InputData | Promise<InputData>>[];
+	modifyInput?: Hook<InputData | Promise<InputData>>[];
+	afterOperation?: Hook<void | Promise<void>>[];
 };
 
 type HookOperationArgs = {
-	ctx: {
+	ctx: DeepReadonly<Omit<Context, "express" | "custom">> & {
 		express: {
-			req: ExpressRequest;
-			res: ExpressResponse;
+			req: Request;
+			res: Response;
 		};
-		customVars: Record<string, unknown>;
-	};
-	existingData?: ExistingData;
-	inputData?: InputData;
-} & CRUD_Operation;
-type ReadonlyHookOperationArgs = {
-	ctx: DeepReadonly<Omit<Context, "express" | "customVars">> & {
-		express: {
-			req: ExpressRequest;
-			res: ExpressResponse;
-		};
-		customVars: Record<string, unknown>;
+		custom: Record<string, unknown>;
 	};
 } & {
 	readonly existingData?: ExistingData;
 	inputData?: InputData;
-} & CRUD_Operation;
-
-type Hook<T> = ({ ctx, operation, existingData, inputData }: ReadonlyHookOperationArgs) => T;
-
-type BeforeOperation = Hook<boolean | Promise<boolean>>;
-type ModifyValidateInputOperation = Hook<InputData | Promise<InputData>>;
-type AfterOperation = Hook<void | Promise<void>>;
-
-/* ********** COLLECTIONS ********** */
-type Collections = Record<string, Collection>;
-
-type Collection = {
-	id?: {
-		name?: string;
-		type: "autoincrement" | "uuid" | "cuid";
-	};
-	fields: {
-		[key: string]: Field;
-	};
-	slug?: string;
-	hooks?: CRUDHooks;
-	webhooks?: Webhook[];
+	readonly operation: CRUD;
 };
 
-type CommonFieldProps = {
-	unique?: boolean;
-	required?: boolean;
-	index?: boolean;
-	map?: string;
-};
-type Field = RelationField | (OtherFields & CommonFieldProps);
-type OtherFields = StringFields | NumField | BoolField | DateTimeField;
-type RelationField = {
-	type: "relation";
-	ref: string;
-	many: boolean;
-};
-type StringFields = {
-	type: "String" | "Json";
-	defaultValue?: string;
-};
-type NumField = {
-	type: "number";
-	defaultValue?: number;
-	subtype: "Int" | "BigInt" | "Float" | "Decimal";
-};
-type BoolField = {
-	type: "Boolean";
-	defaultValue?: boolean;
-};
-type DateTimeField = {
-	type: "DateTime";
-	defaultValue?: { kind: "now" | "updatedAt" } | string;
-};
+type Hook<T> = ({ ctx, operation, existingData, inputData }: HookOperationArgs) => T;
 
-/* ******************** */
-
-/* ********** MIDDLEWARES ********** */
-type BeforeAfterMiddlewares = {
-	middlewares?: {
-		before: MiddlewareHandler[];
-		after: MiddlewareHandler[];
-	};
-};
-
-type MiddlewareHandler = (
-	req: ExpressRequest,
-	res: ExpressResponse,
-	next: ExpressNext
-) => void | Promise<void>;
-
-type DefaultMiddlewares = {
-	serveStatic?: { root: string; options: ServeStaticOptions } | false;
-	morgan?: morganOptions | false;
-	cors?: CorsOptions | false;
-	json?: bodyParser.OptionsJson | false;
-	compression?: CompressionOptions | false;
-	helmet?: HelmetOptions | false;
-	urlencoded?: bodyParser.OptionsUrlencoded | false;
-	rateLimit?: RateLimitOptions | false;
-};
-
-type morganOptions = {
-	format: "combined" | "common" | "dev" | "short" | "tiny";
-	options?: morgan.Options<ExpressRequest, ExpressResponse>;
-};
-/* ******************** */
-type Database = {
-	URI: string;
-} & Omit<PrismaClientOptions, "datasources" | "__internal">;
-
-type ExtendServer = (app: Express, ctx: Context) => void;
-
-type AuthSession = {
-	authFields?: AuthFields;
-	initFirstAuth: { [key: string]: any };
-	/**
-	 * add collection fields to include in the session
-	 * default: everything except secretField (password)
-	 */
-	sessionData?: "*" | string[];
-	options: {
+type Options = {
+	database: string;
+	server?: {
 		/**
-		 * default: 60 * 60 * 24 * 30 * 1000 (30 days)
+		 * Server port.
+		 * default: 3000
 		 */
-		maxAge?: number;
-		secret: string;
+		port?: number;
+		/**
+		 * Extend the underlying Express.js server by writing your own custom endpoints.
+		 */
+		extend?: (app: Express, context: Context) => void;
+		/**
+		 * Middlewares turned on by default.
+		 * Caution: turning certain middlewares off can cause Content Kitty to malfunction.
+		 */
+		middlewares?: DefaultMiddlewares;
 	};
+	/**
+	 * When true, Content Kitty does not serve a frontend admin panel.
+	 * default: false
+	 */
+	disableAdminUI?: boolean;
+	/**
+	 * initial decider for whether the user should be able to access a resource
+	 * returning false here will immediately respond with Unauthorized
+	 * and no operation will have ran
+	 * CONSIDERING REPLACING THIS WITH A publicPages array property to
+	 * let developers decide public routes
+	 */
+	isAccessAllowed?: (context: Context) => boolean;
+	/**
+	 * default: {
+	 *     status: "healthy" | "warning" | "error",
+	 *     timestamp: new Date().toISOString(),
+	 *     uptime: process.uptime()
+	 * }
+	 */
+	healthCheck?:
+		| {
+				/**
+				 * The endpoint to serve the health check from.
+				 */
+				path?: string;
+				/**
+				 * Response body to send.
+				 */
+				data?: (context: Context) => Record<string, any> | any[];
+		  }
+		| false;
 };
 
-type AuthFields = {
+type AuthenticationTable = Omit<Optional<Table, "fields">, "name"> & {
 	/**
-	 * default: "users"
+	 * Table name.
+	 * default: "User"
 	 */
-	collectionKey?: string;
+	name?: string;
 	/**
-	 * unique identifier field example: "email"
+	 * Unique identifier.
+	 * default: "email"
 	 */
-	uniqueIdentifierField?: string;
+	identifierField?: string;
 	/**
 	 * default: "password"
-	 * rename password field
 	 */
 	secretField?: string;
 	/**
@@ -252,135 +198,236 @@ type AuthFields = {
 	roleField?: string;
 };
 
-type CollectionSkeletons = Record<string, Record<string, undefined>>;
-
-type Settings = {
-	db: Database;
-	authSession: AuthSession;
-	port: number;
-	defaultMiddlewares?: DefaultMiddlewares;
-	extendServer?: ExtendServer;
-	disableAdminUI?: boolean;
-	isAccessAllowed?: (options: Context) => boolean;
+type CK = {
 	/**
-	 * default: {
-	 *     status: "healthy",
-	 *     timestamp: new Date().toISOString(),
-	 *     uptime: process.uptime()
-	 * }
+	 * Set authentication method, initial authentication row, what data to keep in the session, etc.
 	 */
-	healthCheck?:
+	authentication: <const AuthenticationClctn extends AuthenticationTable>(
+		args: {
+			table?: AuthenticationClctn;
+		} & {
+			options: Partial<
+				Record<
+					`initial_${AuthenticationClctn["name"] extends string
+						? AuthenticationClctn["name"]
+						: "User"}`,
+					Record<
+						AuthenticationClctn["fields"] extends object
+							? AuthenticationClctn["fields"][number]["name"]
+							:
+									| never
+									| (
+											| (AuthenticationClctn["identifierField"] extends string
+													? AuthenticationClctn["identifierField"]
+													: (typeof defaultAuthFields)["identifierField"])
+											| (AuthenticationClctn["roleField"] extends string
+													? AuthenticationClctn["roleField"]
+													: (typeof defaultAuthFields)["roleField"])
+											| (AuthenticationClctn["secretField"] extends string
+													? AuthenticationClctn["secretField"]
+													: (typeof defaultAuthFields)["secretField"])
+									  ),
+						string
+					>
+				>
+			> & {
+				/**
+				 * Add table fields to include in the user session.
+				 * default: everything except table's secret field
+				 */
+				data?:
+					| "*"
+					| (AuthenticationClctn["fields"] extends object
+							? AuthenticationClctn["fields"][number]["name"]
+							:
+									| never
+									| (
+											| (AuthenticationClctn["identifierField"] extends string
+													? AuthenticationClctn["identifierField"]
+													: (typeof defaultAuthFields)["identifierField"])
+											| (AuthenticationClctn["roleField"] extends string
+													? AuthenticationClctn["roleField"]
+													: (typeof defaultAuthFields)["roleField"])
+											| (AuthenticationClctn["secretField"] extends string
+													? AuthenticationClctn["secretField"]
+													: (typeof defaultAuthFields)["secretField"])
+									  ))[];
+				kind: "session" | "jwt";
+				/**
+				 * default: 60 * 60 * 24 * 30 * 1000 (30 days)
+				 */
+				maxAge?: number;
+				secret: string;
+			};
+		}
+	) => {
+		/**
+		 * Database tables.
+		 */
+		tables: <
+			const FieldNames extends string[],
+			const T extends FieldSuggestiontables<
+				FieldNames,
+				AuthenticationClctn["name"] extends string ? AuthenticationClctn["name"] : undefined
+			>
+		>(
+			args: InferringSelf<
+				T,
+				FieldSuggestiontables<
+					FieldNames,
+					AuthenticationClctn["name"] extends string
+						? AuthenticationClctn["name"]
+						: undefined
+				>
+			>
+		) => {
+			/**
+			 * Additional configurations.
+			 */
+			options: (args: Options) => {
+				/**
+				 * Launch your Content Kitty application.
+				 */
+				init: () => void;
+			};
+		};
+	};
+};
+
+type DupeAuthName = "This table's name is a duplicate of your authentication table's name.";
+
+type InternalTables = { authentication: AuthenticationTable; sessions: Table; plugins: Table };
+
+interface Table<
+	FieldName extends string = string,
+	AllFields extends string = string,
+	AuthTableName extends string | undefined = undefined
+> {
+	id?: {
+		name?: string;
+		type: "autoincrement" | "uuid" | "cuid";
+	};
+	name: undefined extends AuthTableName
+		? FieldName extends (typeof defaultAuthFields)["name"]
+			? DupeAuthName
+			: FieldName
+		: FieldName extends AuthTableName
+		? DupeAuthName
+		: FieldName;
+
+	label?: Labels;
+	fields: NonEmptyArray<Field<Exclude<AllFields, FieldName>>>;
+	slug?: string;
+	hooks?: Hooks;
+	webhooks?: Webhook[];
+}
+
+type Field<AllowedReferences extends string> = {
+	name: string;
+	label?: Labels;
+	unique?: boolean;
+	required?: boolean;
+	index?: boolean;
+	map?: string;
+} & (Str | Json | Num | Bool | Date | Relation<AllowedReferences>);
+
+type Str = {
+	type: "string";
+	defaultValue?: string;
+};
+
+type Json = {
+	type: "json";
+	defaultValue?: string;
+};
+
+type Num = {
+	type: "number";
+	defaultValue?: number;
+};
+
+type Bool = {
+	type: "boolean";
+	defaultValue?: boolean;
+};
+
+type Date = {
+	type: "date";
+	defaultValue?: { kind: "now" | "updatedAt" } | string;
+};
+
+type Relation<AllowedReferences extends string> = {
+	type: "relation";
+	ref: AllowedReferences;
+	many: boolean;
+};
+
+type DefaultMiddlewares = {
+	serveStatic?: { root: string; options: ServeStaticOptions } | false;
+	morgan?:
 		| {
-				path?: string;
-				data?: Record<string, any> | (() => Record<string, any>);
+				format: "combined" | "common" | "dev" | "short" | "tiny";
+				options?: morgan.Options<Request, Response>;
 		  }
 		| false;
+	cors?: CorsOptions | false;
+	json?: bodyParser.OptionsJson | false;
+	compression?: CompressionOptions | false;
+	helmet?: HelmetOptions | false;
+	urlencoded?: bodyParser.OptionsUrlencoded | false;
+	rateLimit?: RateLimitOptions | false;
 };
 
-type Options = {
-	content: {
-		collections: Collections;
-		webhooks?: Webhook[];
-	};
-	settings: Settings;
-};
-type SP = (args: Options) => Promise<void>;
-/* ******************** */
-
-/* ********** MISC. ********** */
-type MutableDataStore = Partial<{
-	prisma: PrismaClient;
-	models: CollectionSkeletons;
-	initFirstAuth: AuthSession["initFirstAuth"];
-}> & {
-	authFields: Required<AuthFields>;
-	pluginStore: ActiveInactivePlugins;
-	normalizedCollections: {
-		visible: Collections;
-		internal: Collections;
-	};
+type StoreGetterSetter<T> = {
+	get: () => T;
+	set: (arg: T) => void;
 };
 
-type CRUD_Operation = {
-	readonly operation: "create" | "read" | "update" | "delete";
+type MutableDataStore = {
+	tables: {
+		store: {
+			authentication: {
+				table: unknown;
+				options: unknown;
+			};
+			other: Table[];
+		};
+	} & StoreGetterSetter<{
+		authentication: {
+			table: AuthenticationTable;
+			options: Parameters<CK["authentication"]>["0"]["options"];
+		};
+		other: Table[];
+	}>;
+	options: { store: Options } & StoreGetterSetter<Options>;
+	db: { store: PrismaClient } & StoreGetterSetter<PrismaClient>;
+	plugins: { store: ActiveInactivePlugins } & StoreGetterSetter<ActiveInactivePlugins>;
+	healthCheck: { store: Record<"status", "healthy" | "warning" | "error"> } & StoreGetterSetter<
+		Record<"status", "healthy" | "warning" | "error">
+	>;
 };
-type RequestHeaders = {
-	[K in keyof IncomingHttpHeaders as string extends K
-		? never
-		: number extends K
-		? never
-		: K]: IncomingHttpHeaders[K];
-} & Record<string, string>;
 
-type LogLevel = "informative" | "warning" | "error";
-type CollectionMethod = "GET" | "POST" | "PUT" | "DELETE";
-type Method = CollectionMethod | "PATCH" | "HEAD" | "OPTIONS" | "TRACE" | "CONNECT";
-
-declare global {
-	/* eslint-disable no-var */
-	// node globals have to be declared with var
-	/* eslint-enable no-var */
-}
-
-declare module "express-session" {
-	interface SessionData {
-		userID?: string;
-	}
-}
-
-interface CustomSessionData extends SessionData {
-	userID?: string;
-}
-
-type AllPrismaErrors =
-	| PrismaClientInitializationError
-	| PrismaClientKnownRequestError
-	| PrismaClientRustPanicError
-	| PrismaClientUnknownRequestError
-	| PrismaClientValidationError;
-/* ******************** */
+/**********************/
 
 export {
-	SP,
+	CK,
 	Options,
-	LogLevel,
-	Database,
 	Context,
-	Collection,
-	Collections,
-	MiddlewareHandler,
-	BeforeAfterMiddlewares,
-	Method,
+	Table,
+	RequestMethods,
 	DefaultMiddlewares,
-	ExtendServer,
-	AllPrismaErrors,
-	PrismaClientRustPanicError,
-	PrismaClientInitializationError,
-	PrismaClientKnownRequestError,
-	PrismaClientUnknownRequestError,
-	PrismaClientValidationError,
 	Webhook,
 	WebhookFunc,
 	EventTriggerPayload,
 	ActiveInactivePlugins,
-	PluginExportFn,
 	Plugins,
 	DatabasePlugin,
-	CRUDHooks,
-	BeforeOperation,
-	AfterOperation,
-	ModifyValidateInputOperation,
-	Field,
-	Settings,
-	AuthSession,
-	AuthFields,
-	RelationField,
-	CustomSessionData,
-	CollectionSkeletons,
 	ExistingData,
 	InputData,
 	MutableDataStore,
-	CollectionMethod,
-	CurrentHook,
 	HookOperationArgs,
+	AuthenticationTable,
+	CRUD,
+	InternalTables,
+	HookFunc,
 };

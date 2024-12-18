@@ -1,39 +1,65 @@
-![](https://img.shields.io/npm/v/system-panda?style=for-the-badge)
-![](https://img.shields.io/npm/dt/system-panda?style=for-the-badge)
-![](https://img.shields.io/github/last-commit/serhankileci/system-panda?style=for-the-badge)
-![](https://img.shields.io/github/license/serhankileci/system-panda?style=for-the-badge)
+# **Content Kitty** 🐱
 
-# **SystemPanda** 🐼
-Headless CMS for Node.js, written in TypeScript.
+![NPM version badge](https://img.shields.io/npm/v/content-kitty?style=flat-square)
+![License Badge](https://img.shields.io/github/license/serhankileci/content-kitty?style=flat-square)
+[![Discord Logo](https://img.shields.io/badge/Discord-7289DA?style=flat-square&logo=discord&logoColor=white&width=1000)](https://discord.com/channels/content-kitty)
+
+**A headless CMS you can rely on for the best developer experience, in Node.js, with full type support.**
+
+- Feature-rich, intuitive, consistent, and predictable
+- Quickly develop your ideas into products inline with business requirements
+- Exhaustive docs filled with real-world examples that stem from business requirements
 
 ## **Installation**
-```
-npm install system-panda
+
+```bash
+npm install content-kitty
 ```
 
-Check out the [**example app**](https://github.com/serhankileci/system-panda/blob/main/docs/get-started.md).
+Check out [**Get Started**](https://github.com/serhankileci/content-kitty/blob/main/docs/get-started.md).
 
 ## **Features**
-- ### [**Hooks**](https://github.com/serhankileci/system-panda/blob/main/docs/hooks.md)
-	Lifecycle hooks for CRUD operations, such as causing side-effects, and validating and modifying input.
-- ### [**Plugins**](https://github.com/serhankileci/system-panda/blob/main/docs/plugins.md)
-	Reusable snippets of code that can be installed directly to your app.
-- ### [**Webhooks**](https://github.com/serhankileci/system-panda/blob/main/docs/webhooks.md)
-	Trigger API requests with data on specific hooks/operations.
-- ### [**Collections**](https://github.com/serhankileci/system-panda/blob/main/docs/collections.md)
-	With Prisma ORM as the database layer, define your data as objects that are mapped to Prisma schema models.
-- ### [**REST API**](https://github.com/serhankileci/system-panda/blob/main/docs/rest-api.md)
-	Generated REST API for your collections that serve data.
-- ### [**Server Extension**](https://github.com/serhankileci/system-panda/blob/main/docs/server-extension.md)
-	Extend the internal Express.js server with custom routes, middlewares, and business logic.
-- ### [**User Management**](https://github.com/serhankileci/system-panda/blob/main/docs/user-management.md)
-	Authentication and Access Control.
 
-## **Working On**
-- Content media support
-- Standard library of plugins
-- Revisit plugin system (routes for uploading plugins to remote repository, etc.)
-- Custom Hooks/Events
-- Version Control (for rollbacks, etc.)
-- Task scheduling (at specified times/conditions)
-- i18n (default translations for the core app and allowing custom translations for collections)
+### [**Hooks**](https://github.com/serhankileci/content-kitty/blob/main/docs/hooks.md)
+
+Lifecycle hooks for CRUD operations, such as causing before/after side-effects, and validating/modifying input.
+
+### [**Plugins**](https://github.com/serhankileci/content-kitty/blob/main/docs/plugins.md)
+
+Reusable snippets of code that you can install. Use from the standard library of plugins, another developer's plugins, or make your own.
+
+### [**Webhooks**](https://github.com/serhankileci/content-kitty/blob/main/docs/webhooks.md)
+
+Trigger API requests on specific CRUD operations.
+
+### [**Tables**](https://github.com/serhankileci/content-kitty/blob/main/docs/tables.md)
+
+Define your data as objects that are then mapped to Prisma ORM (the database layer) schema models.
+
+### [**REST API**](https://github.com/serhankileci/content-kitty/blob/main/docs/rest-api.md)
+
+Generated REST API endpoints for your tables.
+
+### [**Server Extension**](https://github.com/serhankileci/content-kitty/blob/main/docs/server-extension.md)
+
+Extend the internal Express server with custom routes, middlewares, and business logic.
+
+### [**Authentication and Access Control**](https://github.com/serhankileci/content-kitty/blob/main/docs/authentication-and-access-control.md)
+
+Cookie session based authentication and rule-based access Control.
+
+### [**i18n**]("https://github.com/serhankileci/content-kitty/blob/main/docs/i18n.md)
+
+Default translations for the core app and allowing custom translations for tables.
+
+### [**Frontend**]("https://github.com/serhankileci/content-kitty/blob/main/docs/frontend.md")
+
+A deeply customizable frontend admin panel to manage your tables.
+
+### [**Version Control**]("https://github.com/serhankileci/content-kitty/blob/main/docs/version-control.md")
+
+In progress...
+
+### [**Task scheduling**]("https://github.com/serhankileci/content-kitty/blob/main/docs/task-scheduling.md")
+
+In progress...

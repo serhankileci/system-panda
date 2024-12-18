@@ -1,6 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { SessionData, Store } from "express-session";
-import { CustomSessionData, getDataStore, internalTablesKeys } from "../util/index.js";
+import { internalTablesKeys, store } from "../util/index.js";
+
+interface CustomSessionData extends SessionData {
+	userID?: string;
+}
+
+declare module "express-session" {
+	interface SessionData {
+		userID?: string;
+	}
+}
 
 class PrismaSessionStore extends Store {
 	constructor(private prisma: PrismaClient) {
@@ -32,7 +42,7 @@ class PrismaSessionStore extends Store {
 	async set(sid: string, session: CustomSessionData, callback: (err?: any) => void) {
 		try {
 			const { userID, ...rest } = session;
-			const relationKey = getDataStore().authFields.relationKey;
+			const relationKey = "relation_" + store.tables.get().authentication.table.name;
 
 			await this.prisma[internalTablesKeys.sessions].upsert({
 				where: { id: sid },

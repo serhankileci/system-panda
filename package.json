@@ -1,10 +1,10 @@
 {
-	"name": "system-panda",
-	"version": "0.77.0",
-	"homepage": "https://github.com/serhankileci/system-panda",
+	"name": "content-kitty",
+	"version": "0.1.0",
+	"homepage": "https://github.com/serhankileci/content-kitty",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/serhankileci/system-panda.git"
+		"url": "git+https://github.com/serhankileci/content-kitty.git"
 	},
 	"author": "Serhan Kileci <serhanselimkileci@gmail.com>",
 	"keywords": [
@@ -13,7 +13,7 @@
 	],
 	"description": "Headless CMS for Node.js, written in TypeScript.",
 	"bugs": {
-		"url": "https://github.com/serhankileci/system-panda/issues"
+		"url": "https://github.com/serhankileci/content-kitty/issues"
 	},
 	"directories": {
 		"doc": "docs"
@@ -22,19 +22,17 @@
 	"license": "MIT",
 	"main": "./build/index.js",
 	"bin": {
-		"system-panda": "./build/util/cli.js"
+		"content-kitty": "./build/util/cli.js"
 	},
 	"types": "./build/index.d.ts",
 	"scripts": {
 		"prepare": "husky install",
 		"format": "prettier --check 'src/**/*.ts' || prettier --write 'src/**/*.ts'",
 		"lint": "eslint . --ext .ts",
+		"dev:pkg": "nodemon --watch src --ext 'ts' --exec 'tsc -p .'",
 		"dev:test": "vitest --coverage",
-		"dev:package": "nodemon --watch src --ext 'ts' --exec 'tsc -p .'",
 		"test": "vitest --run --coverage",
-		"build:api": "cross-env npm i && npm run format; npm run lint; tsc && cp -r ./src/server/static ./build/server",
-		"build:ui": "cd src/frontend && npm i && npm run build",
-		"build": "npm run build:api && npm run build:ui"
+		"build": "cross-env npm i && npm run format; npm run lint; tsc && cp -r ./src/server/assets ./build/server"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.15.0",
@@ -43,14 +41,15 @@
 		"@types/cookie-parser": "^1.4.3",
 		"@types/cors": "^2.8.13",
 		"@types/express": "^4.17.17",
-		"cross-env": "^7.0.3",
 		"@types/express-session": "^1.17.7",
 		"@types/morgan": "^1.9.4",
 		"@types/node": "^18.13.0",
 		"bcrypt": "^5.1.0",
+		"chalk": "^5.3.0",
 		"compression": "^1.7.4",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
+		"cross-env": "^7.0.3",
 		"execa": "^7.1.1",
 		"express": "^4.18.2",
 		"express-rate-limit": "^6.7.0",
@@ -63,11 +62,12 @@
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.51.0",
 		"@typescript-eslint/parser": "^5.51.0",
-		"eslint": "^8.33.0",
 		"@vitest/coverage-istanbul": "^0.34.1",
-		"vitest": "^0.34.1",
+		"eslint": "^8.57.0",
 		"husky": "^8.0.3",
+		"nodemon": "^3.1.0",
 		"prettier": "^2.8.4",
-		"typescript": "^4.9.5"
+		"typescript": "^5.4.3",
+		"vitest": "^0.34.1"
 	}
 }

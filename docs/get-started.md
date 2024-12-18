@@ -1,14 +1,14 @@
 # **Get Started**
-Here is a basic, example application that uses most of what SystemPanda has to offer.
+Here is a basic, example application that uses most of what Content Kitty has to offer.
 
 ```ts
-import SystemPanda from "system-panda";
+import Content Kitty from "content-kitty";
 import "dotenv/config";
 
-SystemPanda({
+Content Kitty({
     content: {
-        // define your data models
-        collections: {
+        // define your tables
+        tables: {
             student: {
                 id: {
                     name: "id",
@@ -152,7 +152,7 @@ SystemPanda({
                 when, for example, a POST request is received with the following request body:
                 {
                     event: 'create',
-                    collection: 'album',
+                    table: 'album',
                     data: { beforeCreate: null, afterCreate: [ [Object] ] },
                     timestamp: '2023-06-16T20:26:31.485Z'
                 }
@@ -167,7 +167,7 @@ SystemPanda({
                 secret: String(process.env.SECRET),
             },
             initFirstAuth: {
-                email: "admin@system-panda.com",
+                email: "admin@content-kitty.com",
                 password: "1234",
             },
         },
